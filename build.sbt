@@ -51,5 +51,6 @@ lazy val rpc = (project in file("elitem-rpc"))
 
 lazy val commons = (project in file("elitem-commons"))
   .settings(
-    commonSettings
+    commonSettings,
+    libraryDependencies ++= Dependencies.commons
   )

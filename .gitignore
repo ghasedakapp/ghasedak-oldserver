@@ -3,7 +3,7 @@ bin/
 project/
 target/
 build/
-
+conf/
 
 # intellij idea
 *.log
