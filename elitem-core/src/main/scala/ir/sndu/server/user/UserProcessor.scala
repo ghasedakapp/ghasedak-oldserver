@@ -7,13 +7,16 @@ object UserProcessor {
   def props = Props(classOf[UserProcessor])
 }
 
-class UserProcessor extends Actor {
+class UserProcessor
+  extends Actor
+  with UserCommandHandler
+  with UserQueryHandler {
   private val userId = self.path.name.toInt
 
   override def receive: Receive = commandHandler
 
   private def commandHandler: Receive = {
-    case SendMessage(_, Some(peer)) => println(peer)
+    case SendMessage(_, Some(peer)) => sendMessage(peer)
   }
 
   //  private def query: Receive = {
