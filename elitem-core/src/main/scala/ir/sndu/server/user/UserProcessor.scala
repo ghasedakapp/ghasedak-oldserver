@@ -1,6 +1,7 @@
 package ir.sndu.server.user
 
-import akka.actor.{ Actor, Props }
+import akka.actor.{Actor, Props}
+import ir.sndu.server.Processor
 import ir.sndu.server.user.UserCommands.SendMessage
 
 object UserProcessor {
@@ -8,9 +9,16 @@ object UserProcessor {
 }
 
 class UserProcessor
-  extends Actor
+  extends Processor
   with UserCommandHandler
   with UserQueryHandler {
+
+  val squareRoot: PartialFunction[Double, Double] = {
+    case x if x >= 0 => Math.sqrt(x)
+  }
+
+  squareRoot andThen()
+
   private val userId = self.path.name.toInt
 
   override def receive: Receive = commandHandler
