@@ -1,14 +1,11 @@
 package ir.sndu.server
 
 import java.io.File
-import java.nio.file.{ Files, Paths }
 
 import akka.actor.ActorSystem
-import akka.cluster.{ Cluster, ClusterEvent }
+import akka.cluster.Cluster
 import com.typesafe.config.ConfigFactory
-import ir.sndu.server.user.UserExtension
-
-import scala.concurrent.Future
+import io.grpc.ServerBuilder
 
 object Main extends App {
 
@@ -25,12 +22,5 @@ object Main extends App {
 
   if (config.getList("akka.cluster.seed-nodes").isEmpty)
     Cluster(system).join(Cluster(system).selfAddress)
-
-  Thread.sleep(2000)
-
-  system.log.info("Starting user module")
-  val userExt = UserExtension(system)
-
-  userExt.send()
 
 }

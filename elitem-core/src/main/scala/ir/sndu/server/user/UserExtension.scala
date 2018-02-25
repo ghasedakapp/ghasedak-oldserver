@@ -7,7 +7,6 @@ class UserExtensionImpl(system: ExtendedActorSystem) extends Extension {
   private val region = UserProcessorRegion.start()
 
   def send(): Unit = {
-    println("wa sent")
     region ! UserEnvelope(10).withSendMessage(UserCommands.SendMessage(10, Some(Peer(10, PeerType.PRIVATE))))
   }
 }

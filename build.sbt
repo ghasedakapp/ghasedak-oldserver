@@ -29,7 +29,7 @@ lazy val root = (project in file("."))
   .settings(
     commonSettings
   )
-  .dependsOn(commons, core)
+  .dependsOn(commons, core, rpc)
 
 lazy val core = (project in file("elitem-core"))
   .settings(
@@ -47,7 +47,7 @@ lazy val rpc = (project in file("elitem-rpc"))
   .settings(
     commonSettings,
     libraryDependencies ++= Dependencies.rpc
-  )
+  ).dependsOn(core)
 
 lazy val commons = (project in file("elitem-commons"))
   .settings(
