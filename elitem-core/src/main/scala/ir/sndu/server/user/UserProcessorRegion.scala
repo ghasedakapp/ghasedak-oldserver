@@ -6,12 +6,7 @@ import akka.cluster.sharding.{ ClusterSharding, ClusterShardingSettings, ShardRe
 object UserProcessorRegion {
 
   private val extractEntityId: ShardRegion.ExtractEntityId = {
-    case UserEnvelope(id, command, query) ⇒ (
-      id.toString,
-      if (command.isDefined)
-        command.value
-      else if (query.isDefined)
-        query)
+    case UserEnvelope(id, command, query) ⇒ (id.toString, command.valueOption.getOrElse(query.value))
   }
 
   private val numberOfShards = 100
