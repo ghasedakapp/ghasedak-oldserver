@@ -8,6 +8,6 @@ import scala.concurrent.Future
 class AuthServiceImpl extends AuthService {
   override def startPhoneAuth(request: RequestStartPhoneAuth): Future[ResponseStartPhoneAuth] = {
     println("salam")
-    null
+    Future.successful(ResponseStartPhoneAuth())
   }
 }

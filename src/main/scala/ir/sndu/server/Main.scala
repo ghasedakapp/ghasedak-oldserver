@@ -5,7 +5,12 @@ import java.io.File
 import akka.actor.ActorSystem
 import akka.cluster.Cluster
 import com.typesafe.config.ConfigFactory
-import io.grpc.ServerBuilder
+import io.grpc.ServerServiceDefinition
+import ir.sndu.server.auth.AuthServiceGrpc
+import ir.sndu.server.frontend.Frontend
+import ir.sndu.server.rpc.auth.AuthServiceImpl
+
+import scala.concurrent.ExecutionContext
 
 object Main extends App {
 
@@ -17,10 +22,21 @@ object Main extends App {
 
   //Register proto here
 
-  val config = ConfigFactory.load()
+  implicit val config = ConfigFactory.load()
   implicit val system = ActorSystem(config.getString("server-name"), config)
 
   if (config.getList("akka.cluster.seed-nodes").isEmpty)
     Cluster(system).join(Cluster(system).selfAddress)
 
+  implicit val ex: ExecutionContext = system.dispatcher
+
+  Frontend.start(ServiceDescriptors.services)
+
+}
+
+object ServiceDescriptors {
+  def services(implicit ec: ExecutionContext): Seq[ServerServiceDefinition] = {
+    Seq(
+      AuthServiceGrpc.bindService(new AuthServiceImpl, ec))
+  }
 }
