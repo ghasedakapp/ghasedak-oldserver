@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import ir.sndu.server.model.auth.AuthTransaction
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.Tag
+import TypeMapper._
 
 class AuthTransactionRepo(tag: Tag) extends Table[AuthTransaction](tag, "auth_transactions") {
   def transactionHash = column[String]("transaction_hash", O.PrimaryKey)
