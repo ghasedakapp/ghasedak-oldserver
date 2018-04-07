@@ -1,0 +1,20 @@
+syntax = 'proto3';
+
+package ir.sndu.server;
+
+enum PeerType {
+    Unknown = 0;
+    Private = 1;
+    Group = 2;
+}
+
+message Peer {
+    PeerType type = 1;
+    int32 id = 2;
+}
+
+message OutPeer {
+    PeerType type = 1;
+    int32 id = 2;
+    int64 access_hash = 3;
+}

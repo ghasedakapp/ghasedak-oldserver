@@ -1,3 +1,35 @@
+CREATE TABLE history_messages (
+       user_id int NOT NULL,
+       peer_type int NOT NULL,
+       peer_id int NOT NULL,
+       date timestamp NOT NULL,
+       sender_user_id int NOT NULL,
+       random_id bigint NOT NULL,
+       message_content_header int NOT NULL,
+       message_content_data bytea NOT NULL,
+       deleted_at timestamp,
+       PRIMARY KEY(user_id, peer_type, peer_id, date, sender_user_id, random_id)
+);
+
+CREATE TABLE user_dialogs (
+       user_id int NOT NULL,
+       peer_type int NOT NULL,
+       peer_id int NOT NULL,
+       owner_last_received_at timestamp not null,
+       owner_last_read_at timestamp not null,
+       created_at TIMESTAMP DEFAULT NOW(),
+       is_favourite boolean DEFAULT FALSE,
+       PRIMARY KEY(user_id, peer_type, peer_id)
+);
+
+create table dialog_commons(
+    dialog_id varchar(255) not null,
+    last_message_date timestamp not null,
+    last_received_at timestamp not null,
+    last_read_at timestamp not null,
+    primary key(dialog_id)
+);
+
 create table auth_transactions (
     transaction_hash varchar(255) not null,
     app_id int not null,
