@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package ir.sndu.server;
+
+enum ApiPeerType {
+    PeerType_Unknown = 0;
+    PeerType_Private = 1;
+    PeerType_Group = 2;
+}
+
+message ApiOutPeer {
+    ApiPeerType type = 1;
+    int32 id = 2;
+    int64 access_hash = 3;
+}

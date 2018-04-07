@@ -37,6 +37,8 @@ message ApiUser {
   string about = 5;
 }
 
+
+
 message RequestSignUp {
   string transaction_hash = 1;
   string name = 2;
@@ -48,3 +50,4 @@ message ResponseAuth {
   string token = 1;
   ApiUser user = 2;
 }
+
