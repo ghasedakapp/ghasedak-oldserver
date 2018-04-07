@@ -1,11 +1,11 @@
-package ir.sndu.persist.repo
+package ir.sndu.persist.repo.user
 
 import java.time.{ LocalDateTime, ZoneOffset }
 
 import ir.sndu.server.model.user.{ Sex, User, UserState }
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.Tag
-import TypeMapper._
+import ir.sndu.persist.repo.TypeMapper._
 
 final class UserTable(tag: Tag) extends Table[User](tag, "users") {
   import SexColumnType._

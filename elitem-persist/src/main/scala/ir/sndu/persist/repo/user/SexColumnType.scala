@@ -1,4 +1,4 @@
-package ir.sndu.persist.repo
+package ir.sndu.persist.repo.user
 
 import ir.sndu.server.model.user.Sex
 import slick.jdbc.PostgresProfile.api._

@@ -1,4 +1,4 @@
-package ir.sndu.persist.repo
+package ir.sndu.persist.repo.user
 
 import ir.sndu.server.model.user.UserState
 import slick.jdbc.PostgresProfile.api._

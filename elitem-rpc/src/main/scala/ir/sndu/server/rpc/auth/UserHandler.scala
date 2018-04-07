@@ -3,7 +3,7 @@ package ir.sndu.server.rpc.auth
 import java.time.LocalDateTime
 import java.util.concurrent.ThreadLocalRandom
 
-import ir.sndu.persist.repo.UserRepo
+import ir.sndu.persist.repo.user.UserRepo
 import ir.sndu.server.auth.{ ApiSex, ApiUser }
 import ir.sndu.server.model.user.{ User, UserState }
 import slick.dbio.{ Effect, NoStream }
