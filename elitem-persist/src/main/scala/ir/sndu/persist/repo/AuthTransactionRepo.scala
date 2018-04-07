@@ -7,7 +7,7 @@ import slick.jdbc.PostgresProfile.api._
 import slick.lifted.Tag
 import TypeMapper._
 
-abstract class AuthTransactionRepoBase(tag: Tag, name:String) extends Table[AuthTransaction](tag, name) {
+abstract class AuthTransactionRepoBase(tag: Tag, name: String) extends Table[AuthTransaction](tag, name) {
   def transactionHash = column[String]("transaction_hash", O.PrimaryKey)
   def appId = column[Int]("app_id")
   def apiKey = column[String]("api_key")
@@ -19,7 +19,7 @@ abstract class AuthTransactionRepoBase(tag: Tag, name:String) extends Table[Auth
   def deletedAt = column[Option[LocalDateTime]]("deleted_at")
 }
 
-class AuthTransactionRepo(tag:Tag) extends AuthTransactionRepoBase(tag, "auth_transactions") {
+class AuthTransactionRepo(tag: Tag) extends AuthTransactionRepoBase(tag, "auth_transactions") {
   def * = (
     transactionHash,
     appId,
@@ -32,8 +32,6 @@ class AuthTransactionRepo(tag:Tag) extends AuthTransactionRepoBase(tag, "auth_tr
     deletedAt) <> (AuthTransaction.tupled, AuthTransaction.unapply)
 }
 
-
-
-object AuthTransactionRepo{
+object AuthTransactionRepo {
 
 }
