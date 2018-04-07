@@ -49,6 +49,8 @@ object UserRepo {
   } yield users).take(1)
   def idByPhone(phone: Rep[Long]) = byPhone(phone) map (_.id)
 
+  def findByPhone(phone: Long) = byPhone(phone).result.headOption
+
   val idByPhoneC = Compiled(idByPhone _)
 
   private val activeHumanUsers =

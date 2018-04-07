@@ -4,6 +4,7 @@ package ir.sndu.server;
 
 service AuthService {
   rpc StartPhoneAuth (RequestStartPhoneAuth) returns (ResponseStartPhoneAuth) {}
+  rpc SignUp (RequestSignUp) returns (ResponseAuth) {}
 }
 
 message RequestStartPhoneAuth {
@@ -19,4 +20,31 @@ message RequestStartPhoneAuth {
 message ResponseStartPhoneAuth {
   string transaction_hash = 1;
   bool is_registered = 2;
+}
+
+
+enum ApiSex {
+  Unknown = 0;
+  Male = 1;
+  Female = 2;
+}
+
+message ApiUser {
+  int32 id = 1;
+  string name = 2;
+  string nick = 3;
+  ApiSex sex = 4;
+  string about = 5;
+}
+
+message RequestSignUp {
+  string transaction_hash = 1;
+  string name = 2;
+  ApiSex sex = 3;
+  int64 number = 4;
+}
+
+message ResponseAuth {
+  string token = 1;
+  ApiUser user = 2;
 }

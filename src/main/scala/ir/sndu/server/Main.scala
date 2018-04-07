@@ -35,7 +35,7 @@ object Main extends App {
 }
 
 object ServiceDescriptors {
-  def services(implicit ec: ExecutionContext): Seq[ServerServiceDefinition] = {
+  def services(implicit system: ActorSystem, ec: ExecutionContext): Seq[ServerServiceDefinition] = {
     Seq(
       AuthServiceGrpc.bindService(new AuthServiceImpl, ec))
   }

@@ -4,8 +4,8 @@ import java.time.LocalDateTime
 import java.util.concurrent.ThreadLocalRandom
 
 import ir.sndu.persist.db.PostgresDb
-import ir.sndu.persist.repo.{ UserPhoneRepo, UserRepo }
-import ir.sndu.server.model.user.{ Sex, User, UserPhone, UserState }
+import ir.sndu.persist.repo.{UserPhoneRepo, UserRepo}
+import ir.sndu.server.model.user.{Sex, User, UserState}
 import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures
 
