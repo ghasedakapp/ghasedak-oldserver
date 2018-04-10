@@ -33,6 +33,7 @@ message RequestSendMessage{
     ApiOutPeer out_peer = 1;
     int64 random_id = 2;
     ApiMessage message = 3;
+    string token = 4;
 }
 
 message ResponseVoid{}
