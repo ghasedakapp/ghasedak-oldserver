@@ -1,7 +1,7 @@
 package ir.sndu.server.rpc
 
-import ir.sndu.server.auth.ApiSex
 import ir.sndu.server.model.user.Sex
+import ir.sndu.server.users.ApiSex
 
 object ApiConversions {
   implicit def sexToApi(sex: Sex): ApiSex = ApiSex.fromValue(sex.toInt)

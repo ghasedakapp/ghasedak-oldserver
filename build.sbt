@@ -1,4 +1,3 @@
-import com.trueaccord.scalapb.Scalapb.ScalaPbOptions
 import ir.sndu.Dependencies
 
 name := "elitem"
@@ -57,7 +56,7 @@ lazy val test = elitemModule("elitem-test")
   .settings(
     libraryDependencies ++= Dependencies.test
   )
-  .dependsOn(commons, core, rpc, persist)
+  .dependsOn(root, commons, core, rpc, persist, model)
 
 
 def elitemModule(name: String): Project = {

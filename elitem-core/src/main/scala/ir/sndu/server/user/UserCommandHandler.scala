@@ -22,6 +22,7 @@ trait UserCommandHandler {
   }
 
   private def getDate: Instant = {
+    //TODO Avoids duplicate date
     Instant.now()
   }
 

@@ -20,18 +20,24 @@ object Main extends App {
 
   System.setProperty("file.encoding", "UTF-8")
 
-  //Register proto here
+  ElitemServer.start()
 
-  implicit val config = ConfigFactory.load()
-  implicit val system = ActorSystem(config.getString("server-name"), config)
+}
 
-  if (config.getList("akka.cluster.seed-nodes").isEmpty)
-    Cluster(system).join(Cluster(system).selfAddress)
+object ElitemServer {
+  def start(): Unit = {
+    //Register proto here
 
-  implicit val ex: ExecutionContext = system.dispatcher
+    implicit val config = ConfigFactory.load()
+    implicit val system = ActorSystem(config.getString("server-name"), config)
 
-  Frontend.start(ServiceDescriptors.services)
+    if (config.getList("akka.cluster.seed-nodes").isEmpty)
+      Cluster(system).join(Cluster(system).selfAddress)
 
+    implicit val ex: ExecutionContext = system.dispatcher
+
+    Frontend.start(ServiceDescriptors.services)
+  }
 }
 
 object ServiceDescriptors {

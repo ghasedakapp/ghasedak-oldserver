@@ -8,7 +8,7 @@ object Dependencies {
     val akka = "2.5.8"
     val slick = "3.2.1"
     val slickPg = "0.16.0"
-    val scalapb = "0.6.6"
+    val scalapb = "0.7.1"
     val postgres = "42.2.1"
     val flyway = "5.0.7"
   }
@@ -30,10 +30,10 @@ object Dependencies {
     val flyway = "org.flywaydb" % "flyway-core" % V.flyway
 
 
-    val scalapb = "com.trueaccord.scalapb" %% "compilerplugin" % V.scalapb
-    val scalapbRuntime = "com.trueaccord.scalapb" %% "scalapb-runtime" % com.trueaccord.scalapb.compiler.Version.scalapbVersion % "protobuf"
-    val grpc = Seq("io.grpc" % "grpc-netty" % com.trueaccord.scalapb.compiler.Version.grpcJavaVersion,
-      "com.trueaccord.scalapb" %% "scalapb-runtime-grpc" % com.trueaccord.scalapb.compiler.Version.scalapbVersion)
+    val scalap = "com.thesamet.scalapb" %% "compilerplugin" % V.scalapb
+    val scalapbRuntime = "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf"
+    val grpc = Seq("io.grpc" % "grpc-netty" % scalapb.compiler.Version.grpcJavaVersion,
+      "com.thesamet.scalapb" %% "scalapb-runtime-grpc" % scalapb.compiler.Version.scalapbVersion)
 
     val betterFile = "com.github.pathikrit" %% "better-files" % "3.4.0"
 
@@ -55,7 +55,7 @@ object Dependencies {
 
   val core = shared ++ Seq(
     actor,cluster,sharding,akkaPersist,
-    scalapb, scalapbRuntime, akkaSlf4j
+    scalap, scalapbRuntime, akkaSlf4j
   )
 
   val persist = shared ++ Seq(

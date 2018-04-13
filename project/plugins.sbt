@@ -1,4 +1,4 @@
-logLevel := Level.Warn
+logLevel := Level.Debug
 
 resolvers += "Flyway" at "https://davidmweber.github.io/flyway-sbt.repo"
 
