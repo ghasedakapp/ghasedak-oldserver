@@ -22,7 +22,8 @@ class MessagingServiceImpl(implicit system: ActorSystem) extends MessagingServic
     authorize(request.token) { userId =>
       val (outPeer, randomId, message, _) = RequestSendMessage.unapply(request).get
 
-      userExt.sendMessage(userId, outPeer.map(p => ApiPeer(p.`type`, p.id)).get, randomId, message.get).mapTo[ResponseVoid]
+      userExt.sendMessage(userId, outPeer.map(p => ApiPeer(p.`type`, p.id)).get, randomId, message.get).map(
+        _ => ResponseVoid())
     }
   }
 }

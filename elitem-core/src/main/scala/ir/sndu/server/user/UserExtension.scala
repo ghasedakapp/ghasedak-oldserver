@@ -17,7 +17,7 @@ class UserExtensionImpl(system: ExtendedActorSystem) extends Extension {
 
   def sendMessage(userId: Int, peer: ApiPeer, randomId: Long, message: ApiMessage): Future[SendMessageAck] =
     (region ? UserEnvelope(userId).withSendMessage(
-      UserCommands.SendMessage(userId, Some(peer), randomId))).mapTo[SendMessageAck]
+      UserCommands.SendMessage(userId, Some(peer), randomId, None, Some(message)))).mapTo[SendMessageAck]
 
 }
 

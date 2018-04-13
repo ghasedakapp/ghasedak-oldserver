@@ -18,7 +18,7 @@ trait UserCommandHandler {
       sm.randomId,
       getDate,
       sm.message.get))
-      .mapTo[SendMessageAck]
+      .map(_ => SendMessageAck())
   }
 
   private def getDate: Instant = {
