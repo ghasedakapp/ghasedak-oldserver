@@ -4,7 +4,7 @@ import java.time.LocalDateTime
 
 import ir.sndu.persist.repo.TypeMapper._
 import ir.sndu.server.model.dialog.{ DialogCommon, UserDialog }
-import ir.sndu.server.model.{ Peer, PeerType }
+import ir.sndu.server.peer.{ ApiPeer, ApiPeerType }
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.Tag
 
@@ -77,7 +77,7 @@ final class UserDialogTable(tag: Tag) extends Table[UserDialog](tag, "user_dialo
       isFavourite) ⇒
       UserDialog(
         userId = userId,
-        peer = Peer(PeerType.fromValue(peerType), peerId),
+        peer = ApiPeer(ApiPeerType.fromValue(peerType), peerId),
         ownerLastReceivedAt = ownerLastReceivedAt,
         ownerLastReadAt = ownerLastReadAt,
         createdAt = createdAt,

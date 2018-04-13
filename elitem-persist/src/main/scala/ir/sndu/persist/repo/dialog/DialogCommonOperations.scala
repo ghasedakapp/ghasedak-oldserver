@@ -3,8 +3,8 @@ package ir.sndu.persist.repo.dialog
 import java.time.LocalDateTime
 
 import ir.sndu.persist.repo.TypeMapper._
-import ir.sndu.server.model.Peer
 import ir.sndu.server.model.dialog.DialogCommon
+import ir.sndu.server.peer.ApiPeer
 import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.ExecutionContext
@@ -24,44 +24,44 @@ object DialogCommonRepo {
 trait DialogCommonOperations extends DialogId {
   import DialogCommonRepo._
 
-  def findCommon(userId: Option[Int], peer: Peer): DBIO[Option[DialogCommon]] =
+  def findCommon(userId: Option[Int], peer: ApiPeer): DBIO[Option[DialogCommon]] =
     byPKC.applied(getDialogId(userId, peer)).result.headOption
 
   def commonExists(dialogId: String) = existsC(dialogId).result
 
-  def updateLastMessageDatePrivate(userId: Int, peer: Peer, lastMessageDate: LocalDateTime)(implicit ec: ExecutionContext) = {
+  def updateLastMessageDatePrivate(userId: Int, peer: ApiPeer, lastMessageDate: LocalDateTime)(implicit ec: ExecutionContext) = {
     requirePrivate(peer)
     byPKC.applied(getDialogId(Some(userId), peer)).map(_.lastMessageDate).update(lastMessageDate)
   }
 
-  def updateLastMessageDateGroup(peer: Peer, lastMessageDate: LocalDateTime)(implicit ec: ExecutionContext) = {
+  def updateLastMessageDateGroup(peer: ApiPeer, lastMessageDate: LocalDateTime)(implicit ec: ExecutionContext) = {
     requireGroup(peer)
     byPKC.applied(getDialogId(None, peer))
       .map(_.lastMessageDate)
       .update(lastMessageDate)
   }
 
-  def updateLastReceivedAtPrivate(userId: Int, peer: Peer, lastReceivedAt: LocalDateTime)(implicit ec: ExecutionContext) = {
+  def updateLastReceivedAtPrivate(userId: Int, peer: ApiPeer, lastReceivedAt: LocalDateTime)(implicit ec: ExecutionContext) = {
     requirePrivate(peer)
     byPKC.applied(getDialogId(Some(userId), peer)).map(_.lastReceivedAt).update(lastReceivedAt)
   }
 
-  def updateLastReceivedAtGroup(peer: Peer, lastReceivedAt: LocalDateTime)(implicit ec: ExecutionContext) = {
+  def updateLastReceivedAtGroup(peer: ApiPeer, lastReceivedAt: LocalDateTime)(implicit ec: ExecutionContext) = {
     requireGroup(peer)
     byPKC.applied(getDialogId(None, peer)).map(_.lastReceivedAt).update(lastReceivedAt)
   }
 
-  def updateLastReadAtPrivate(userId: Int, peer: Peer, lastReadAt: LocalDateTime)(implicit ec: ExecutionContext) = {
+  def updateLastReadAtPrivate(userId: Int, peer: ApiPeer, lastReadAt: LocalDateTime)(implicit ec: ExecutionContext) = {
     requirePrivate(peer)
     byPKC.applied(getDialogId(Some(userId), peer)).map(_.lastReadAt).update(lastReadAt)
   }
 
-  def updateLastReadAtGroup(peer: Peer, lastReadAt: LocalDateTime)(implicit ec: ExecutionContext) = {
+  def updateLastReadAtGroup(peer: ApiPeer, lastReadAt: LocalDateTime)(implicit ec: ExecutionContext) = {
     requireGroup(peer)
     byPKC.applied(getDialogId(None, peer)).map(_.lastReadAt).update(lastReadAt)
   }
 
-  def requirePrivate(peer: Peer) = require(peer.`type`.isPrivate, "It should be private peer")
+  def requirePrivate(peer: ApiPeer) = require(peer.`type`.isPrivate, "It should be private peer")
 
-  def requireGroup(peer: Peer) = require(peer.`type`.isGroup, "It should be group peer")
+  def requireGroup(peer: ApiPeer) = require(peer.`type`.isGroup, "It should be group peer")
 }

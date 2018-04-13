@@ -1,27 +1,23 @@
 syntax = "proto3";
 
 package ir.sndu.server;
+import "google/protobuf/wrappers.proto";
 import "scalapb/scalapb.proto";
-
-enum PeerType{
-    PRIVATE = 0;
-    GROUP = 1;
-    CHANNEL = 2;
-}
-
-message Peer {
-    int32 peer_id = 1;
-    PeerType peer_tpe = 2;
-}
-
+import "api/peer.proto";
+import "api/messaging.proto";
 
 message UserCommands {
     message SendMessage {
         option (scalapb.message).extends = "ir.sndu.server.user.UserCommand";
         int32 user_id = 1;
-        Peer peer = 2;
+        ir.sndu.server.ApiPeer peer = 2;
+        int64 randomId = 3;
+        google.protobuf.Int64Value date = 4;
+        ir.sndu.server.ApiMessage message = 5;
     }
+    message SendMessageAck{}
 }
+
 
 message UserQueries {
     message GetState {

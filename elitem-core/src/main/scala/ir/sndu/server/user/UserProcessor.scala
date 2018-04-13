@@ -1,8 +1,15 @@
 package ir.sndu.server.user
 
-import akka.actor.{ Actor, Props }
+import akka.actor.{ Actor, Props, Status }
+import ir.sndu.persist.db.PostgresDb
 import ir.sndu.server.Processor
 import ir.sndu.server.user.UserCommands.SendMessage
+
+import scala.concurrent.{ ExecutionContext, Future }
+import scala.util.{ Failure, Try }
+import akka.pattern.pipe
+import slick.jdbc.PostgresProfile
+import PostgresProfile.backend._
 
 object UserProcessor {
   def props = Props(classOf[UserProcessor])
@@ -12,12 +19,20 @@ class UserProcessor extends Processor
   with UserCommandHandler
   with UserQueryHandler {
 
-  private val userId = self.path.name.toInt
+  type CommandHandler = PartialFunction[Any, () => Future[Any]]
 
-  override def receive: Receive = commandHandler
+  protected val userId: Int = self.path.name.toInt
+  protected implicit val ec: ExecutionContext = context.dispatcher
+  protected implicit val db: Database = PostgresDb.db
 
-  private def commandHandler: Receive = {
-    case SendMessage(_, Some(peer)) => sendMessage(peer)
+  override def receive: Receive = commandHandler andThen {
+    handler =>
+      Try(
+        handler() pipeTo sender).failed map (e => sender ! Status.Failure(e))
+  }
+
+  private def commandHandler: CommandHandler = {
+    case sm: SendMessage => sendMessage(sm)
   }
 
   //  private def query: Receive = {

@@ -2,7 +2,7 @@ package ir.sndu.server.model.dialog
 
 import java.time.LocalDateTime
 
-import ir.sndu.server.model.Peer
+import ir.sndu.server.peer.ApiPeer
 
 case class DialogCommon(
   dialogId: String,
@@ -12,7 +12,7 @@ case class DialogCommon(
 
 case class UserDialog(
   userId: Int,
-  peer: Peer,
+  peer: ApiPeer,
   ownerLastReceivedAt: LocalDateTime,
   ownerLastReadAt: LocalDateTime,
   createdAt: LocalDateTime,

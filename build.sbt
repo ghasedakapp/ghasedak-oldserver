@@ -1,3 +1,4 @@
+import com.trueaccord.scalapb.Scalapb.ScalaPbOptions
 import ir.sndu.Dependencies
 
 name := "elitem"
@@ -9,18 +10,13 @@ lazy val commonSettings = Seq(
   version := "0.1.0-SNAPSHOT",
   scalaVersion := "2.12.3",
   mainClass in Compile := Some("ir.sndu.server.Main"),
-  PB.targets in Compile := {
-    println((sourceManaged  in Compile).value)
-    println((sourceManaged).value)
-    Seq(
-      scalapb.gen() -> (sourceManaged  in Compile).value
-    )
-  },
-  {
-    println(scalaSource)
-    println(scalaSource in ProtocPlugin.ProtobufConfig)
+  PB.targets in Compile := Seq(
+      scalapb.gen() -> (sourceManaged  in Compile).value),
+  PB.includePaths in Compile ++= Seq(
+    file("elitem-model/src/main/protobuf")
+  ),
     scalaSource in ProtocPlugin.ProtobufConfig := sourceManaged.value
-  }
+
 
 )
 
@@ -35,7 +31,7 @@ lazy val root = (project in file("."))
 lazy val core = elitemModule("elitem-core")
   .settings(
     libraryDependencies ++= Dependencies.core
-  ).dependsOn(model)
+  ).dependsOn(model, persist)
 
 lazy val persist = elitemModule("elitem-persist")
   .settings(

@@ -4,7 +4,7 @@ import java.time.LocalDateTime
 
 import ir.sndu.persist.repo.TypeMapper._
 import ir.sndu.server.model.dialog.UserDialog
-import ir.sndu.server.model.{ Peer, PeerType }
+import ir.sndu.server.peer.{ ApiPeer, ApiPeerType }
 import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.ExecutionContext
@@ -33,27 +33,27 @@ trait UserDialogOperations {
   def findUsersVisible(userId: Rep[Int]) = notArchived.filter(_.userId === userId)
 
   def findGroupIds(userId: Int) =
-    idByPeerTypeC((userId, PeerType.Group.value)).result
+    idByPeerTypeC((userId, ApiPeerType.Group.value)).result
 
-  def findUsers(userId: Int, peer: Peer): DBIO[Option[UserDialog]] =
+  def findUsers(userId: Int, peer: ApiPeer): DBIO[Option[UserDialog]] =
     byPKC.applied((userId, peer.`type`.value, peer.id)).result.headOption
 
-  def usersExists(userId: Int, peer: Peer) =
+  def usersExists(userId: Int, peer: ApiPeer) =
     byPKC.applied((userId, peer.`type`.value, peer.id)).exists.result
 
-  def favourite(userId: Int, peer: Peer) =
+  def favourite(userId: Int, peer: ApiPeer) =
     byPKC.applied((userId, peer.`type`.value, peer.id)).map(_.isFavourite).update(true)
 
-  def unfavourite(userId: Int, peer: Peer) =
+  def unfavourite(userId: Int, peer: ApiPeer) =
     byPKC.applied((userId, peer.`type`.value, peer.id)).map(_.isFavourite).update(false)
 
-  def updateOwnerLastReceivedAt(userId: Int, peer: Peer, ownerLastReceivedAt: LocalDateTime)(implicit ec: ExecutionContext) =
+  def updateOwnerLastReceivedAt(userId: Int, peer: ApiPeer, ownerLastReceivedAt: LocalDateTime)(implicit ec: ExecutionContext) =
     byPKC.applied((userId, peer.`type`.value, peer.id)).map(_.ownerLastReceivedAt).update(ownerLastReceivedAt)
 
-  def updateOwnerLastReadAt(userId: Int, peer: Peer, ownerLastReadAt: LocalDateTime)(implicit ec: ExecutionContext) =
+  def updateOwnerLastReadAt(userId: Int, peer: ApiPeer, ownerLastReadAt: LocalDateTime)(implicit ec: ExecutionContext) =
     byPKC.applied((userId, peer.`type`.value, peer.id)).map(_.ownerLastReadAt).update(ownerLastReadAt)
 
-  def delete(userId: Int, peer: Peer) =
+  def delete(userId: Int, peer: ApiPeer) =
     byPKC.applied((userId, peer.`type`.value, peer.id)).delete
 
 }

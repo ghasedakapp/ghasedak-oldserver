@@ -1,9 +1,24 @@
 package ir.sndu.server.user
 
-trait UserCommandHandler {
+import java.time.Instant
 
-  def sendMessage(peer: Peer): Unit = {
-    println(peer)
+import ir.sndu.server.user.UserCommands.{ SendMessage, SendMessageAck }
+
+import scala.concurrent.Future
+
+trait UserCommandHandler {
+  self: UserProcessor =>
+
+  import HistoryUtils._
+
+  def sendMessage(sm: SendMessage)(): Future[SendMessageAck] = {
+    db.run((writeHistoryMessage _).tupled(SendMessage.unapply(
+      sm.copy(date = Some(getDate))).get))
+      .mapTo[SendMessageAck]
+  }
+
+  private def getDate: Long = {
+    Instant.now().toEpochMilli
   }
 
 }

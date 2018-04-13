@@ -8,7 +8,7 @@ import slick.jdbc.PostgresProfile._
 import scala.concurrent.{ ExecutionContext, Future }
 
 trait AuthHelper {
-  def authenticate[T](token: String)(f: Int => Future[T])(
+  def authorize[T](token: String)(f: Int => Future[T])(
     implicit
     db: backend.Database,
     ec: ExecutionContext,
