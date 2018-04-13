@@ -2,7 +2,6 @@ package ir.sndu.server.rpc.messaging
 
 import akka.actor.ActorSystem
 import akka.event.{ Logging, LoggingAdapter }
-import akka.util.Timeout
 import ir.sndu.persist.db.PostgresDb
 import ir.sndu.server.messaging.MessagingServiceGrpc.MessagingService
 import ir.sndu.server.messaging.{ RequestSendMessage, ResponseVoid }

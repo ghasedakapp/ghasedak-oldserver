@@ -10,6 +10,7 @@ import scala.util.{ Failure, Try }
 import akka.pattern.pipe
 import slick.jdbc.PostgresProfile
 import PostgresProfile.backend._
+import ir.sndu.server.peer.{ ApiPeer, ApiPeerType }
 
 object UserProcessor {
   def props = Props(classOf[UserProcessor])
@@ -22,6 +23,7 @@ class UserProcessor extends Processor
   type CommandHandler = PartialFunction[Any, () => Future[Any]]
 
   protected val userId: Int = self.path.name.toInt
+  protected val selfPeer = ApiPeer(ApiPeerType.Private, userId)
   protected implicit val ec: ExecutionContext = context.dispatcher
   protected implicit val db: Database = PostgresDb.db
 

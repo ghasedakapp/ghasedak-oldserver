@@ -12,13 +12,17 @@ trait UserCommandHandler {
   import HistoryUtils._
 
   def sendMessage(sm: SendMessage)(): Future[SendMessageAck] = {
-    db.run((writeHistoryMessage _).tupled(SendMessage.unapply(
-      sm.copy(date = Some(getDate))).get))
+    db.run(writeHistoryMessage(
+      selfPeer,
+      sm.peer.get,
+      sm.randomId,
+      getDate,
+      sm.message.get))
       .mapTo[SendMessageAck]
   }
 
-  private def getDate: Long = {
-    Instant.now().toEpochMilli
+  private def getDate: Instant = {
+    Instant.now()
   }
 
 }
