@@ -7,13 +7,25 @@ import "api/messaging.proto";
 
 service MessagingService {
     rpc SendMessage(RequestSendMessage) returns (ResponseVoid) {}
+    rpc LoadHistory(RequestLoadHistory) returns (ResponseLoadHistory) {}
 }
 
 message RequestSendMessage{
-    ir.sndu.server.ApiOutPeer out_peer = 1;
+    ApiOutPeer out_peer = 1;
     int64 random_id = 2;
-    ir.sndu.server.ApiMessage message = 3;
+    ApiMessage message = 3;
     string token = 4;
 }
 
 message ResponseVoid{}
+
+message RequestLoadHistory{
+    ApiOutPeer peer = 1;
+    int64 date = 2;
+    int32 limit = 3;
+    string token = 4;
+}
+
+message ResponseLoadHistory{
+    repeated ApiMessageContainer history = 1;
+}
