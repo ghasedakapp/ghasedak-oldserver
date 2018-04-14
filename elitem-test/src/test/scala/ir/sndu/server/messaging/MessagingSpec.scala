@@ -37,6 +37,7 @@ class MessagingSpec extends GrpcBaseSuit
     val msg1 = ApiMessage().withTextMessage(ApiTextMessage("salam1"))
     val msg2 = ApiMessage().withTextMessage(ApiTextMessage("salam2"))
     befrest(outPeer2, msg1)
+    Thread.sleep(100)
     befrest(outPeer2, msg2)
 
     val rsp = messagingStub.loadHistory(RequestLoadHistory(

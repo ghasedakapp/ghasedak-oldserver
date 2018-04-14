@@ -2,7 +2,9 @@ package ir.sndu.server.model.dialog
 
 import java.time.{ LocalDateTime, ZoneOffset }
 
-import ir.sndu.server.messaging.ApiDialog
+import com.google.protobuf.CodedInputStream
+import ir.sndu.server.messaging.{ ApiDialog, ApiMessage }
+import ir.sndu.server.model.history.HistoryMessage
 import ir.sndu.server.peer.ApiPeer
 
 case class DialogCommon(
@@ -29,10 +31,18 @@ case class Dialog(
   lastReadAt: LocalDateTime,
   createdAt: LocalDateTime,
   isFavourite: Boolean) {
-  def toApi: ApiDialog = ApiDialog(
-    Some(peer),
-    0,
-    lastMessageDate.toEpochSecond(ZoneOffset.UTC))
+  def toApi(msgOpt: Option[HistoryMessage]): ApiDialog = {
+    val history = msgOpt.getOrElse(HistoryMessage.empty(userId, peer, lastMessageDate))
+    val msgDate = lastMessageDate.toEpochSecond(ZoneOffset.UTC)
+    ApiDialog(
+      Some(peer),
+      0,
+      msgDate,
+      history.senderUserId,
+      history.randomId,
+      msgDate,
+      Some(ApiMessage().mergeFrom(CodedInputStream.newInstance(history.messageContentData))))
+  }
 
 }
 

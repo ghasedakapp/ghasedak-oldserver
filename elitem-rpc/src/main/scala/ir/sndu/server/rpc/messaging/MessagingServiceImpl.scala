@@ -15,7 +15,7 @@ import ir.sndu.server.rpc.auth.AuthHelper
 import ir.sndu.server.user.UserExtension
 
 import scala.concurrent.Future
-
+import slick.dbio._
 class MessagingServiceImpl(implicit system: ActorSystem) extends MessagingService
   with AuthHelper {
   implicit protected val ec = system.dispatcher
@@ -53,7 +53,14 @@ class MessagingServiceImpl(implicit system: ActorSystem) extends MessagingServic
 
   override def loadDialogs(request: RequestLoadDialogs): Future[ResponseLoadDialogs] =
     authorize(request.token) { userId =>
-      db.run(DialogRepo.find(userId, request.limit)) map (r => ResponseLoadDialogs(r.map(_.toApi)))
+      val action = for {
+        dialogs <- DialogRepo.find(userId, request.limit)
+        fullDialogs <- DBIO.sequence(dialogs.map(d =>
+          HistoryMessageRepo.find(d.userId, d.peer, Some(d.lastMessageDate), 1).headOption.map(d.toApi)))
+
+      } yield ResponseLoadDialogs(fullDialogs)
+
+      db.run(action)
     }
 
 }
