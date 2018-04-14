@@ -8,6 +8,7 @@ import "api/messaging.proto";
 service MessagingService {
     rpc SendMessage(RequestSendMessage) returns (ResponseVoid) {}
     rpc LoadHistory(RequestLoadHistory) returns (ResponseLoadHistory) {}
+    rpc LoadDialogs(RequestLoadDialogs) returns (ResponseLoadDialogs) {}
 }
 
 message RequestSendMessage{
@@ -28,4 +29,13 @@ message RequestLoadHistory{
 
 message ResponseLoadHistory{
     repeated ApiMessageContainer history = 1;
+}
+
+message RequestLoadDialogs {
+    int32 limit = 1;
+    string token = 2;
+}
+
+message ResponseLoadDialogs{
+    repeated ApiDialog dialogs = 1;
 }

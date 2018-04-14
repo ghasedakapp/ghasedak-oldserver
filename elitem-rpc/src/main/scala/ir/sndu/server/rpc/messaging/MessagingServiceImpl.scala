@@ -6,6 +6,7 @@ import akka.actor.ActorSystem
 import akka.event.{ Logging, LoggingAdapter }
 import com.google.protobuf.CodedInputStream
 import ir.sndu.persist.db.PostgresDb
+import ir.sndu.persist.repo.dialog.DialogRepo
 import ir.sndu.persist.repo.history.HistoryMessageRepo
 import ir.sndu.server.messaging.MessagingServiceGrpc.MessagingService
 import ir.sndu.server.messaging._
@@ -26,8 +27,11 @@ class MessagingServiceImpl(implicit system: ActorSystem) extends MessagingServic
     authorize(request.token) { userId =>
       val (outPeer, randomId, message, _) = RequestSendMessage.unapply(request).get
 
-      userExt.sendMessage(userId, outPeer.map(p => ApiPeer(p.`type`, p.id)).get, randomId, message.get).map(
-        _ => ResponseVoid())
+      userExt.sendMessage(
+        userId,
+        outPeer.map(p => ApiPeer(p.`type`, p.id)).get,
+        randomId,
+        message.get).map(_ => ResponseVoid())
     }
 
   override def loadHistory(request: RequestLoadHistory): Future[ResponseLoadHistory] =
@@ -46,4 +50,10 @@ class MessagingServiceImpl(implicit system: ActorSystem) extends MessagingServic
 
       } map (ResponseLoadHistory(_))
     }
+
+  override def loadDialogs(request: RequestLoadDialogs): Future[ResponseLoadDialogs] =
+    authorize(request.token) { userId =>
+      db.run(DialogRepo.find(userId, request.limit)) map (r => ResponseLoadDialogs(r.map(_.toApi)))
+    }
+
 }

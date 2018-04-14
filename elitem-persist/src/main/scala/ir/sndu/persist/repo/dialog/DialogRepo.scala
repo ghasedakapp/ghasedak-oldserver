@@ -3,10 +3,13 @@ package ir.sndu.persist.repo.dialog
 import java.time.LocalDateTime
 
 import ir.sndu.persist.repo.TypeMapper._
-import ir.sndu.server.model.dialog.{ DialogCommon, UserDialog }
+import ir.sndu.server.model.dialog.{ Dialog, DialogCommon, UserDialog }
 import ir.sndu.server.peer.{ ApiPeer, ApiPeerType }
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.Tag
+import ir.sndu.server.utils._
+
+import scala.concurrent.ExecutionContext
 
 final class DialogCommonTable(tag: Tag) extends Table[DialogCommon](tag, "dialog_commons") {
 
@@ -93,9 +96,26 @@ final class UserDialogTable(tag: Tag) extends Table[UserDialog](tag, "user_dialo
 }
 
 object DialogRepo extends UserDialogOperations with DialogCommonOperations {
-
+  import ImplicitTimes._
   private val dialogs = for {
     c ← DialogCommonRepo.dialogCommon
     u ← UserDialogRepo.userDialogs if c.dialogId === repDialogId(u.userId, u.peerId, u.peerType)
   } yield (c, u)
+
+  def create(
+    userId: Int,
+    peer: ApiPeer,
+    lastMessageDate: LocalDateTime) = {
+    createUserDialog(userId, peer, DateTimeHelper.origin, DateTimeHelper.origin) andThen
+      createCommon(DialogCommon(getDialogId(Some(userId), peer), lastMessageDate, DateTimeHelper.origin, DateTimeHelper.origin))
+  }
+
+  def find(userId: Int, limit: Int)(implicit ec: ExecutionContext) = {
+    dialogs.filter(r => r._2.userId === userId)
+      .sortBy {
+        case (common, _) => common.lastMessageDate.desc
+      }.take(limit).result.map(_.map {
+        case (c, u) => Dialog.from(c, u)
+      })
+  }
 }

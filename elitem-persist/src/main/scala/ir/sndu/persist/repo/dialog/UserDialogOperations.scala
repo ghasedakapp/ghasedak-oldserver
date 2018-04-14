@@ -30,6 +30,19 @@ object UserDialogRepo {
 trait UserDialogOperations {
   import UserDialogRepo._
 
+  def createUserDialog(
+    userId: Int,
+    peer: ApiPeer,
+    ownerLastReceivedAt: LocalDateTime,
+    ownerLastReadAt: LocalDateTime) =
+    userDialogs insertOrUpdate UserDialog(
+      userId,
+      peer,
+      ownerLastReceivedAt,
+      ownerLastReadAt,
+      LocalDateTime.now(),
+      false)
+
   def findUsersVisible(userId: Rep[Int]) = notArchived.filter(_.userId === userId)
 
   def findGroupIds(userId: Int) =

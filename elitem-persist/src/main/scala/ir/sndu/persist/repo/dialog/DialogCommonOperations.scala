@@ -4,7 +4,7 @@ import java.time.LocalDateTime
 
 import ir.sndu.persist.repo.TypeMapper._
 import ir.sndu.server.model.dialog.DialogCommon
-import ir.sndu.server.peer.ApiPeer
+import ir.sndu.server.peer.{ ApiPeer, ApiPeerType }
 import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.ExecutionContext
@@ -24,10 +24,19 @@ object DialogCommonRepo {
 trait DialogCommonOperations extends DialogId {
   import DialogCommonRepo._
 
+  def createCommon(common: DialogCommon) =
+    dialogCommon insertOrUpdate common
+
   def findCommon(userId: Option[Int], peer: ApiPeer): DBIO[Option[DialogCommon]] =
     byPKC.applied(getDialogId(userId, peer)).result.headOption
 
   def commonExists(dialogId: String) = existsC(dialogId).result
+
+  def updateLastMessageDate(userId: Int, peer: ApiPeer, lastMessageDate: LocalDateTime)(implicit ec: ExecutionContext) =
+    peer.`type` match {
+      case ApiPeerType.Private => updateLastMessageDatePrivate(userId: Int, peer: ApiPeer, lastMessageDate: LocalDateTime)
+      case ApiPeerType.Group => updateLastMessageDateGroup(peer, lastMessageDate)
+    }
 
   def updateLastMessageDatePrivate(userId: Int, peer: ApiPeer, lastMessageDate: LocalDateTime)(implicit ec: ExecutionContext) = {
     requirePrivate(peer)

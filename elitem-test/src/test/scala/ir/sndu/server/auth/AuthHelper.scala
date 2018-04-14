@@ -1,14 +1,13 @@
 package ir.sndu.server.auth
 
-import ir.sndu.server.GrpcBaseSuit
-import ir.sndu.server.users.{ ApiSex, ApiUser }
+import ir.sndu.server.users.ApiSex
+import ir.sndu.server.{ GrpcBaseSuit, UserInfo }
 
 import scala.util.Random
 
 trait AuthHelper {
   self: GrpcBaseSuit =>
 
-  case class UserInfo(user: ApiUser, token: String, number: Long)
   def createUser(): UserInfo = {
     val number = Random.nextLong()
     val rsp = authStub.signUp(RequestSignUp(

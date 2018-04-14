@@ -8,7 +8,7 @@ trait DialogId {
 
   def getDialogId(optUserId: Option[Int], peer: ApiPeer): String = (optUserId, peer) match {
     case (Some(userId), ApiPeer(ApiPeerType.Private, peerUserId)) ⇒
-      val userIds = if (userId < peerUserId) s"${userId}_${peerUserId}" else s"${peerUserId}_${userId}"
+      val userIds = s"${userId}_${peerUserId}"
       s"${peer.`type`.value}_$userIds"
     case (_, ApiPeer(ApiPeerType.Group, groupId)) ⇒
       s"${peer.`type`.value}_$groupId"

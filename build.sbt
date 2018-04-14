@@ -35,7 +35,7 @@ lazy val core = elitemModule("elitem-core")
 lazy val persist = elitemModule("elitem-persist")
   .settings(
     libraryDependencies ++= Dependencies.persist
-  ).dependsOn(model)
+  ).dependsOn(model, commons)
 
 lazy val rpc = elitemModule("elitem-rpc")
   .settings(
