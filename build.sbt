@@ -25,7 +25,7 @@ lazy val root = (project in file("."))
     commonSettings
   )
   .dependsOn(commons, core, rpc)
-  .aggregate(core,persist,rpc, commons, model)
+  .aggregate(core,persist,rpc, commons, model, cli)
 
 lazy val core = elitemModule("elitem-core")
   .settings(
@@ -50,6 +50,11 @@ lazy val model = elitemModule("elitem-model")
 lazy val commons = elitemModule("elitem-commons")
   .settings(
     libraryDependencies ++= Dependencies.commons
+  )
+
+lazy val cli = elitemModule("elitem-cli")
+  .settings(
+    libraryDependencies ++= Dependencies.cli
   )
 
 lazy val test = elitemModule("elitem-test")

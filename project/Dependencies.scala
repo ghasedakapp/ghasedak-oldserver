@@ -39,6 +39,8 @@ object Dependencies {
 
     val logback = "ch.qos.logback" % "logback-classic" % "1.2.3"
 
+    val scopt = "com.github.scopt" %% "scopt" % "3.7.0"
+
   }
 
   object Test {
@@ -66,6 +68,8 @@ object Dependencies {
   val model = shared
 
   val commons = shared
+
+  val cli = shared ++ Seq(scopt)
 
   val test = shared ++ Seq(scalatic, scalaTest, akkaTest)
 
