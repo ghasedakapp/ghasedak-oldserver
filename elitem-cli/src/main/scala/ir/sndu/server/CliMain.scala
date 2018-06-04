@@ -1,13 +1,47 @@
 package ir.sndu.server
 
 import java.io.File
+
+import scopt.OptionDef
 case class Config(foo: Int = -1, out: File = new File("."), xyz: Boolean = false,
   libName: String = "", maxCount: Int = -1, verbose: Boolean = false, debug: Boolean = false,
   mode: String = "", files: Seq[File] = Seq(), keepalive: Boolean = false,
   jars: Seq[File] = Seq(), kwargs: Map[String, String] = Map())
 
+object ElitemConsole {
+  def withColor(color: String, f: => Unit): Unit = {
+    print(color)
+    f
+    print(Console.WHITE)
+  }
+
+  def withError(f: => Unit): Unit = withColor(Console.RED, f)
+
+  def withWarning(f: => Unit): Unit = withColor(Console.RED, f)
+
+  def withOutput(f: => Unit): Unit = withColor(Console.GREEN, f)
+}
+
 object CliMain extends App {
+  import ElitemConsole._
   val parser = new scopt.OptionParser[Config]("scopt") {
+    override def reportError(msg: String): Unit = withError(super.reportError(msg))
+    override def reportWarning(msg: String): Unit = withWarning(super.reportWarning(msg))
+    override def showTryHelp(): Unit = withError(super.showTryHelp())
+    override def showUsageAsError(): Unit = withError(super.showUsageAsError())
+
+    override def showHeader(): Unit = withOutput(super.showHeader())
+    override def showUsage(): Unit = withOutput(super.showUsage())
+
+    override def help(name: String): OptionDef[Unit, Config] = {
+      val o = opt[Unit](name) action { (x, c) =>
+        showUsage()
+        c
+      }
+      helpOptions += o
+      o
+    }
+
     head("scopt", "3.x")
 
     opt[Int]('f', "foo").action((x, c) =>
@@ -59,13 +93,26 @@ object CliMain extends App {
           else success))
   }
 
-  parser.parse(args, Config())
-  // parser.parse returns Option[C]
-  //  parser.parse(args, Config()) match {
-  //    case Some(config) =>
-  //     do stuff
-  //
-  //    case None =>
-  //     arguments are bad, error message will have been displayed
-  //  }
+
+  def f(config: Config): Unit = {
+    print(Console.CYAN + "elitem > ")
+    print(Console.WHITE)
+    val output = scala.io.StdIn.readLine()
+    if (output == "exit") System.exit(0)
+
+    System.err.print(Console.RED)
+
+    parser.parse(output.replaceAll("\\s", " ").split(" "), Config()) match {
+      case Some(config) =>
+        println(Console.GREEN + config)
+        f(config)
+
+      case None =>
+        f(config)
+    }
+
+  }
+
+  f(Config())
+
 }
