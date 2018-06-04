@@ -39,7 +39,7 @@ case class ElitemOptionParser() extends scopt.OptionParser[Config]("scopt") {
     parse(output.replaceAll("\\s", " ").split(" "), Config()) match {
       case Some(config) =>
         withColor(Console.GREEN) {
-          Console.out.print(config)
+          Console.out.println(config)
         }
         repl(config)
 
