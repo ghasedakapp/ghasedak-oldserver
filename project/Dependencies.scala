@@ -11,6 +11,7 @@ object Dependencies {
     val scalapb = "0.7.1"
     val postgres = "42.2.1"
     val flyway = "5.0.7"
+    val config = "1.3.2"
   }
 
   object Compile {
@@ -21,6 +22,7 @@ object Dependencies {
     val akkaPersist =  "com.typesafe.akka" %% "akka-persistence" % V.akka
     val akkaSlf4j =  "com.typesafe.akka" %% "akka-slf4j" % V.akka
 
+    val config = "com.typesafe" % "config" % V.config
 
 
     val postgres = "org.postgresql" % "postgresql" % V.postgres
@@ -40,6 +42,9 @@ object Dependencies {
     val logback = "ch.qos.logback" % "logback-classic" % "1.2.3"
 
     val scopt = "com.github.scopt" %% "scopt" % "3.7.0"
+    val picoCli = "info.picocli" % "picocli" % "3.0.2"
+    val textIo = "org.beryx" % "text-io" % "3.1.3" % "runtime"
+    val levelDB = "org.iq80.leveldb" % "leveldb" % "0.10"
 
   }
 
@@ -67,9 +72,9 @@ object Dependencies {
   val rpc = shared ++ grpc ++ Seq()
   val model = shared
 
-  val commons = shared
+  val commons = shared ++ Seq(config)
 
-  val cli = shared ++ Seq(scopt)
+  val cli = shared ++ Seq(scopt, picoCli, textIo, levelDB) ++ grpc
 
   val test = shared ++ Seq(scalatic, scalaTest, akkaTest)
 
