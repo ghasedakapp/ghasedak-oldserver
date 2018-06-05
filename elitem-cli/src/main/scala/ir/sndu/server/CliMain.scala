@@ -1,6 +1,9 @@
 package ir.sndu.server
 
+import ir.sndu.server.command.ElitemCli
+import picocli.CommandLine
+
 object CliMain extends App {
-  val parser = ElitemOptionParser()
-  parser.repl(Config())
+  CommandLine.run(new ElitemCli(), args: _*)
 }
+
