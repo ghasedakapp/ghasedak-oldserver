@@ -15,8 +15,6 @@ lazy val commonSettings = Seq(
     file("elitem-model/src/main/protobuf")
   ),
     scalaSource in ProtocPlugin.ProtobufConfig := sourceManaged.value
-
-
 )
 
 
@@ -54,8 +52,12 @@ lazy val commons = elitemModule("elitem-commons")
 
 lazy val cli = elitemModule("elitem-cli")
   .settings(
-    libraryDependencies ++= Dependencies.cli
+    libraryDependencies ++= Dependencies.cli,
+    PB.protoSources in Compile ++= Seq(
+      file("elitem-rpc/src/main/protobuf")
+    )
   )
+  .dependsOn(model, commons)
 
 lazy val test = elitemModule("elitem-test")
   .settings(
