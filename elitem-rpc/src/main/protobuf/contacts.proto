@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package ir.sndu.server;
+
+import "api/peer.proto";
+
+service ContactService {
+    rpc SearchContacts(RequestSearchContacts) returns (ResponseSearchContacts) {}
+}
+
+message RequestSearchContacts{
+    string query = 1;
+    string token = 2;
+}
+
+message ResponseSearchContacts{
+    repeated ApiOutPeer peers = 1;
+}
