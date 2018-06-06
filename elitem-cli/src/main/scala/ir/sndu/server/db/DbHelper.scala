@@ -8,7 +8,7 @@ import org.iq80.leveldb.impl.Iq80DBFactory._
 
 object DbHelper {
 
-  def leveldb(path: Option[String] = None)(f: DB => Unit) = {
+  def leveldb(path: Option[String] = None)(f: DB => Unit)(implicit log: org.slf4j.Logger) = {
     val options = new Options()
     options.createIfMissing(true)
     val db = factory.open(new File(path.getOrElse(".") + "/session"), options)
@@ -16,6 +16,7 @@ object DbHelper {
       f(db)
     } catch {
       case e: Throwable =>
+        log.error(e.getMessage, e)
         withColor(scala.Console.RED) {
           System.err.println(s"Error: ${e.getMessage}")
         }

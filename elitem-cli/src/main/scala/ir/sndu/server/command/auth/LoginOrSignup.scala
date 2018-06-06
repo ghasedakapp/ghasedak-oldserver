@@ -1,8 +1,9 @@
-package ir.sndu.server.command
+package ir.sndu.server.command.auth
 
 import ir.sndu.server.ElitemConsole.withError
 import ir.sndu.server.GrpcStubs._
 import ir.sndu.server.auth.RequestSignUp
+import ir.sndu.server.command.CommandBase
 import ir.sndu.server.db.DbHelper._
 import ir.sndu.server.users.ApiSex
 import org.iq80.leveldb.DB
@@ -11,7 +12,7 @@ import picocli.CommandLine
 @CommandLine.Command(
   name = "login",
   description = Array("@|bold Login|@ @|underline elitem|@ example"))
-class LoginOrSignup extends Runnable {
+class LoginOrSignup extends CommandBase {
 
   private def signup()(implicit db: DB): Unit = {
     val req = RequestSignUp(

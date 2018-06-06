@@ -3,9 +3,9 @@ package ir.sndu.server.user
 import java.time.{ Instant, LocalDateTime, ZoneId }
 
 import ir.sndu.persist.repo.history.HistoryMessageRepo
-import ir.sndu.server.messaging.ApiMessage
+import ir.sndu.server.message.ApiMessage
 import ir.sndu.server.model.history.HistoryMessage
-import ir.sndu.server.peer.{ ApiPeer, ApiPeerType }
+import ir.sndu.server.peer.ApiPeer
 import slick.dbio.DBIO
 
 import scala.concurrent.ExecutionContext

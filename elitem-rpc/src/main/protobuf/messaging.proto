@@ -3,7 +3,7 @@ syntax = "proto3";
 package ir.sndu.server;
 
 import "api/peer.proto";
-import "api/messaging.proto";
+import "api/message.proto";
 
 service MessagingService {
     rpc SendMessage(RequestSendMessage) returns (ResponseVoid) {}

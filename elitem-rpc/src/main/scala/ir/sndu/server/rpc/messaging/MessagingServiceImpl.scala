@@ -8,14 +8,15 @@ import com.google.protobuf.CodedInputStream
 import ir.sndu.persist.db.PostgresDb
 import ir.sndu.persist.repo.dialog.DialogRepo
 import ir.sndu.persist.repo.history.HistoryMessageRepo
+import ir.sndu.server.message.{ ApiMessage, ApiMessageContainer }
 import ir.sndu.server.messaging.MessagingServiceGrpc.MessagingService
 import ir.sndu.server.messaging._
 import ir.sndu.server.peer.ApiPeer
 import ir.sndu.server.rpc.auth.AuthHelper
 import ir.sndu.server.user.UserExtension
+import slick.dbio._
 
 import scala.concurrent.Future
-import slick.dbio._
 class MessagingServiceImpl(implicit system: ActorSystem) extends MessagingService
   with AuthHelper {
   implicit protected val ec = system.dispatcher

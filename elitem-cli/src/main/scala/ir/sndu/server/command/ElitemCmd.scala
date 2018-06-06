@@ -1,5 +1,8 @@
 package ir.sndu.server.command
 
+import ir.sndu.server.command.auth.LoginOrSignup
+import ir.sndu.server.command.cache.ClearCache
+import ir.sndu.server.command.dialog.LoadDialog
 import picocli.CommandLine.{ Command, HelpCommand }
 
 @Command(
@@ -10,8 +13,9 @@ import picocli.CommandLine.{ Command, HelpCommand }
   subcommands = Array(
     classOf[HelpCommand],
     classOf[LoginOrSignup],
-    classOf[ClearCache]))
-class ElitemCli extends Runnable {
+    classOf[ClearCache],
+    classOf[LoadDialog]))
+class ElitemCmd extends Runnable {
 
   @picocli.CommandLine.Option(
     names = Array("-d", "--database"),

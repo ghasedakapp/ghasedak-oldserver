@@ -3,7 +3,7 @@ package ir.sndu.server.model.dialog
 import java.time.{ LocalDateTime, ZoneOffset }
 
 import com.google.protobuf.CodedInputStream
-import ir.sndu.server.messaging.{ ApiDialog, ApiMessage }
+import ir.sndu.server.message.{ ApiDialog, ApiMessage }
 import ir.sndu.server.model.history.HistoryMessage
 import ir.sndu.server.peer.ApiPeer
 
