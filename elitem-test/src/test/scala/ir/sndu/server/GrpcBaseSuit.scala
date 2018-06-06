@@ -18,7 +18,7 @@ class GrpcBaseSuit extends FlatSpec
   ElitemServer.start()
 
   private val channel: ManagedChannel =
-    ManagedChannelBuilder.forAddress("192.168.1.8", 6060).usePlaintext(true).build
+    ManagedChannelBuilder.forAddress("127.0.0.1", 6060).usePlaintext(true).build
 
   protected implicit val authStub = AuthServiceGrpc.blockingStub(channel)
   protected implicit val messagingStub = MessagingServiceGrpc.blockingStub(channel)
