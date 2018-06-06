@@ -9,7 +9,7 @@ import picocli.CommandLine
 
 @CommandLine.Command(
   name = "dialogs",
-  description = Array("@|bold Login|@ @|underline elitem|@ example"))
+  description = Array("Load Dialogs"))
 class LoadDialog extends CommandBase {
 
   private def load(limit: Int, token: String): Unit = {
