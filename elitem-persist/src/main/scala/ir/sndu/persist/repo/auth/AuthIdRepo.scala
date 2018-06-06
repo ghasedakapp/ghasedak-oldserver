@@ -72,6 +72,7 @@ object AuthIdRepo {
 
   def delete(id: String) =
     activeAuthIds.filter(_.id === id).map(_.deletedAt).update(Some(LocalDateTime.now()))
-  def deleteByUser(userId:Int) =
+
+  def deleteByUser(userId: Int) =
     activeAuthIds.filter(_.userId === userId).map(_.deletedAt).update(Some(LocalDateTime.now()))
 }

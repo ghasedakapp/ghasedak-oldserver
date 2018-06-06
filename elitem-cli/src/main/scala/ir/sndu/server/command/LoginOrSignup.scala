@@ -3,7 +3,7 @@ package ir.sndu.server.command
 import ir.sndu.server.ElitemConsole.withError
 import ir.sndu.server.GrpcStubs._
 import ir.sndu.server.auth.RequestSignUp
-import ir.sndu.server.disk.DbHelper._
+import ir.sndu.server.db.DbHelper._
 import ir.sndu.server.users.ApiSex
 import org.iq80.leveldb.DB
 import picocli.CommandLine

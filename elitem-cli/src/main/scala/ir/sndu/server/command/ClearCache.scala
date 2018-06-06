@@ -2,7 +2,7 @@ package ir.sndu.server.command
 
 import java.io.File
 
-import ir.sndu.server.disk.FileHelper
+import ir.sndu.server.utils.FileHelper
 import picocli.CommandLine.Command
 
 @Command(

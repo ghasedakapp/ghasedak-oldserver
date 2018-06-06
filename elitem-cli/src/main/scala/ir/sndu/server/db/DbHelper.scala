@@ -1,4 +1,4 @@
-package ir.sndu.server.disk
+package ir.sndu.server.db
 
 import java.io._
 

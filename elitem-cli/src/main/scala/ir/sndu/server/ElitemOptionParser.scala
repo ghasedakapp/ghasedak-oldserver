@@ -9,6 +9,7 @@ case class Config(foo: Int = -1, out: File = new File("."), xyz: Boolean = false
   mode: String = "", files: Seq[File] = Seq(), keepalive: Boolean = false,
   jars: Seq[File] = Seq(), kwargs: Map[String, String] = Map())
 
+@Deprecated
 case class ElitemOptionParser() extends scopt.OptionParser[Config]("scopt") {
   import ElitemConsole._
 
