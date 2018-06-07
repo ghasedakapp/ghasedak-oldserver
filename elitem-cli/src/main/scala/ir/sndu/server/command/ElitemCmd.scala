@@ -4,8 +4,7 @@ import ir.sndu.server.command.auth.LoginOrSignup
 import ir.sndu.server.command.cache.ClearCache
 import ir.sndu.server.command.dialog.LoadDialog
 import ir.sndu.server.command.messaging.SendMesage
-import picocli.CommandLine.{ Command, HelpCommand }
-
+import picocli.CommandLine.{Command, HelpCommand}
 @Command(
   name = "elitem",
   version = Array("Elitem v0.1 demo"),
@@ -22,7 +21,7 @@ class ElitemCmd extends Runnable {
   @picocli.CommandLine.Option(
     names = Array("-d", "--database"),
     description = Array("Database file path"))
-  private var database: String = _
+  var database: String = _
 
   def run(): Unit = {
   }

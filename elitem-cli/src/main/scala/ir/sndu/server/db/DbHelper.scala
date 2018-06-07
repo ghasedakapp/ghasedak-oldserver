@@ -2,16 +2,30 @@ package ir.sndu.server.db
 
 import java.io._
 
-import ir.sndu.server.ElitemConsole.withColor
+import ir.sndu.server.CliConfigs
+import ir.sndu.server.ElitemConsole.{ withColor, withWarning }
+import ir.sndu.server.command.ElitemCmd
 import org.iq80.leveldb.{ DB, _ }
 import org.iq80.leveldb.impl.Iq80DBFactory._
 
 object DbHelper {
-
-  def leveldb(path: Option[String] = None)(f: DB => Unit)(implicit log: org.slf4j.Logger) = {
+  private def overwriteDbPath(parent: ElitemCmd): Unit = {
+    Option(parent.database) match {
+      case Some(path) =>
+        withWarning(println("Overwriting db path..."))
+        CliConfigs.dbPath = path
+      case None =>
+    }
+  }
+  def leveldb(f: DB => Unit)(
+    implicit
+    log: org.slf4j.Logger,
+    parent: ElitemCmd) = {
+    overwriteDbPath(parent)
+    val path = CliConfigs.dbPath
     val options = new Options()
     options.createIfMissing(true)
-    val db = factory.open(new File(path.getOrElse(".") + "/session"), options)
+    val db = factory.open(new File(s"$path/session"), options)
     try {
       f(db)
     } catch {

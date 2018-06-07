@@ -23,7 +23,7 @@ class LoadDialog extends CommandBase {
   private var limit: Int = _
 
   override def run(): Unit =
-    leveldb() { implicit db =>
+    leveldb { implicit db =>
       db.get("token") match {
         case Some(token) => load(Option(limit).getOrElse(10), token)
         case None => withError {

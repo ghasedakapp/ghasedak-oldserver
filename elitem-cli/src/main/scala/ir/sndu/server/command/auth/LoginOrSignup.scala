@@ -36,7 +36,7 @@ class LoginOrSignup extends CommandBase {
   private var phone: Long = _
 
   override def run(): Unit =
-    leveldb() { implicit db =>
+    leveldb { implicit db =>
       db.get("token") match {
         case Some(token) => withError {
           System.err.println("You are logged in")

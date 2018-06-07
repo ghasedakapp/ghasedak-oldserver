@@ -2,7 +2,7 @@ package ir.sndu.server.command.messaging
 
 import ir.sndu.server.ElitemConsole.withError
 import ir.sndu.server.GrpcStubs._
-import ir.sndu.server.command.{ ClientData, CommandBase }
+import ir.sndu.server.command.{ ClientData, CommandBase, ElitemCmd }
 import ir.sndu.server.db.DbHelper._
 import ir.sndu.server.messaging.{ RequestLoadDialogs, RequestSendMessage }
 import picocli.CommandLine
@@ -10,6 +10,7 @@ import ir.sndu.server.command.AuthHelper._
 import ir.sndu.server.contacts.RequestSearchContacts
 import ir.sndu.server.message.{ ApiMessage, ApiTextMessage }
 import ir.sndu.server.peer.{ ApiOutPeer, ApiPeerType }
+import picocli.CommandLine.ParentCommand
 
 import scala.util.Random
 @CommandLine.Command(
