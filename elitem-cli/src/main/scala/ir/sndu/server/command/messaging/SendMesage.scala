@@ -7,28 +7,45 @@ import ir.sndu.server.db.DbHelper._
 import ir.sndu.server.messaging.{ RequestLoadDialogs, RequestSendMessage }
 import picocli.CommandLine
 import ir.sndu.server.command.AuthHelper._
+import ir.sndu.server.contacts.RequestSearchContacts
 import ir.sndu.server.message.{ ApiMessage, ApiTextMessage }
 import ir.sndu.server.peer.{ ApiOutPeer, ApiPeerType }
+
+import scala.util.Random
 @CommandLine.Command(
   name = "sendmessage",
-  description = Array("Send MEssage to Specific user by phone number"))
+  description = Array("Send Message to Specific user by phone number"))
 class SendMesage extends CommandBase {
 
-  private def send(peer: Long, msg: String)(implicit client: ClientData): Unit = {
+  private def send(number: Long, msg: String)(implicit client: ClientData): Unit = {
 
-    //    val outPeer2 = ApiOutPeer(ApiPeerType.Private, user2.id)
+    val peers = contactsStub.searchContacts(RequestSearchContacts(number.toString, client.token)).peers
 
-    val msg1 = ApiMessage().withTextMessage(ApiTextMessage(msg))
-    RequestSendMessage()
+    if (peers.isEmpty)
+      withError(System.err.println("Phone number does not exists"))
+    else
+      messagingStub.sendMessage(RequestSendMessage(
+        outPeer = Some(peers.head),
+        randomId = Random.nextLong(),
+        message = Some(ApiMessage().withTextMessage(ApiTextMessage(msg))),
+        client.token))
+
   }
 
   @CommandLine.Option(
-    names = Array("-l", "--limit"),
-    description = Array("Number of dialogs"))
-  private var limit: Int = _
+    names = Array("-p", "--peer"),
+    required = true,
+    description = Array("Peer mobile number"))
+  private var peer: Long = _
+
+  @CommandLine.Option(
+    names = Array("-m", "--message"),
+    required = true,
+    description = Array("Text message content"))
+  private var message: String = _
 
   override def run(): Unit =
     authenticate { implicit client =>
-      send(1L, "")
+      send(peer, message)
     }
 }

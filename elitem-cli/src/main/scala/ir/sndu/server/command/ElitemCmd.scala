@@ -3,6 +3,7 @@ package ir.sndu.server.command
 import ir.sndu.server.command.auth.LoginOrSignup
 import ir.sndu.server.command.cache.ClearCache
 import ir.sndu.server.command.dialog.LoadDialog
+import ir.sndu.server.command.messaging.SendMesage
 import picocli.CommandLine.{ Command, HelpCommand }
 
 @Command(
@@ -14,12 +15,13 @@ import picocli.CommandLine.{ Command, HelpCommand }
     classOf[HelpCommand],
     classOf[LoginOrSignup],
     classOf[ClearCache],
-    classOf[LoadDialog]))
+    classOf[LoadDialog],
+    classOf[SendMesage]))
 class ElitemCmd extends Runnable {
 
   @picocli.CommandLine.Option(
     names = Array("-d", "--database"),
-    description = Array("Databse file path"))
+    description = Array("Database file path"))
   private var database: String = _
 
   def run(): Unit = {

@@ -15,9 +15,11 @@ trait AuthHelper {
     log: LoggingAdapter): Future[T] = {
     db.run(AuthIdRepo.find(token)) flatMap {
       case Some(auth) => f(auth.userId.get)
-      case None => Future.failed(AuthErrors.InvalidToken)
+      case None =>
+        log.warning("Invalid token: {}", token)
+        Future.failed(AuthErrors.InvalidToken)
     } recoverWith {
-      case e: Throwable =>
+      case e: Throwable if !e.isInstanceOf[RpcError] =>
         log.error(e, "Errors in reading from database")
         Future.failed(CommonsError.InternalError)
     }
