@@ -7,7 +7,7 @@ import java.util.concurrent.ThreadLocalRandom
 import ir.sndu.persist.repo.AuthIdRepo
 import ir.sndu.persist.repo.user.{ UserPhoneRepo, UserRepo }
 import ir.sndu.server.model.user.{ User, UserState }
-import ir.sndu.server.users.{ ApiSex, ApiUser }
+import ir.sndu.server.user.{ ApiSex, ApiUser }
 import slick.dbio.{ Effect, NoStream }
 
 trait UserHandler {

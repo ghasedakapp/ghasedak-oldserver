@@ -14,7 +14,6 @@ class AuthServiceImpl(implicit system: ActorSystem) extends AuthService with Use
   implicit protected val db = PostgresDb.db
   implicit protected val log: LoggingAdapter = Logging.getLogger(system, this)
   override def startPhoneAuth(request: RequestStartPhoneAuth): Future[ResponseStartPhoneAuth] = {
-    println("salam")
     Future.successful(ResponseStartPhoneAuth())
   }
 

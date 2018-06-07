@@ -5,7 +5,7 @@ import ir.sndu.server.GrpcStubs._
 import ir.sndu.server.auth.RequestSignUp
 import ir.sndu.server.command.CommandBase
 import ir.sndu.server.db.DbHelper._
-import ir.sndu.server.users.ApiSex
+import ir.sndu.server.user.ApiSex
 import org.iq80.leveldb.DB
 import picocli.CommandLine
 
