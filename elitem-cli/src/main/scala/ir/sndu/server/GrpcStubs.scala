@@ -4,6 +4,7 @@ import io.grpc.{ ManagedChannel, ManagedChannelBuilder }
 import ir.sndu.server.auth.AuthServiceGrpc
 import ir.sndu.server.contacts.ContactServiceGrpc
 import ir.sndu.server.messaging.MessagingServiceGrpc
+import ir.sndu.server.users.UserServiceGrpc
 
 object GrpcStubs {
   private val channel: ManagedChannel =
@@ -11,4 +12,5 @@ object GrpcStubs {
   val authStub = AuthServiceGrpc.blockingStub(channel)
   val messagingStub = MessagingServiceGrpc.blockingStub(channel)
   val contactsStub = ContactServiceGrpc.blockingStub(channel)
+  val userStub = UserServiceGrpc.blockingStub(channel)
 }
