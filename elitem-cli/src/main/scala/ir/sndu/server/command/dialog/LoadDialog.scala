@@ -5,6 +5,7 @@ import ir.sndu.server.GrpcStubs._
 import ir.sndu.server.command.CommandBase
 import ir.sndu.server.db.DbHelper._
 import ir.sndu.server.messaging.RequestLoadDialogs
+import ir.sndu.server.users.RequestLoadFullUsers
 import picocli.CommandLine
 
 @CommandLine.Command(
@@ -12,8 +13,12 @@ import picocli.CommandLine
   description = Array("Load Dialogs"))
 class LoadDialog extends CommandBase {
 
+  import ir.sndu.server.ApiConversions._
   private def load(limit: Int, token: String): Unit = {
     val rsp = messagingStub.loadDialogs(RequestLoadDialogs(10, token))
+    val userPeers = rsp.dialogs.flatMap(_.peer.flatMap(p => p.toUserOutPeer))
+
+    userStub.loadFullUsers(RequestLoadFullUsers(userPeers))
     rsp.dialogs.foreach(println)
   }
 
