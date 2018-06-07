@@ -4,6 +4,7 @@ import java.io.File
 
 import io.grpc.{ ManagedChannel, ManagedChannelBuilder }
 import ir.sndu.server.auth.AuthServiceGrpc
+import ir.sndu.server.contacts.ContactServiceGrpc
 import ir.sndu.server.messaging.MessagingServiceGrpc
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{ FlatSpec, Matchers }
@@ -22,5 +23,6 @@ class GrpcBaseSuit extends FlatSpec
 
   protected implicit val authStub = AuthServiceGrpc.blockingStub(channel)
   protected implicit val messagingStub = MessagingServiceGrpc.blockingStub(channel)
+  protected implicit val contactStub = ContactServiceGrpc.blockingStub(channel)
 
 }
