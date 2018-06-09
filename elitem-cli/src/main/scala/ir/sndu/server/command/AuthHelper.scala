@@ -11,10 +11,10 @@ object AuthHelper {
     log: org.slf4j.Logger,
     parent: ElitemCmd): Unit = {
     leveldb { implicit db =>
-      db.get("token") match {
-        case Some(token) => f(ClientData(token))
-        case None => withError(System.err.println("Please login at first"))
-      }
+      db.get("token")
+    }.get match {
+      case Some(token) => f(ClientData(token))
+      case None => withError(System.err.println("Please login at first"))
     }
   }
 }

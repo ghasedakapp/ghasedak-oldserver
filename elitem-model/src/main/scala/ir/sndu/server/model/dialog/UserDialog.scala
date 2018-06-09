@@ -33,7 +33,7 @@ case class Dialog(
   isFavourite: Boolean) {
   def toApi(msgOpt: Option[HistoryMessage]): ApiDialog = {
     val history = msgOpt.getOrElse(HistoryMessage.empty(userId, peer, lastMessageDate))
-    val msgDate = lastMessageDate.toEpochSecond(ZoneOffset.UTC)
+    val msgDate = lastMessageDate.toInstant(ZoneOffset.UTC).toEpochMilli
     ApiDialog(
       Some(peer),
       0,
@@ -41,7 +41,7 @@ case class Dialog(
       history.senderUserId,
       history.randomId,
       msgDate,
-      Some(ApiMessage().mergeFrom(CodedInputStream.newInstance(history.messageContentData))))
+      Some(ApiMessage.parseFrom(history.messageContentData)))
   }
 
 }

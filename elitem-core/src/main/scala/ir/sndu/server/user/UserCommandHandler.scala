@@ -1,6 +1,6 @@
 package ir.sndu.server.user
 
-import java.time.{ Instant, LocalDateTime, ZoneId }
+import java.time.{ Instant, LocalDateTime, ZoneId, ZoneOffset }
 
 import ir.sndu.persist.repo.dialog.DialogRepo
 import ir.sndu.server.user.UserCommands.{ SendMessage, SendMessageAck }
@@ -15,7 +15,7 @@ trait UserCommandHandler {
 
   def sendMessage(sm: SendMessage)(): Future[SendMessageAck] = {
     val msgDate = calculateDate
-    val msgLocalDate = LocalDateTime.ofInstant(msgDate, ZoneId.systemDefault())
+    val msgLocalDate = LocalDateTime.ofInstant(msgDate, ZoneOffset.UTC)
     val action = for {
       _ <- writeHistoryMessage(
         selfPeer,
