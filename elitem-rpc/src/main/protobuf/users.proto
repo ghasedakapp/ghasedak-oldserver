@@ -1,9 +1,9 @@
 syntax = "proto3";
 
-package ir.sndu.server;
+package ir.sndu.server.rpc;
 
 import "api/peer.proto";
-import "api/user.proto";
+import "api/users.proto";
 
 service UserService {
     rpc LoadFullUsers(RequestLoadFullUsers) returns (ResponseLoadFullUsers) {}

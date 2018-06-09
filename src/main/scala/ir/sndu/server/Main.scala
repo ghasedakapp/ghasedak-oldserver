@@ -10,12 +10,11 @@ import ir.sndu.server.auth.AuthServiceGrpc
 import ir.sndu.server.contacts.ContactServiceGrpc
 import ir.sndu.server.frontend.Frontend
 import ir.sndu.server.messaging.MessagingServiceGrpc
-import ir.sndu.server.model.user.User
 import ir.sndu.server.rpc.auth.AuthServiceImpl
 import ir.sndu.server.rpc.contacts.ContactServiceImpl
 import ir.sndu.server.rpc.messaging.MessagingServiceImpl
 import ir.sndu.server.rpc.user.UsersServiceImpl
-import ir.sndu.server.users.UserServiceGrpc
+import ir.sndu.server.rpc.users.UserServiceGrpc
 
 import scala.concurrent.ExecutionContext
 

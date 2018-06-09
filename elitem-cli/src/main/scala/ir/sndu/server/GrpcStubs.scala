@@ -4,7 +4,7 @@ import io.grpc.{ ManagedChannel, ManagedChannelBuilder }
 import ir.sndu.server.auth.AuthServiceGrpc
 import ir.sndu.server.contacts.ContactServiceGrpc
 import ir.sndu.server.messaging.MessagingServiceGrpc
-import ir.sndu.server.users.UserServiceGrpc
+import ir.sndu.server.rpc.users.UserServiceGrpc
 
 object GrpcStubs {
   private val channel: ManagedChannel =

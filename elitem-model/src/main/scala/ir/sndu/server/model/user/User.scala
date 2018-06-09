@@ -2,7 +2,7 @@ package ir.sndu.server.model.user
 
 import java.time.LocalDateTime
 
-import ir.sndu.server.user.{ ApiSex, ApiUser }
+import ir.sndu.server.users.{ ApiSex, ApiUser }
 
 sealed trait UserState {
   def toInt: Int

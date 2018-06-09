@@ -5,8 +5,8 @@ import akka.event.{ Logging, LoggingAdapter }
 import ir.sndu.persist.db.PostgresDb
 import ir.sndu.persist.repo.user.UserRepo
 import ir.sndu.server.rpc.auth.AuthHelper
-import ir.sndu.server.users.UserServiceGrpc.UserService
-import ir.sndu.server.users.{ RequestLoadFullUsers, ResponseLoadFullUsers }
+import ir.sndu.server.rpc.users.{ RequestLoadFullUsers, ResponseLoadFullUsers }
+import ir.sndu.server.rpc.users.UserServiceGrpc.UserService
 
 import scala.concurrent.Future
 

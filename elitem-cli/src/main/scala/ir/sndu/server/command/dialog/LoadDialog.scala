@@ -2,9 +2,9 @@ package ir.sndu.server.command.dialog
 
 import ir.sndu.server.GrpcStubs._
 import ir.sndu.server.command.AuthHelper._
-import ir.sndu.server.command.{ClientData, CommandBase}
+import ir.sndu.server.command.{ ClientData, CommandBase }
 import ir.sndu.server.messaging.RequestLoadDialogs
-import ir.sndu.server.users.RequestLoadFullUsers
+import ir.sndu.server.rpc.users.RequestLoadFullUsers
 import picocli.CommandLine
 
 @CommandLine.Command(

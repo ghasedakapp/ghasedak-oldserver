@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package ir.sndu.server;
 
-import "api/user.proto";
+import "api/users.proto";
 
 
 service AuthService {
