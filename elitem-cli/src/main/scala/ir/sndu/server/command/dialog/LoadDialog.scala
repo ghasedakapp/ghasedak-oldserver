@@ -3,11 +3,12 @@ package ir.sndu.server.command.dialog
 import java.time.{ Instant, ZoneOffset }
 
 import ir.sndu.server.GrpcStubs._
+import ir.sndu.server.PeerHelper
 import ir.sndu.server.command.AuthHelper._
 import ir.sndu.server.command.{ ClientData, CommandBase }
 import ir.sndu.server.message.ApiDialog
 import ir.sndu.server.messaging.RequestLoadDialogs
-import ir.sndu.server.peer.{ ApiPeerType, ApiUserOutPeer }
+import ir.sndu.server.peer.{ ApiPeer, ApiPeerType, ApiUserOutPeer }
 import ir.sndu.server.rpc.users.RequestLoadFullUsers
 import ir.sndu.server.users.ApiUser
 import org.iq80.leveldb.DB
@@ -19,6 +20,7 @@ import picocli.CommandLine
 class LoadDialog extends CommandBase {
 
   case class LocalDialog(
+    uniqueId: String = "",
     name: String = "",
     peerType: String = "",
     msg: String = "",
@@ -44,6 +46,7 @@ class LoadDialog extends CommandBase {
   private def getDialog(user: ApiUser, dialog: ApiDialog): LocalDialog = {
     val message = dialog.message.get.getTextMessage.text
     LocalDialog(
+      PeerHelper.toUniqueId(ApiPeer(ApiPeerType.Private, user.id)).toString,
       user.name,
       "Private",
       if (message.size > 20) message.substring(0, 15) + "..." else message,
