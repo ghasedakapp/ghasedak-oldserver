@@ -4,6 +4,7 @@ import java.io.File
 
 import io.grpc.{ ManagedChannel, ManagedChannelBuilder }
 import ir.sndu.server.auth.AuthServiceGrpc
+import ir.sndu.server.config.{ AppType, ElitemConfigFactory }
 import ir.sndu.server.contacts.ContactServiceGrpc
 import ir.sndu.server.messaging.MessagingServiceGrpc
 import org.scalatest.concurrent.ScalaFutures
@@ -13,9 +14,8 @@ class GrpcBaseSuit extends FlatSpec
   with Matchers
   with ScalaFutures {
 
-  private val configPath = new File(".").getCanonicalPath + "/conf/test.conf"
-  System.setProperty("config.file", configPath.toString)
-  System.setProperty("file.encoding", "UTF-8")
+  protected val conf = ElitemConfigFactory.load(AppType.Test)
+
   ElitemServer.start()
 
   private val channel: ManagedChannel =

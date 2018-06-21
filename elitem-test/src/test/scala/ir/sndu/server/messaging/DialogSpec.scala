@@ -22,19 +22,24 @@ class DialogSpec extends GrpcBaseSuit
 
     val msg1 = ApiMessage().withTextMessage(ApiTextMessage("salam1"))
     val msg2 = ApiMessage().withTextMessage(ApiTextMessage("salam2"))
+    val msg3 = ApiMessage().withTextMessage(ApiTextMessage("salam3"))
+
     befrest(outPeer2, msg1)
     Thread.sleep(100)
     befrest(outPeer3, msg2)
+    Thread.sleep(100)
+    befrest(outPeer3, msg3)
 
     val rspUser1 = messagingStub.loadDialogs(RequestLoadDialogs(10, token1))
     rspUser1.dialogs.size shouldBe 2
-    rspUser1.dialogs.map(_.message.get) shouldBe Seq(msg2, msg1)
+    rspUser1.dialogs.map(_.message.get) shouldBe Seq(msg3, msg1)
 
     val rspUser2 = messagingStub.loadDialogs(RequestLoadDialogs(10, token2))
     rspUser2.dialogs.size shouldBe 1
 
     val rspUser3 = messagingStub.loadDialogs(RequestLoadDialogs(10, token3))
     rspUser3.dialogs.size shouldBe 1
+    rspUser3.dialogs.map(_.message.get) shouldBe Seq(msg3)
 
   }
 }
