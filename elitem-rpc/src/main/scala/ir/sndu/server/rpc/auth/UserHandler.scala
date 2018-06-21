@@ -1,6 +1,6 @@
 package ir.sndu.server.rpc.auth
 
-import java.time.LocalDateTime
+import java.time.{ LocalDateTime, ZoneOffset }
 import java.util.UUID
 import java.util.concurrent.ThreadLocalRandom
 
@@ -19,7 +19,7 @@ trait UserHandler {
     val userId = ThreadLocalRandom.current().nextInt()
     val userPhoneId = ThreadLocalRandom.current().nextInt()
     for {
-      _ <- UserRepo.create(User(userId, "", name, "IR", sex, UserState.Registered, LocalDateTime.now()))
+      _ <- UserRepo.create(User(userId, "", name, "IR", sex, UserState.Registered, LocalDateTime.now(ZoneOffset.UTC)))
       _ <- UserPhoneRepo.create(userPhoneId, userId, "", number, name)
     } yield ApiUser(userId, name, "", sex)
   }

@@ -21,7 +21,7 @@ trait UserCommandHandler {
         selfPeer,
         sm.peer.get,
         sm.randomId,
-        msgDate,
+        msgLocalDate,
         sm.message.get)
       _ <- createOrUpdateDialog(userId, sm.peer.get, msgLocalDate)
       _ <- createOrUpdateDialog(sm.peer.get.id, selfPeer, msgLocalDate)

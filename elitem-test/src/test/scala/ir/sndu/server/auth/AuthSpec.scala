@@ -1,12 +1,12 @@
 package ir.sndu.server.auth
 
-import java.time.LocalDateTime
+import java.time.{LocalDateTime, ZoneOffset}
 import java.util.concurrent.ThreadLocalRandom
 
 import ir.sndu.persist.db.PostgresDb
-import ir.sndu.persist.repo.user.{ UserPhoneRepo, UserRepo }
+import ir.sndu.persist.repo.user.{UserPhoneRepo, UserRepo}
 import ir.sndu.server.GrpcBaseSuit
-import ir.sndu.server.model.user.{ Sex, User, UserState }
+import ir.sndu.server.model.user.{Sex, User, UserState}
 import ir.sndu.server.users.ApiSex
 
 import scala.util.Random
@@ -18,7 +18,7 @@ class AuthSpec extends GrpcBaseSuit {
 
   def login(): Unit = {
     val id = ThreadLocalRandom.current().nextInt()
-    PostgresDb.db.run(UserRepo.create(User(id, "", "", "IR", Sex.Female, UserState.Registered, LocalDateTime.now()))).futureValue
+    PostgresDb.db.run(UserRepo.create(User(id, "", "", "IR", Sex.Female, UserState.Registered, LocalDateTime.now(ZoneOffset.UTC)))).futureValue
     PostgresDb.db.run(UserPhoneRepo.create(ThreadLocalRandom.current().nextInt(), id, "", 98935, "")).futureValue
   }
 

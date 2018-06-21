@@ -1,6 +1,6 @@
 package ir.sndu.persist.repo
 
-import java.time.LocalDateTime
+import java.time.{ LocalDateTime, ZoneOffset }
 
 import ir.sndu.persist.repo.TypeMapper._
 import ir.sndu.server.model.auth.AuthId
@@ -71,8 +71,8 @@ object AuthIdRepo {
     activeIdByUserIds(userIds).result
 
   def delete(id: String) =
-    activeAuthIds.filter(_.id === id).map(_.deletedAt).update(Some(LocalDateTime.now()))
+    activeAuthIds.filter(_.id === id).map(_.deletedAt).update(Some(LocalDateTime.now(ZoneOffset.UTC)))
 
   def deleteByUser(userId: Int) =
-    activeAuthIds.filter(_.userId === userId).map(_.deletedAt).update(Some(LocalDateTime.now()))
+    activeAuthIds.filter(_.userId === userId).map(_.deletedAt).update(Some(LocalDateTime.now(ZoneOffset.UTC)))
 }

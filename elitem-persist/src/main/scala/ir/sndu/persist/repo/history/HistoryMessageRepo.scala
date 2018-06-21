@@ -1,6 +1,6 @@
 package ir.sndu.persist.repo.history
 
-import java.time.LocalDateTime
+import java.time.{ LocalDateTime, ZoneOffset }
 
 import ir.sndu.persist.repo.TypeMapper._
 import ir.sndu.server.model.history.HistoryMessage
@@ -185,7 +185,7 @@ object HistoryMessageRepo {
     notDeletedMessages
       .filter(m ⇒ m.userId === userId && m.peerType === peer.`type`.value && m.peerId === peer.id)
       .map(_.deletedAt)
-      .update(Some(LocalDateTime.now()))
+      .update(Some(LocalDateTime.now(ZoneOffset.UTC)))
   }
 
   def delete(userId: Int, peer: ApiPeer, randomIds: Set[Long]) =
@@ -193,5 +193,5 @@ object HistoryMessageRepo {
       .filter(m ⇒ m.userId === userId && m.peerType === peer.`type`.value && m.peerId === peer.id)
       .filter(_.randomId inSet randomIds)
       .map(_.deletedAt)
-      .update(Some(LocalDateTime.now()))
+      .update(Some(LocalDateTime.now(ZoneOffset.UTC)))
 }
