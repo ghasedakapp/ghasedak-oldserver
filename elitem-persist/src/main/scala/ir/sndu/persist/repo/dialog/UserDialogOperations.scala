@@ -1,6 +1,6 @@
 package ir.sndu.persist.repo.dialog
 
-import java.time.{ LocalDateTime, ZoneOffset }
+import java.time.{ LocalDateTime, ZoneId, ZoneOffset }
 
 import ir.sndu.persist.repo.TypeMapper._
 import ir.sndu.server.model.dialog.UserDialog
@@ -40,7 +40,7 @@ trait UserDialogOperations {
       peer,
       ownerLastReceivedAt,
       ownerLastReadAt,
-      LocalDateTime.now(ZoneOffset.UTC),
+      LocalDateTime.now(ZoneId.systemDefault()),
       false)
 
   def findUsersVisible(userId: Rep[Int]) = notArchived.filter(_.userId === userId)

@@ -18,7 +18,7 @@ class AuthSpec extends GrpcBaseSuit {
 
   def login(): Unit = {
     val id = ThreadLocalRandom.current().nextInt()
-    PostgresDb.db.run(UserRepo.create(User(id, "", "", "IR", Sex.Female, UserState.Registered, LocalDateTime.now(ZoneOffset.UTC)))).futureValue
+    PostgresDb.db.run(UserRepo.create(User(id, "", "", "IR", Sex.Female, UserState.Registered, LocalDateTime.now()))).futureValue
     PostgresDb.db.run(UserPhoneRepo.create(ThreadLocalRandom.current().nextInt(), id, "", 98935, "")).futureValue
   }
 

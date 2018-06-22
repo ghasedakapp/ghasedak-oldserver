@@ -1,6 +1,6 @@
 package ir.sndu.server.model.dialog
 
-import java.time.{ LocalDateTime, ZoneOffset }
+import java.time.{ LocalDateTime, ZoneId, ZoneOffset }
 
 import com.google.protobuf.CodedInputStream
 import ir.sndu.server.message.{ ApiDialog, ApiMessage }
@@ -33,7 +33,7 @@ case class Dialog(
   isFavourite: Boolean) {
   def toApi(msgOpt: Option[HistoryMessage]): ApiDialog = {
     val history = msgOpt.getOrElse(HistoryMessage.empty(userId, peer, lastMessageDate))
-    val msgDate = lastMessageDate.toInstant(ZoneOffset.UTC).toEpochMilli
+    val msgDate = lastMessageDate.atZone(ZoneId.systemDefault()).toInstant.toEpochMilli
     ApiDialog(
       Some(peer),
       0,

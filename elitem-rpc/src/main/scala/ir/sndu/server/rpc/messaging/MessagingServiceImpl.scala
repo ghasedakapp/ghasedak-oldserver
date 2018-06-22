@@ -1,6 +1,6 @@
 package ir.sndu.server.rpc.messaging
 
-import java.time.{ Instant, LocalDateTime, ZoneId }
+import java.time.{ Instant, LocalDateTime, ZoneId, ZoneOffset }
 
 import akka.actor.ActorSystem
 import akka.event.{ Logging, LoggingAdapter }

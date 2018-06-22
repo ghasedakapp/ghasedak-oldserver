@@ -78,7 +78,7 @@ object UserRepo {
   def setDeletedAt(userId: Int) =
     users.filter(_.id === userId).
       map(_.deletedAt).
-      update(Some(LocalDateTime.now(ZoneOffset.UTC)))
+      update(Some(LocalDateTime.now()))
 
   def setName(userId: Int, name: String) =
     users.filter(_.id === userId).map(_.name).update(name)
