@@ -38,7 +38,7 @@ class MessagingServiceImpl(implicit system: ActorSystem) extends MessagingServic
   override def loadHistory(request: RequestLoadHistory): Future[ResponseLoadHistory] =
     authorize(request.token) { userId =>
       val (peer, date, limit, _) = RequestLoadHistory.unapply(request).get
-      db.run(HistoryMessageRepo.findAfter(
+      db.run(HistoryMessageRepo.findBefore(
         userId,
         ApiPeer(peer.get.`type`, peer.get.id),
         LocalDateTime.ofInstant(Instant.ofEpochMilli(date), ZoneId.systemDefault()),
