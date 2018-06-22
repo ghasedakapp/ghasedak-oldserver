@@ -22,6 +22,7 @@ class LoginOrSignup extends CommandBase {
 
     val rsp = authStub.signUp(req)
     db.put("token", rsp.token)
+    db.putBytes("user", rsp.user.get.toByteArray)
   }
 
   @CommandLine.Option(

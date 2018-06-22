@@ -1,6 +1,6 @@
 package ir.sndu.server
 
-import ir.sndu.server.peer.{ ApiPeer, ApiPeerType, ApiUserOutPeer }
+import ir.sndu.server.peer.{ ApiOutPeer, ApiPeer, ApiPeerType, ApiUserOutPeer }
 
 object ApiConversions {
   implicit class RichApiPeer(peer: ApiPeer) {
@@ -9,5 +9,7 @@ object ApiConversions {
         case ApiPeerType.Private => Some(ApiUserOutPeer(peer.id))
         case ApiPeerType.Group => None
       }
+
+    def toOutPeer(userId: Int): ApiOutPeer = ApiOutPeer(peer.`type`, peer.id)
   }
 }
