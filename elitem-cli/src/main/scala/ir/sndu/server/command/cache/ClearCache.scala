@@ -9,7 +9,7 @@ import picocli.CommandLine.Command
 
 @Command(
   name = "clearcache",
-  description = Array("Clear DB"))
+  description = Array("Clear Session DB"))
 class ClearCache extends CommandBase {
 
   private def getPath: String = Option(parentCmd.database).getOrElse(CliConfigs.dbPath + "/session")
