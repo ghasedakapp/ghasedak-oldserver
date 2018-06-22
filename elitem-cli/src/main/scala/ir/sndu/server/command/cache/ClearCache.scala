@@ -3,7 +3,6 @@ package ir.sndu.server.command.cache
 import java.io.File
 
 import ir.sndu.server.CliConfigs
-import ir.sndu.server.ElitemConsole.withWarning
 import ir.sndu.server.command.CommandBase
 import ir.sndu.server.utils.FileHelper
 import picocli.CommandLine.Command

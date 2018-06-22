@@ -66,8 +66,15 @@ class LoadDialog extends CommandBase {
           case ApiPeerType.Group => LocalDialog()
         }
       }
-      println(localDialogs)
+      val dialogs = localDialogs.zipWithIndex.map(record => (record._2 + 1, record._1)).toMap
+      printDialogs(dialogs)
     }
+
+  private def printDialogs(dialogs: Map[Int, LocalDialog]): Unit = {
+    dialogs.toSeq.foreach {
+      case (index, dialog) => println(s"$index-> $dialog")
+    }
+  }
 
   @CommandLine.Option(
     names = Array("-l", "--limit"),
