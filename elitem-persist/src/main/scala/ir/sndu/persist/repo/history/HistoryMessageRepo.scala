@@ -133,7 +133,7 @@ object HistoryMessageRepo {
     byUserIdPeerRidC.applied((userId, peer.`type`.value, peer.id, randomId)).exists.result
 
   def findBefore(userId: Int, peer: ApiPeer, date: LocalDateTime, limit: Long) =
-    beforeC((userId, peer.`type`.value, peer.id, date, limit)).result
+    beforeC((userId, peer.id, peer.`type`.value, date, limit)).result
 
   def findBidi(userId: Int, peer: ApiPeer, date: LocalDateTime, limit: Long) =
     (beforeExclC.applied((userId, peer.`type`.value, peer.id, date, limit)) ++
