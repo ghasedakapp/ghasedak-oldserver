@@ -7,6 +7,7 @@ import akka.cluster.Cluster
 import com.typesafe.config.ConfigFactory
 import io.grpc.ServerServiceDefinition
 import ir.sndu.server.auth.AuthServiceGrpc
+import ir.sndu.server.config.{ AppType, ElitemConfigFactory }
 import ir.sndu.server.contacts.ContactServiceGrpc
 import ir.sndu.server.frontend.Frontend
 import ir.sndu.server.messaging.MessagingServiceGrpc
@@ -20,11 +21,7 @@ import scala.concurrent.ExecutionContext
 
 object Main extends App {
 
-  val configPath = new File(".").getCanonicalPath + "/conf/server.conf"
-
-  System.setProperty("config.file", configPath.toString)
-
-  System.setProperty("file.encoding", "UTF-8")
+  val config = ElitemConfigFactory.load(AppType.Server)
 
   ElitemServer.start()
 

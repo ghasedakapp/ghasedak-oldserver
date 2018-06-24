@@ -1,3 +1,4 @@
+import com.typesafe.sbt.packager.Keys.bashScriptExtraDefines
 import ir.sndu.Dependencies
 
 name := "elitem"
@@ -8,7 +9,6 @@ enablePlugins(JavaAppPackaging)
 
 lazy val commonSettings = Seq(
   organization := "ir.elitem",
-  version := "0.1.0-SNAPSHOT",
   scalaVersion := "2.12.3",
   mainClass in Compile := Some("ir.sndu.server.Main"),
   PB.targets in Compile := Seq(
@@ -22,9 +22,10 @@ lazy val commonSettings = Seq(
 
 lazy val root = (project in file("."))
   .settings(
-    commonSettings
+    commonSettings,
+    Packaging.packagingSettings
   )
-  .dependsOn(commons, core, rpc)
+  .dependsOn(commons, core, rpc, cli)
   .aggregate(core,persist,rpc, commons, model, cli)
 
 lazy val core = elitemModule("elitem-core")
@@ -57,7 +58,8 @@ lazy val cli = elitemModule("elitem-cli")
     libraryDependencies ++= Dependencies.cli,
     PB.protoSources in Compile ++= Seq(
       file("elitem-rpc/src/main/protobuf")
-    )
+    ),
+    mainClass in Compile := Some("ir.sndu.server.CliMain")
   )
   .dependsOn(model, commons)
 
