@@ -1,0 +1,6 @@
+* Initial release
+  * Login And Signup Service
+  * SendMessage Service
+  * LoadDialog Service
+  * LoadHistory Service
+  * LoadFullUser Service
