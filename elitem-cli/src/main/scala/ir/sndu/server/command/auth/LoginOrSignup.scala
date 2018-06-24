@@ -11,7 +11,7 @@ import picocli.CommandLine
 
 @CommandLine.Command(
   name = "login",
-  description = Array("@|bold Login|@ @|underline elitem|@ example"))
+  description = Array("@|bold Login|@ or @|underline Signup|@"))
 class LoginOrSignup extends CommandBase {
 
   private def signup()(implicit db: DB): Unit = {
