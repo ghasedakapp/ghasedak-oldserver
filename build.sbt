@@ -4,6 +4,8 @@ name := "elitem"
 
 scalaSource in ProtocPlugin.ProtobufConfig := sourceManaged.value
 
+enablePlugins(JavaAppPackaging)
+
 lazy val commonSettings = Seq(
   organization := "ir.elitem",
   version := "0.1.0-SNAPSHOT",
