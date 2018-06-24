@@ -70,9 +70,12 @@ class LoadDialog extends CommandBase {
       printDialogs(dialogs)
     }
 
+  private def formatDialog(dialog: LocalDialog): String =
+    s"[uid:${dialog.uniqueId}, name:${dialog.name}, type:${dialog.peerType}, msg:${dialog.msg}, date:${dialog.date}]"
+
   private def printDialogs(dialogs: Map[Int, LocalDialog]): Unit = {
     dialogs.toSeq.foreach {
-      case (index, dialog) => println(s"$index-> $dialog")
+      case (index, dialog) => println(s"$index-> ${formatDialog(dialog)}")
     }
   }
 
