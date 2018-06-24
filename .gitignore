@@ -2,7 +2,7 @@
 bin/
 target/
 build/
-./conf
+/conf/
 # intellij idea
 *.log
 *.iml
