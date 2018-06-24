@@ -11,7 +11,7 @@ import ir.sndu.persist.repo.history.HistoryMessageRepo
 import ir.sndu.server.message.{ ApiMessage, ApiMessageContainer }
 import ir.sndu.server.messaging.MessagingServiceGrpc.MessagingService
 import ir.sndu.server.messaging._
-import ir.sndu.server.peer.ApiPeer
+import ir.sndu.server.peer.{ ApiOutPeer, ApiPeer }
 import ir.sndu.server.rpc.auth.AuthHelper
 import ir.sndu.server.user.UserExtension
 import slick.dbio._
@@ -28,11 +28,14 @@ class MessagingServiceImpl(implicit system: ActorSystem) extends MessagingServic
     authorize(request.token) { userId =>
       val (outPeer, randomId, message, _) = RequestSendMessage.unapply(request).get
 
-      userExt.sendMessage(
-        userId,
-        outPeer.map(p => ApiPeer(p.`type`, p.id)).get,
-        randomId,
-        message.get).map(_ => ResponseVoid())
+      withValidPeer(outPeer, userId) {
+        userExt.sendMessage(
+          userId,
+          outPeer.map(p => ApiPeer(p.`type`, p.id)).get,
+          randomId,
+          message.get).map(_ => ResponseVoid())
+      }
+
     }
 
   override def loadHistory(request: RequestLoadHistory): Future[ResponseLoadHistory] =
@@ -64,4 +67,10 @@ class MessagingServiceImpl(implicit system: ActorSystem) extends MessagingServic
       db.run(action)
     }
 
+  private def withValidPeer[T](peer: Option[ApiOutPeer], senderUserId: Int)(f: => Future[T]): Future[T] = {
+    if (peer.exists(_.id == senderUserId)) {
+      log.warning("Attempt to send message to yourself")
+      Future.failed(MessagingError.MessageToSelf)
+    } else f
+  }
 }
