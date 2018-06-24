@@ -10,6 +10,8 @@ import ir.sndu.server.messaging.RequestLoadHistory
 import ir.sndu.server.ApiConversions._
 import ir.sndu.server.command.AuthHelper.authenticate
 import ir.sndu.server.message.{ ApiMessage, ApiMessageContainer }
+import ir.sndu.server.ElitemConsole._
+
 @CommandLine.Command(
   name = "history",
   description = Array("Load History"))
@@ -42,6 +44,7 @@ class LoadHistory extends CommandBase {
 
   override def run(): Unit =
     authenticate { implicit client =>
-      formatMessages(loadBefore()) foreach println
+      withOutput(
+        formatMessages(loadBefore()).foldLeft("")(_ + _ + "\n"))
     }
 }

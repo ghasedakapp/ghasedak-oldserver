@@ -1,0 +1,3 @@
+* core: Avoids sending message to yourself
+* cli: Show proper error message
+* cli: Improves dialog display
