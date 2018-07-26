@@ -33,17 +33,17 @@ object UserState {
 
 @SerialVersionUID(1L)
 case class User(
-  id: Int,
-  accessSalt: String,
-  name: String,
-  countryCode: String,
-  sex: Sex,
-  state: UserState,
-  createdAt: LocalDateTime,
-  nickname: Option[String] = None,
-  about: Option[String] = None,
-  deletedAt: Option[LocalDateTime] = None,
-  isBot: Boolean = false) {
+    id: Int,
+    accessSalt: String,
+    name: String,
+    countryCode: String,
+    sex: Sex,
+    state: UserState,
+    createdAt: LocalDateTime,
+    nickname: Option[String] = None,
+    about: Option[String] = None,
+    deletedAt: Option[LocalDateTime] = None,
+    isBot: Boolean = false) {
   def toApi(): ApiUser = {
     ApiUser(
       id,

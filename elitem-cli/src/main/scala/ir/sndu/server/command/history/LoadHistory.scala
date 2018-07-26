@@ -36,14 +36,14 @@ class LoadHistory extends CommandBase {
   }
 
   private def formatMessages(messages: Seq[ApiMessageContainer]): Seq[String] = {
-    messages.flatMap(m => m.message.map(_.getTextMessage.text +
+    messages.flatMap(m ⇒ m.message.map(_.getTextMessage.text +
       "  |  " +
       LocalDateTime.ofInstant(Instant.ofEpochMilli(m.date), ZoneOffset.ofHoursMinutes(4, 30))))
 
   }
 
   override def run(): Unit =
-    authenticate { implicit client =>
+    authenticate { implicit client ⇒
       withOutput(
         formatMessages(loadBefore()).foldLeft("")(_ + _ + "\n"))
     }

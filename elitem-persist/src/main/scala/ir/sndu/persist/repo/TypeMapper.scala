@@ -6,6 +6,6 @@ import slick.jdbc.PostgresProfile.api._
 
 object TypeMapper {
   implicit val dateTimeColumnType = MappedColumnType.base[LocalDateTime, Timestamp](
-    { localTime => Timestamp.valueOf(localTime) },
-    { timestamp => timestamp.toLocalDateTime })
+    { localTime ⇒ Timestamp.valueOf(localTime) },
+    { timestamp ⇒ timestamp.toLocalDateTime })
 }

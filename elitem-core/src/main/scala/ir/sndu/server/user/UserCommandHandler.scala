@@ -8,7 +8,7 @@ import ir.sndu.server.user.UserCommands.{ SendMessage, SendMessageAck }
 import scala.concurrent.Future
 
 trait UserCommandHandler {
-  self: UserProcessor =>
+  self: UserProcessor ⇒
 
   import HistoryUtils._
   import DialogUtils._
@@ -17,14 +17,14 @@ trait UserCommandHandler {
     val msgDate = calculateDate
     val msgLocalDate = LocalDateTime.ofInstant(msgDate, ZoneId.systemDefault())
     val action = for {
-      _ <- writeHistoryMessage(
+      _ ← writeHistoryMessage(
         selfPeer,
         sm.peer.get,
         sm.randomId,
         msgLocalDate,
         sm.message.get)
-      _ <- createOrUpdateDialog(userId, sm.peer.get, msgLocalDate)
-      _ <- createOrUpdateDialog(sm.peer.get.id, selfPeer, msgLocalDate)
+      _ ← createOrUpdateDialog(userId, sm.peer.get, msgLocalDate)
+      _ ← createOrUpdateDialog(sm.peer.get.id, selfPeer, msgLocalDate)
     } yield SendMessageAck()
     db.run(action)
   }

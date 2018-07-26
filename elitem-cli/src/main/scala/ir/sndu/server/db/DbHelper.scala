@@ -11,13 +11,13 @@ import org.iq80.leveldb.impl.Iq80DBFactory._
 object DbHelper {
   private def overwriteDbPath(parent: ElitemCmd): Unit = {
     Option(parent.database) match {
-      case Some(path) =>
+      case Some(path) ⇒
         withWarning(println("Overwriting db path..."))
         CliConfigs.dbPath = path
-      case None =>
+      case None ⇒
     }
   }
-  def leveldb[T](f: DB => T)(
+  def leveldb[T](f: DB ⇒ T)(
     implicit
     log: org.slf4j.Logger,
     parent: ElitemCmd): Option[T] = {
@@ -29,7 +29,7 @@ object DbHelper {
     try {
       Some(f(db))
     } catch {
-      case e: Throwable =>
+      case e: Throwable ⇒
         log.error(e.getMessage, e)
         withColor(scala.Console.RED) {
           System.err.println(s"Error: ${e.getMessage}")

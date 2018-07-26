@@ -6,8 +6,8 @@ object ApiConversions {
   implicit class RichApiPeer(peer: ApiPeer) {
     def toUserOutPeer: Option[ApiUserOutPeer] =
       peer.`type` match {
-        case ApiPeerType.Private => Some(ApiUserOutPeer(peer.id))
-        case ApiPeerType.Group => None
+        case ApiPeerType.Private ⇒ Some(ApiUserOutPeer(peer.id))
+        case ApiPeerType.Group   ⇒ None
       }
 
     def toOutPeer(userId: Int): ApiOutPeer = ApiOutPeer(peer.`type`, peer.id)

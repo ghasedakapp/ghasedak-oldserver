@@ -1,11 +1,14 @@
 import com.typesafe.sbt.packager.Keys.bashScriptExtraDefines
 import ir.sndu.Dependencies
+import scalariform.formatter.preferences._
 
 name := "elitem"
 
 scalaSource in ProtocPlugin.ProtobufConfig := sourceManaged.value
 
 enablePlugins(JavaAppPackaging)
+
+
 
 lazy val commonSettings = Seq(
   organization := "ir.elitem",
@@ -16,7 +19,11 @@ lazy val commonSettings = Seq(
   PB.includePaths in Compile ++= Seq(
     file("elitem-model/src/main/protobuf")
   ),
-    scalaSource in ProtocPlugin.ProtobufConfig := sourceManaged.value
+    scalaSource in ProtocPlugin.ProtobufConfig := sourceManaged.value,
+  scalariformPreferences := scalariformPreferences.value
+    .setPreference(AlignSingleLineCaseStatements, true)
+    .setPreference(DoubleIndentConstructorArguments, true)
+    .setPreference(DanglingCloseParenthesis, Preserve)
 )
 
 

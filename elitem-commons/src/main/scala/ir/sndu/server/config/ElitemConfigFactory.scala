@@ -27,9 +27,9 @@ object ElitemConfigFactory {
   private def getPathes(app: AppType): (String, String) = {
     val path = new File(".").getCanonicalPath
     app match {
-      case AppType.Server => (path + "/conf/server.conf", path + "/conf/logback.xml")
-      case AppType.Cli => (path + "/conf/cli/cli.conf", path + "/conf/cli/logback.xml")
-      case AppType.Test => (path + "/conf/test/test.conf", path + "/conf/test/logback.xml")
+      case AppType.Server ⇒ (path + "/conf/server.conf", path + "/conf/logback.xml")
+      case AppType.Cli    ⇒ (path + "/conf/cli/cli.conf", path + "/conf/cli/logback.xml")
+      case AppType.Test   ⇒ (path + "/conf/test/test.conf", path + "/conf/test/logback.xml")
     }
   }
 

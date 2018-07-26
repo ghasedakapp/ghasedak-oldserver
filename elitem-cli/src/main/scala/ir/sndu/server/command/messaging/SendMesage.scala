@@ -33,9 +33,9 @@ class SendMesage extends CommandBase {
           client.token))
 
       } catch {
-        case e: StatusRuntimeException if e.getStatus.getDescription == "MESSAGE_TO_SELF" =>
+        case e: StatusRuntimeException if e.getStatus.getDescription == "MESSAGE_TO_SELF" ⇒
           withError("You cant't message to yourself")
-        case e: Throwable =>
+        case e: Throwable ⇒
           log.error(e.getMessage, e)
           commonError
 
@@ -56,7 +56,7 @@ class SendMesage extends CommandBase {
   private var message: String = _
 
   override def run(): Unit =
-    authenticate { implicit client =>
+    authenticate { implicit client ⇒
       send(peer, message)
     }
 }

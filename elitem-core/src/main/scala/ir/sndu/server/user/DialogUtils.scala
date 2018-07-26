@@ -12,8 +12,8 @@ object DialogUtils {
 
   def createOrUpdateDialog(userId: Int, peer: ApiPeer, lastMessageDate: LocalDateTime)(implicit ec: ExecutionContext): DBIOAction[Unit, NoStream, Effect.Read with Effect.Write with Effect.Write] = {
     for {
-      exist <- DialogRepo.usersExists(userId, peer)
-      _ <- if (exist)
+      exist ← DialogRepo.usersExists(userId, peer)
+      _ ← if (exist)
         DialogRepo.updateLastMessageDate(userId, peer, lastMessageDate)
       else
         DialogRepo.create(userId, peer, lastMessageDate)

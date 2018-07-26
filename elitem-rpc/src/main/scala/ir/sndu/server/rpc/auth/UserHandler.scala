@@ -11,7 +11,7 @@ import ir.sndu.server.users.{ ApiSex, ApiUser }
 import slick.dbio.{ Effect, NoStream }
 
 trait UserHandler {
-  this: AuthServiceImpl =>
+  this: AuthServiceImpl ⇒
 
   import ir.sndu.server.rpc.ApiConversions._
 
@@ -19,14 +19,14 @@ trait UserHandler {
     val userId = ThreadLocalRandom.current().nextInt()
     val userPhoneId = ThreadLocalRandom.current().nextInt()
     for {
-      _ <- UserRepo.create(User(userId, "", name, "IR", sex, UserState.Registered, LocalDateTime.now()))
-      _ <- UserPhoneRepo.create(userPhoneId, userId, "", number, name)
+      _ ← UserRepo.create(User(userId, "", name, "IR", sex, UserState.Registered, LocalDateTime.now()))
+      _ ← UserPhoneRepo.create(userPhoneId, userId, "", number, name)
     } yield ApiUser(userId, name, "", sex)
   }
 
   def createToken(userId: Int): slick.dbio.DBIOAction[String, NoStream, Effect.Write] = {
     val token = UUID.randomUUID().toString
-    AuthIdRepo.create(token, Some(userId), None) map (_ => token)
+    AuthIdRepo.create(token, Some(userId), None) map (_ ⇒ token)
   }
 
 }

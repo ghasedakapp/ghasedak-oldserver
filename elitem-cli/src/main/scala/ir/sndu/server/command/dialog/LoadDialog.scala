@@ -20,12 +20,12 @@ import picocli.CommandLine
 class LoadDialog extends CommandBase {
 
   case class LocalDialog(
-    uniqueId: String = "",
-    name: String = "",
-    peerType: String = "",
-    msg: String = "",
-    date: String = "",
-    counter: String = "0")
+      uniqueId: String = "",
+      name: String = "",
+      peerType: String = "",
+      msg: String = "",
+      date: String = "",
+      counter: String = "0")
 
   import ir.sndu.server.ApiConversions._
   import ir.sndu.server.db.DbHelper._
@@ -33,10 +33,10 @@ class LoadDialog extends CommandBase {
     db.getBytes(userPeer.userId.toString).map(ApiUser.parseFrom)
 
   private def fillMissing(dialogs: Seq[ApiDialog])(implicit client: ClientData, db: DB) {
-    val userPeers = dialogs.flatMap(_.peer.flatMap(p => p.toUserOutPeer))
+    val userPeers = dialogs.flatMap(_.peer.flatMap(p ⇒ p.toUserOutPeer))
     userStub.loadFullUsers(RequestLoadFullUsers(
       userPeers.filter(getUser(_).isEmpty),
-      client.token)).fullUsers.foreach { u =>
+      client.token)).fullUsers.foreach { u ⇒
       db.putBytes(u.id.toString, u.toByteArray)
       //TODO load full groups
 
@@ -53,20 +53,20 @@ class LoadDialog extends CommandBase {
       Instant.ofEpochMilli(dialog.date).atZone(ZoneOffset.ofHoursMinutes(4, 30)).toString)
   }
   private def load(limit: Int)(implicit client: ClientData): Unit =
-    leveldb { implicit db =>
+    leveldb { implicit db ⇒
       val rsp = messagingStub.loadDialogs(RequestLoadDialogs(limit, client.token))
       fillMissing(rsp.dialogs)
 
-      val localDialogs = rsp.dialogs.map { dialog =>
+      val localDialogs = rsp.dialogs.map { dialog ⇒
         val peer = dialog.peer.get
         peer.`type` match {
-          case ApiPeerType.Private =>
+          case ApiPeerType.Private ⇒
             val user = getUser(ApiUserOutPeer(peer.id)).getOrElse(ApiUser())
             getDialog(user, dialog)
-          case ApiPeerType.Group => LocalDialog()
+          case ApiPeerType.Group ⇒ LocalDialog()
         }
       }
-      val dialogs = localDialogs.zipWithIndex.map(record => (record._2 + 1, record._1)).toMap
+      val dialogs = localDialogs.zipWithIndex.map(record ⇒ (record._2 + 1, record._1)).toMap
       printDialogs(dialogs)
     }
 
@@ -75,7 +75,7 @@ class LoadDialog extends CommandBase {
 
   private def printDialogs(dialogs: Map[Int, LocalDialog]): Unit = {
     dialogs.toSeq.foreach {
-      case (index, dialog) => println(s"$index-> ${formatDialog(dialog)}")
+      case (index, dialog) ⇒ println(s"$index-> ${formatDialog(dialog)}")
     }
   }
 
@@ -85,7 +85,7 @@ class LoadDialog extends CommandBase {
   private var limit: Int = 10
 
   override def run(): Unit =
-    authenticate { implicit client =>
+    authenticate { implicit client ⇒
       load(limit)
     }
 }

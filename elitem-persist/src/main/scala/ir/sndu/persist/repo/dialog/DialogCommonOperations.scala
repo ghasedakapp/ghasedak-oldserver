@@ -34,8 +34,8 @@ trait DialogCommonOperations extends DialogId {
 
   def updateLastMessageDate(userId: Int, peer: ApiPeer, lastMessageDate: LocalDateTime)(implicit ec: ExecutionContext) =
     peer.`type` match {
-      case ApiPeerType.Private => updateLastMessageDatePrivate(userId: Int, peer: ApiPeer, lastMessageDate: LocalDateTime)
-      case ApiPeerType.Group => updateLastMessageDateGroup(peer, lastMessageDate)
+      case ApiPeerType.Private ⇒ updateLastMessageDatePrivate(userId: Int, peer: ApiPeer, lastMessageDate: LocalDateTime)
+      case ApiPeerType.Group   ⇒ updateLastMessageDateGroup(peer, lastMessageDate)
     }
 
   def updateLastMessageDatePrivate(userId: Int, peer: ApiPeer, lastMessageDate: LocalDateTime)(implicit ec: ExecutionContext) = {

@@ -17,8 +17,8 @@ class UsersServiceImpl(implicit system: ActorSystem) extends UserService
   implicit protected val log: LoggingAdapter = Logging.getLogger(system, this)
 
   override def loadFullUsers(request: RequestLoadFullUsers): Future[ResponseLoadFullUsers] =
-    authorize(request.token) { userId =>
-      db.run(UserRepo.findByIds(request.userPeers.map(_.userId).toSet)).map { users =>
+    authorize(request.token) { userId ⇒
+      db.run(UserRepo.findByIds(request.userPeers.map(_.userId).toSet)).map { users ⇒
         users map (_.toApi())
       } map (ResponseLoadFullUsers(_))
     }

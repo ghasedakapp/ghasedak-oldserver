@@ -8,7 +8,7 @@ import scala.collection.JavaConverters._
 object EndpointType {
   def fromConfig(str: String): EndpointTypes.EndpointType = {
     str match {
-      case "grpc" => EndpointTypes.Grpc
+      case "grpc" ⇒ EndpointTypes.Grpc
     }
   }
 }
@@ -35,7 +35,7 @@ object Frontend {
 
   private def startEndpoint(endpoint: Endpoint, services: Seq[ServerServiceDefinition]): Unit = {
     endpoint.typ match {
-      case EndpointTypes.Grpc => GrpcFrontend.start(endpoint.interface, endpoint.port, services)
+      case EndpointTypes.Grpc ⇒ GrpcFrontend.start(endpoint.interface, endpoint.port, services)
     }
 
   }

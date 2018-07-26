@@ -111,11 +111,11 @@ object DialogRepo extends UserDialogOperations with DialogCommonOperations {
   }
 
   def find(userId: Int, limit: Int)(implicit ec: ExecutionContext) = {
-    dialogs.filter(r => r._2.userId === userId)
+    dialogs.filter(r ⇒ r._2.userId === userId)
       .sortBy {
-        case (common, _) => common.lastMessageDate.desc
+        case (common, _) ⇒ common.lastMessageDate.desc
       }.take(limit).result.map(_.map {
-        case (c, u) => Dialog.from(c, u)
+        case (c, u) ⇒ Dialog.from(c, u)
       })
   }
 }

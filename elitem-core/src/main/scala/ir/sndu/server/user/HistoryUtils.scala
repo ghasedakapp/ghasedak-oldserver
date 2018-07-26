@@ -19,7 +19,7 @@ object HistoryUtils {
     date: LocalDateTime,
     message: ApiMessage)(implicit ec: ExecutionContext): DBIO[Unit] = {
     for {
-      _ <- HistoryMessageRepo.create(HistoryMessage(
+      _ ← HistoryMessageRepo.create(HistoryMessage(
         origin.id,
         dest,
         date,
@@ -28,7 +28,7 @@ object HistoryUtils {
         message.message.number,
         message.toByteArray,
         None))
-      _ <- HistoryMessageRepo.create(HistoryMessage(
+      _ ← HistoryMessageRepo.create(HistoryMessage(
         dest.id,
         origin,
         date,

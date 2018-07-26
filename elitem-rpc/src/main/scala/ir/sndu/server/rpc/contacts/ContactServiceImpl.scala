@@ -18,9 +18,9 @@ class ContactServiceImpl(implicit system: ActorSystem) extends ContactService
   implicit protected val log: LoggingAdapter = Logging.getLogger(system, this)
 
   override def searchContacts(request: RequestSearchContacts): Future[ResponseSearchContacts] =
-    authorize(request.token) { userId =>
-      db.run(UserPhoneRepo.findByNumbers(Set(request.query.toLong))).map(users =>
-        ResponseSearchContacts(users.map(u => ApiOutPeer(ApiPeerType.Private, u.userId))))
+    authorize(request.token) { userId ⇒
+      db.run(UserPhoneRepo.findByNumbers(Set(request.query.toLong))).map(users ⇒
+        ResponseSearchContacts(users.map(u ⇒ ApiOutPeer(ApiPeerType.Private, u.userId))))
     }
 
 }

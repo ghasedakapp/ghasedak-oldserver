@@ -19,13 +19,13 @@ class AuthServiceImpl(implicit system: ActorSystem) extends AuthService with Use
 
   override def signUp(request: RequestSignUp): Future[ResponseAuth] = {
     val action = UserRepo.findByPhone(request.number) flatMap {
-      case Some(u) =>
+      case Some(u) ⇒
         createToken(u.id) map (ResponseAuth(_, Some(u.toApi())))
 
-      case None =>
+      case None ⇒
         for {
-          user <- createUser(request.number, request.name, request.sex)
-          token <- createToken(user.id)
+          user ← createUser(request.number, request.name, request.sex)
+          token ← createToken(user.id)
         } yield ResponseAuth(token, Some(user))
     }
     db.run(action)

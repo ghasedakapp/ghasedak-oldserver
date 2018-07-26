@@ -20,7 +20,7 @@ class UserProcessor extends Processor
   with UserCommandHandler
   with UserQueryHandler {
 
-  type CommandHandler = PartialFunction[Any, () => Future[Any]]
+  type CommandHandler = PartialFunction[Any, () ⇒ Future[Any]]
 
   protected val userId: Int = self.path.name.toInt
   protected val selfPeer = ApiPeer(ApiPeerType.Private, userId)
@@ -28,13 +28,13 @@ class UserProcessor extends Processor
   protected implicit val db: Database = PostgresDb.db
 
   override def receive: Receive = commandHandler andThen {
-    handler =>
+    handler ⇒
       Try(
-        handler() pipeTo sender).failed map (e => sender ! Status.Failure(e))
+        handler() pipeTo sender).failed map (e ⇒ sender ! Status.Failure(e))
   }
 
   private def commandHandler: CommandHandler = {
-    case sm: SendMessage => sendMessage(sm)
+    case sm: SendMessage ⇒ sendMessage(sm)
   }
 
   //  private def query: Receive = {
