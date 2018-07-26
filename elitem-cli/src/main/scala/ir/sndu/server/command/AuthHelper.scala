@@ -8,7 +8,7 @@ case class ClientData(token: String, userId: Int)
 object AuthHelper {
   def authenticate(f: ClientData ⇒ Unit)(
     implicit
-    log: org.slf4j.Logger,
+    log:    org.slf4j.Logger,
     parent: ElitemCmd): Unit = {
     leveldb { implicit db ⇒
       db.get("token").flatMap(token ⇒ db.getBytes("user").map(u ⇒ ClientData(token, ApiUser.parseFrom(u).id)))

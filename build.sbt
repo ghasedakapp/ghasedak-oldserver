@@ -21,9 +21,10 @@ lazy val commonSettings = Seq(
   ),
     scalaSource in ProtocPlugin.ProtobufConfig := sourceManaged.value,
   scalariformPreferences := scalariformPreferences.value
+    .setPreference(RewriteArrowSymbols, true)
+    .setPreference(AlignParameters, true)
     .setPreference(AlignSingleLineCaseStatements, true)
-    .setPreference(DoubleIndentConstructorArguments, true)
-    .setPreference(DanglingCloseParenthesis, Preserve)
+    .setPreference(SpacesAroundMultiImports, true)
 )
 
 

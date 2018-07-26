@@ -166,7 +166,7 @@ object HistoryMessageRepo {
     notDeletedMessages.filter(m ⇒ m.userId === userId && m.peerType === peer.`type`.value && m.peerId === peer.id && (m.randomId inSet randomIds)).result
 
   def updateContentAll(userIds: Set[Int], randomId: Long, peerType: ApiPeerType, peerIds: Set[Int],
-    messageContentHeader: Int, messageContentData: Array[Byte]): FixedSqlAction[Int, NoStream, Write] =
+                       messageContentHeader: Int, messageContentData: Array[Byte]): FixedSqlAction[Int, NoStream, Write] =
     notDeletedMessages
       .filter(m ⇒ m.randomId === randomId && m.peerType === peerType.value)
       .filter(_.peerId inSet peerIds)

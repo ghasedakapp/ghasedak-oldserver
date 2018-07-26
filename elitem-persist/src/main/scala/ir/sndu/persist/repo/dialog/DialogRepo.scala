@@ -103,8 +103,8 @@ object DialogRepo extends UserDialogOperations with DialogCommonOperations {
   } yield (c, u)
 
   def create(
-    userId: Int,
-    peer: ApiPeer,
+    userId:          Int,
+    peer:            ApiPeer,
     lastMessageDate: LocalDateTime) = {
     createUserDialog(userId, peer, DateTimeHelper.origin, DateTimeHelper.origin) andThen
       createCommon(DialogCommon(getDialogId(Some(userId), peer), lastMessageDate, DateTimeHelper.origin, DateTimeHelper.origin))

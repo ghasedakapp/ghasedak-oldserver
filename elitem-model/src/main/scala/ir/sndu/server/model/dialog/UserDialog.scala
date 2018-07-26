@@ -8,29 +8,29 @@ import ir.sndu.server.model.history.HistoryMessage
 import ir.sndu.server.peer.ApiPeer
 
 case class DialogCommon(
-    dialogId: String,
-    lastMessageDate: LocalDateTime,
-    lastReceivedAt: LocalDateTime,
-    lastReadAt: LocalDateTime)
+  dialogId:        String,
+  lastMessageDate: LocalDateTime,
+  lastReceivedAt:  LocalDateTime,
+  lastReadAt:      LocalDateTime)
 
 case class UserDialog(
-    userId: Int,
-    peer: ApiPeer,
-    ownerLastReceivedAt: LocalDateTime,
-    ownerLastReadAt: LocalDateTime,
-    createdAt: LocalDateTime,
-    isFavourite: Boolean)
+  userId:              Int,
+  peer:                ApiPeer,
+  ownerLastReceivedAt: LocalDateTime,
+  ownerLastReadAt:     LocalDateTime,
+  createdAt:           LocalDateTime,
+  isFavourite:         Boolean)
 
 case class Dialog(
-    userId: Int,
-    peer: ApiPeer,
-    ownerLastReceivedAt: LocalDateTime,
-    ownerLastReadAt: LocalDateTime,
-    lastMessageDate: LocalDateTime,
-    lastReceivedAt: LocalDateTime,
-    lastReadAt: LocalDateTime,
-    createdAt: LocalDateTime,
-    isFavourite: Boolean) {
+  userId:              Int,
+  peer:                ApiPeer,
+  ownerLastReceivedAt: LocalDateTime,
+  ownerLastReadAt:     LocalDateTime,
+  lastMessageDate:     LocalDateTime,
+  lastReceivedAt:      LocalDateTime,
+  lastReadAt:          LocalDateTime,
+  createdAt:           LocalDateTime,
+  isFavourite:         Boolean) {
   def toApi(msgOpt: Option[HistoryMessage]): ApiDialog = {
     val history = msgOpt.getOrElse(HistoryMessage.empty(userId, peer, lastMessageDate))
     val msgDate = lastMessageDate.atZone(ZoneId.systemDefault()).toInstant.toEpochMilli

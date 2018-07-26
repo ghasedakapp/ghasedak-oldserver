@@ -10,8 +10,8 @@ import scala.concurrent.{ ExecutionContext, Future }
 trait AuthHelper {
   def authorize[T](token: String)(f: Int ⇒ Future[T])(
     implicit
-    db: backend.Database,
-    ec: ExecutionContext,
+    db:  backend.Database,
+    ec:  ExecutionContext,
     log: LoggingAdapter): Future[T] = {
     db.run(AuthIdRepo.find(token)) flatMap {
       case Some(auth) ⇒ f(auth.userId.get)

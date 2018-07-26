@@ -20,12 +20,12 @@ import picocli.CommandLine
 class LoadDialog extends CommandBase {
 
   case class LocalDialog(
-      uniqueId: String = "",
-      name: String = "",
-      peerType: String = "",
-      msg: String = "",
-      date: String = "",
-      counter: String = "0")
+    uniqueId: String = "",
+    name:     String = "",
+    peerType: String = "",
+    msg:      String = "",
+    date:     String = "",
+    counter:  String = "0")
 
   import ir.sndu.server.ApiConversions._
   import ir.sndu.server.db.DbHelper._

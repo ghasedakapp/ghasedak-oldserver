@@ -13,11 +13,11 @@ import scala.concurrent.ExecutionContext
 object HistoryUtils {
 
   def writeHistoryMessage(
-    origin: ApiPeer,
-    dest: ApiPeer,
+    origin:   ApiPeer,
+    dest:     ApiPeer,
     randomId: Long,
-    date: LocalDateTime,
-    message: ApiMessage)(implicit ec: ExecutionContext): DBIO[Unit] = {
+    date:     LocalDateTime,
+    message:  ApiMessage)(implicit ec: ExecutionContext): DBIO[Unit] = {
     for {
       _ ← HistoryMessageRepo.create(HistoryMessage(
         origin.id,

@@ -19,7 +19,7 @@ object DbHelper {
   }
   def leveldb[T](f: DB ⇒ T)(
     implicit
-    log: org.slf4j.Logger,
+    log:    org.slf4j.Logger,
     parent: ElitemCmd): Option[T] = {
     overwriteDbPath(parent)
     val path = CliConfigs.dbPath

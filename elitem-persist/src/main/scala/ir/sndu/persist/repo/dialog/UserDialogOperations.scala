@@ -31,10 +31,10 @@ trait UserDialogOperations {
   import UserDialogRepo._
 
   def createUserDialog(
-    userId: Int,
-    peer: ApiPeer,
+    userId:              Int,
+    peer:                ApiPeer,
     ownerLastReceivedAt: LocalDateTime,
-    ownerLastReadAt: LocalDateTime) =
+    ownerLastReadAt:     LocalDateTime) =
     userDialogs insertOrUpdate UserDialog(
       userId,
       peer,
