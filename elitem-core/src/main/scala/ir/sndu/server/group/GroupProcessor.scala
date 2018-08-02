@@ -40,7 +40,9 @@ object GroupProcessor {
         case c: Create ⇒
           log.debug("Persisting....")
           val evt = Created(Instant.now(), entityId.toInt)
-          Effect.persist(evt)
+          Effect.persist(evt).andThen { _ ⇒
+            c.replyTo ! CreateAck
+          }
         case StopOffice ⇒
           log.debug("Stopping ......")
           Effect.stop
