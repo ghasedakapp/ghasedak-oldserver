@@ -8,8 +8,9 @@ option (scalapb.options) = {
     import: "ir.sndu.server.CoreTypeMapper._"
     primitive_wrappers: true
     single_file: true
-    preamble: "sealed trait GroupCommand { val replyTo:ir.sndu.server.ActorRefContainer } "
-    preamble: "sealed trait GroupQuery"
+    preamble: "trait GroupCommand"
+//    preamble: "sealed trait GroupCommand { val replyTo:ir.sndu.server.ActorRefContainer } "
+    preamble: "trait GroupQuery"
 };
 
 import "google/protobuf/wrappers.proto";

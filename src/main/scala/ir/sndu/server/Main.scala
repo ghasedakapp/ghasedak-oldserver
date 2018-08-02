@@ -8,6 +8,7 @@ import ir.sndu.server.auth.AuthServiceGrpc
 import ir.sndu.server.config.{ AppType, ElitemConfigFactory }
 import ir.sndu.server.contacts.ContactServiceGrpc
 import ir.sndu.server.frontend.Frontend
+import ir.sndu.server.group.GroupExtension
 import ir.sndu.server.messaging.MessagingServiceGrpc
 import ir.sndu.server.rpc.auth.AuthServiceImpl
 import ir.sndu.server.rpc.contacts.ContactServiceImpl
@@ -36,6 +37,8 @@ object ElitemServer {
       Cluster(system).join(Cluster(system).selfAddress)
 
     implicit val ex: ExecutionContext = system.dispatcher
+
+    implicit val groupExt = GroupExtension(system)
 
     Frontend.start(ServiceDescriptors.services)
   }
