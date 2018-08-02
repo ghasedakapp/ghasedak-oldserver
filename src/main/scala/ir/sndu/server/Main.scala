@@ -1,7 +1,5 @@
 package ir.sndu.server
 
-import java.io.File
-
 import akka.actor.ActorSystem
 import akka.cluster.Cluster
 import com.typesafe.config.ConfigFactory
