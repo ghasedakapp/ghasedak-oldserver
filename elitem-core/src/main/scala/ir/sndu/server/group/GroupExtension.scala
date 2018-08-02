@@ -23,17 +23,17 @@ class GroupExtensionImpl(system: ActorSystem) extends Extension {
   private val sharding = ClusterSharding(system.toTyped)
 
   private val shardRegion: ActorRef[ShardingEnvelope[GroupCommand]] = sharding.spawn(
-    behavior = entityId ⇒ GroupProcessor.behavior,
+    behavior = GroupProcessor.shardingBehavior,
     props = Props.empty,
     typeKey = GroupProcessor.ShardingTypeName,
     settings = ClusterShardingSettings(system.toTyped),
     maxNumberOfShards = GroupProcessor.MaxNumberOfShards,
     handOffStopMessage = StopOffice)
 
-  val groupId = UUID.randomUUID().toString
+  val groupId = 10L
 
   val entityRef: EntityRef[GroupCommand] =
-    sharding.entityRefFor(GroupProcessor.ShardingTypeName, groupId)
+    sharding.entityRefFor(GroupProcessor.ShardingTypeName, groupId.toString)
 
   private def construct(r: ActorRef[CreateAck]): Create = Create(replyTo = r)
 

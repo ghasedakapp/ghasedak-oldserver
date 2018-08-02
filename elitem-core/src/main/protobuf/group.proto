@@ -15,7 +15,35 @@ option (scalapb.options) = {
 
 import "google/protobuf/wrappers.proto";
 import "scalapb/scalapb.proto";
+import "api/file.proto";
 
+enum GroupType {
+    General = 0;
+    SuperGroup = 1;
+    Channel = 2;
+}
+
+message GroupExt {
+    string key = 1;
+    oneof value {
+        string string_value = 2;
+        bool bool_value = 3;
+    }
+}
+
+message GroupEvents {
+    message Created {
+        option (scalapb.message).extends = "ir.sndu.server.group.GroupEvent";
+
+        int64 ts = 1 [(scalapb.field).type = "java.time.Instant"];
+        int32 group_id = 2;
+        GroupType typ = 3;
+        int32 creator_user_id = 4;
+        int64 access_hash = 5;
+        string title = 6;
+        repeated int32 user_ids = 7;
+    }
+}
 
 
 message GroupMember {

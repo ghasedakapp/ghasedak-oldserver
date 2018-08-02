@@ -12,16 +12,21 @@ object Dependencies {
     val postgres = "42.2.1"
     val flyway = "5.0.7"
     val config = "1.3.2"
+    val persistCassandra = "0.87"
   }
 
   object Compile {
 
+
+    val akkaTyped =  "com.typesafe.akka" %% "akka-actor-typed" % V.akka
     val actor =  "com.typesafe.akka" %% "akka-actor" % V.akka
     val cluster =  "com.typesafe.akka" %% "akka-cluster" % V.akka
     val sharding =  "com.typesafe.akka" %% "akka-cluster-sharding" % V.akka
     val shardingTyped = "com.typesafe.akka" %% "akka-cluster-sharding-typed" % V.akka
+    val persistTyped = "com.typesafe.akka" %% "akka-persistence-typed" % V.akka
     val akkaPersist =  "com.typesafe.akka" %% "akka-persistence" % V.akka
     val akkaSlf4j =  "com.typesafe.akka" %% "akka-slf4j" % V.akka
+    val persistCassandra = "com.typesafe.akka" %% "akka-persistence-cassandra" % V.persistCassandra
 
     val config = "com.typesafe" % "config" % V.config
 
@@ -53,6 +58,7 @@ object Dependencies {
     val scalatic = "org.scalactic" %% "scalactic" % "3.0.5"
     val scalaTest = "org.scalatest" %% "scalatest" % "3.0.5" % "test"
     val akkaTest = "com.typesafe.akka" %% "akka-testkit" % V.akka % "test"
+    val persistCassTest = "com.typesafe.akka" %% "akka-persistence-cassandra-launcher" % V.persistCassandra % "test"
   }
 
 
@@ -62,8 +68,8 @@ object Dependencies {
   val shared = Seq(betterFile, logback)
 
   val core = shared ++ Seq(
-    actor,cluster,sharding,shardingTyped,akkaPersist,
-    scalap, scalapbRuntime, akkaSlf4j
+    akkaTyped,actor,cluster,sharding,akkaPersist,shardingTyped, persistTyped,
+    scalap, scalapbRuntime, akkaSlf4j, persistCassandra
   )
 
   val persist = shared ++ Seq(
