@@ -80,3 +80,31 @@ CREATE TABLE auth_ids (
     deleted_at timestamp,
     PRIMARY KEY (id)
 );
+
+CREATE TABLE groups (
+       id int NOT NULL,
+       creator_user_id int NOT NULL,
+       access_hash bigint NOT NULL,
+       title varchar(255) NOT NULL,
+       created_at timestamp NOT NULL,
+       `type` int NOT NULL,
+       about varchar(1024),
+       topic varchar(255),
+       title_changer_user_id int NOT NULL,
+       title_changed_at timestamp NOT NULL,
+       title_change_random_id bigint NOT NULL,
+       avatar_changer_user_id int NOT NULL,
+       avatar_changed_at timestamp NOT NULL,
+       avatar_change_random_id bigint NOT NULL,
+       PRIMARY KEY (id)
+);
+
+CREATE TABLE group_users (
+       group_id int NOT NULL,
+       user_id int NOT NULL,
+       inviter_user_id int NOT NULL,
+       invited_at timestamp NOT NULL,
+       PRIMARY KEY (group_id, user_id)
+);
+
+CREATE INDEX idx_group_users_user_id on group_users (user_id);

@@ -6,7 +6,8 @@ import akka.actor.typed.scaladsl.adapter._
 import akka.cluster.sharding.typed.scaladsl.EntityTypeKey
 import akka.event.Logging
 import ir.sndu.server.GroupCommand
-import ir.sndu.server.GroupCommands.Create
+import ir.sndu.server.GroupCommands.{ Create, CreateAck }
+import ir.sndu.server.ImplicitActorRef._
 
 case object StopOffice extends GroupCommand
 
@@ -21,7 +22,7 @@ object GroupProcessor {
       val log = Logging(system, getClass)
       msg match {
         case c: Create ⇒
-
+          c.replyTo ! CreateAck
           Behaviors.same
         case StopOffice ⇒
           log.debug("Stopping ......")
