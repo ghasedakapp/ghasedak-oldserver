@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package ir.sndu.server.file;
+package ir.sndu.server;
 
 message FileLocation {
     int64 file_id = 1;

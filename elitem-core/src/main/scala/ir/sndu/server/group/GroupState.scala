@@ -2,7 +2,7 @@ package ir.sndu.server.group
 
 import java.time.Instant
 
-import ir.sndu.server.file.file.Avatar
+import ir.sndu.server.file.Avatar
 import ir.sndu.server.group.GroupEvents.Created
 
 private[group] object GroupState {

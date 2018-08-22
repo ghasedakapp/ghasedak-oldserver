@@ -28,9 +28,7 @@ object GroupProcessor {
       eventHandler) onRecoveryCompleted recovery
 
   private def commandHandler(entityId: String): CommandHandler[GroupCommand, GroupEvent, GroupState] =
-    CommandHandler.byState {
-      case state ⇒ initial(entityId)
-    }
+    CommandHandler.byState(state ⇒ initial(entityId))
 
   private def initial(entityId: String): CommandHandler[GroupCommand, GroupEvent, GroupState] =
     (ctx, state, cmd) ⇒ {

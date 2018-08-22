@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package ir.sndu.server.rpc;
+
+import "api/peer.proto";
+import "api/groups.proto";
+import "misc.proto";
+
+service GroupService {
+    rpc CreateGroup(RequestCreateGroup) returns (ResponseCreateGroup) {}
+    rpc DeleteGroup(RequestDeleteGroup) returns (ResponseSeq) {}
+    rpc InviteUser(RequestInviteUser) returns (ResponseSeqDate) {}
+    rpc KickUser(RequestKickUser) returns (ResponseSeqDate) {}
+}
+
+message RequestCreateGroup {
+    int64 random_id = 1;
+    string title = 2;
+    repeated ApiUserOutPeer users = 3;
+    ApiGroupType groupType = 4;
+}
+
+message ResponseCreateGroup {
+    int32 seq = 1;
+    bytes state = 2;
+    ApiGroup group = 3;
+    int64 date = 4;
+}
+
+
+message RequestDeleteGroup {
+    ApiGroupOutPeer group_peer = 1;
+}
+
+
+message RequestInviteUser {
+    ApiGroupOutPeer group_peer = 1;
+    ApiUserOutPeer user_peer = 2;
+    int64 random_id = 3;
+}
+
+
+message RequestKickUser {
+    ApiGroupOutPeer group_peer = 1;
+    ApiUserOutPeer user_peer = 2;
+    int64 random_id = 3;
+}
