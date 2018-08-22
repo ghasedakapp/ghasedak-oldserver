@@ -1,7 +1,6 @@
 syntax = "proto3";
 
-
-package ir.sndu.server.group;
+package ir.sndu.server;
 
 option (scalapb.options) = {
     flat_package: true
@@ -15,43 +14,7 @@ option (scalapb.options) = {
 
 import "google/protobuf/wrappers.proto";
 import "scalapb/scalapb.proto";
-
-enum GroupType {
-    General = 0;
-    SuperGroup = 1;
-    Channel = 2;
-}
-
-message GroupExt {
-    string key = 1;
-    oneof value {
-        string string_value = 2;
-        bool bool_value = 3;
-    }
-}
-
-message GroupEvents {
-    message Created {
-        option (scalapb.message).extends = "ir.sndu.server.group.GroupEvent";
-
-        int64 ts = 1 [(scalapb.field).type = "java.time.Instant"];
-        int32 group_id = 2;
-        GroupType typ = 3;
-        int32 creator_user_id = 4;
-        int64 access_hash = 5;
-        string title = 6;
-        repeated int32 user_ids = 7;
-    }
-}
-
-
-message GroupMember {
-    int32 user_id = 1;
-    int32 inviter_user_id = 2;
-    int64 invited_at = 3;
-    bool is_admin = 4;
-}
-
+import "api/groups.proto";
 
 message GroupCommands {
     message Create {
@@ -69,4 +32,31 @@ message GroupCommands {
     message CreateAck {
         int64 access_hash = 1;
     }
+
+
+    message DeleteGroup {
+        option (scalapb.message).extends = "GroupCommand";
+
+        int32 client_user_id = 1;
+        int64 client_auth_id = 2;
+    }
+
+    message Invite {
+        option (scalapb.message).extends = "GroupCommand";
+
+        int32 invitee_user_id = 1;
+        int32 inviter_user_id = 2;
+        int64 inviter_auth_id = 3;
+        int64 random_id = 4;
+    }
+
+    message Kick {
+        option (scalapb.message).extends = "GroupCommand";
+
+        int32 kicked_user_id = 1;
+        int32 kicker_user_id = 2;
+        int64 kicker_auth_id = 3;
+        int64 random_id = 4;
+    }
+
 }

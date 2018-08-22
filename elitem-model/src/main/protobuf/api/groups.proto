@@ -6,8 +6,8 @@ import "api/file.proto";
 
 
 enum ApiGroupType {
-    Type_Group = 0;
-    Type_Channel = 1;
+    General = 0;
+    Channel = 1;
 }
 
 message ApiGroupOutPeer {

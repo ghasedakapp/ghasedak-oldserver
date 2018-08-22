@@ -1,16 +1,14 @@
 package ir.sndu.server.group
 
-import java.util.UUID
-
-import akka.actor.typed.scaladsl.AskPattern._
 import akka.actor.typed.scaladsl.adapter._
 import akka.actor.typed.{ ActorRef, Props }
 import akka.actor.{ ActorSystem, ExtendedActorSystem, Extension, ExtensionId }
-import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef, EntityTypeKey }
+import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
 import akka.cluster.sharding.typed.{ ClusterShardingSettings, ShardingEnvelope }
 import akka.util.Timeout
 import ir.sndu.server.ActorRefConversions._
-import ir.sndu.server.group.GroupCommands.{ Create, CreateAck }
+import ir.sndu.server.GroupCommand
+import ir.sndu.server.GroupCommands.{ Create, CreateAck }
 
 import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
