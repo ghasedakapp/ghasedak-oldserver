@@ -6,7 +6,7 @@ import akka.actor.{ ActorSystem, ExtendedActorSystem, Extension, ExtensionId }
 import ir.sndu.persist.db.PostgresDb
 import ir.sndu.persist.repo.group.{ GroupRepo, GroupUserRepo }
 import ir.sndu.server.GroupCommands.CreateAck
-import ir.sndu.server.groups.ApiGroupType
+import ir.sndu.server.groups.{ ApiGroup, ApiGroupType }
 import ir.sndu.server.model.group.Group
 import ir.sndu.server.sequence.SeqState
 import slick.jdbc.PostgresProfile
@@ -19,12 +19,13 @@ class GroupExtensionImpl(system: ActorSystem) extends Extension {
   val db: PostgresProfile.backend.Database = PostgresDb.db
 
   def create(
-    groupId:       Int,
     typ:           ApiGroupType,
     creatorUserId: Int,
     title:         String,
     randomId:      Long,
-    userIds:       Seq[Int]): Future[CreateAck] = {
+    userIds:       Seq[Int]): Future[ApiGroup] = {
+
+    val groupId = Random.nextInt()
 
     val creationResult = for {
       _ ← GroupRepo.create(Group(
@@ -53,7 +54,10 @@ class GroupExtensionImpl(system: ActorSystem) extends Extension {
         inviteeUserId = userId,
         inviterUserId = creatorUserId)))
 
-    } yield CreateAck()
+    } yield ApiGroup(
+      id = groupId,
+      title = title,
+      groupType = typ)
 
   }
 
