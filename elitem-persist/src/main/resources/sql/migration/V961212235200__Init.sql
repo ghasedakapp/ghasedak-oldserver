@@ -104,6 +104,8 @@ CREATE TABLE group_users (
        user_id int NOT NULL,
        inviter_user_id int NOT NULL,
        invited_at timestamp NOT NULL,
+       joined_at timestamp DEFAULT NULL,
+       is_admin boolean default false
        PRIMARY KEY (group_id, user_id)
 );
 

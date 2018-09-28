@@ -70,6 +70,13 @@ class GroupExtensionImpl(system: ActorSystem) extends Extension {
       isAdmin = false)) map (_ ⇒ SeqState())
   }
 
+  def kick(
+    groupId: Int,
+    userId:  Int): Future[SeqState] = {
+    //TODO make orphan if owner was deleted
+    db.run(GroupUserRepo.delete(groupId, userId)) map (_ ⇒ SeqState())
+  }
+
 }
 
 object GroupExtension extends ExtensionId[GroupExtensionImpl] {
