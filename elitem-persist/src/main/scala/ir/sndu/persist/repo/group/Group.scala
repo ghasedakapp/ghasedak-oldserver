@@ -73,7 +73,7 @@ object GroupRepo {
 
   val allIds = groups.map(_.id)
 
-  def create(group: Group, randomId: Long, isHidden: Boolean) = {
+  def create(group: Group, randomId: Long) = {
     groups += FullGroup(
       id = group.id,
       creatorUserId = group.creatorUserId,

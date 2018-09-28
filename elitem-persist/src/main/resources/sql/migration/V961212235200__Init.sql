@@ -87,7 +87,7 @@ CREATE TABLE groups (
        access_hash bigint NOT NULL,
        title varchar(255) NOT NULL,
        created_at timestamp NOT NULL,
-       `type` int NOT NULL,
+       type int NOT NULL,
        about varchar(1024),
        topic varchar(255),
        title_changer_user_id int NOT NULL,

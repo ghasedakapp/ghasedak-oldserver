@@ -1,44 +1,78 @@
 package ir.sndu.server.group
 
-import akka.actor.typed.scaladsl.adapter._
-import akka.actor.typed.{ ActorRef, Props }
+import java.time.{ LocalDateTime, ZoneOffset }
+
 import akka.actor.{ ActorSystem, ExtendedActorSystem, Extension, ExtensionId }
-import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
-import akka.cluster.sharding.typed.{ ClusterShardingSettings, ShardingEnvelope }
-import akka.util.Timeout
-import ir.sndu.server.ActorRefConversions._
-import ir.sndu.server.GroupCommand
-import ir.sndu.server.GroupCommands.{ Create, CreateAck }
+import ir.sndu.persist.db.PostgresDb
+import ir.sndu.persist.repo.group.{ GroupRepo, GroupUserRepo }
+import ir.sndu.server.GroupCommands.CreateAck
+import ir.sndu.server.groups.ApiGroupType
+import ir.sndu.server.model.group.Group
+import ir.sndu.server.sequence.SeqState
+import slick.jdbc.PostgresProfile
 
-import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
+import scala.util.Random
+
 class GroupExtensionImpl(system: ActorSystem) extends Extension {
-  implicit val timeout: Timeout = 15.seconds
-  implicit val scheduler = system.scheduler
   implicit val ec: ExecutionContext = system.dispatcher
-  implicit val _sys = system
+  val db: PostgresProfile.backend.Database = PostgresDb.db
 
-  private val sharding = ClusterSharding(system.toTyped)
+  def create(
+    groupId:       Int,
+    typ:           ApiGroupType,
+    creatorUserId: Int,
+    title:         String,
+    randomId:      Long,
+    userIds:       Seq[Int]): Future[CreateAck] = {
 
-  private val shardRegion: ActorRef[ShardingEnvelope[GroupCommand]] = sharding.spawn(
-    behavior = GroupProcessor.shardingBehavior,
-    props = Props.empty,
-    typeKey = GroupProcessor.ShardingTypeName,
-    settings = ClusterShardingSettings(system.toTyped),
-    maxNumberOfShards = GroupProcessor.MaxNumberOfShards,
-    handOffStopMessage = StopOffice)
+    val creationResult = for {
+      _ ← GroupRepo.create(Group(
+        id = groupId,
+        creatorUserId = creatorUserId,
+        accessHash = Random.nextLong(),
+        title = title,
+        createdAt = LocalDateTime.now(ZoneOffset.UTC),
+        typ = typ,
+        about = None,
+        topic = None), randomId)
+      _ ← GroupUserRepo.create(
+        groupId = groupId,
+        userId = creatorUserId,
+        inviterUserId = creatorUserId,
+        invitedAt = LocalDateTime.now(ZoneOffset.UTC),
+        joinedAt = None,
+        isAdmin = true)
 
-  val groupId = 10L
+    } yield ()
 
-  val entityRef: EntityRef[GroupCommand] =
-    sharding.entityRefFor(GroupProcessor.ShardingTypeName, groupId.toString)
+    for {
+      _ ← db.run(creationResult)
+      _ ← Future.sequence(userIds map (userId ⇒ invite(
+        groupId,
+        inviteeUserId = userId,
+        inviterUserId = creatorUserId)))
 
-  private def construct(r: ActorRef[CreateAck]): Create = Create(replyTo = r)
+    } yield CreateAck()
 
-  val f: Future[CreateAck] = entityRef ? construct
+  }
+
+  def invite(
+    groupId:       Int,
+    inviteeUserId: Int,
+    inviterUserId: Int): Future[SeqState] = {
+    db.run(GroupUserRepo.create(
+      groupId = groupId,
+      userId = inviteeUserId,
+      inviterUserId = inviterUserId,
+      invitedAt = LocalDateTime.now(ZoneOffset.UTC),
+      joinedAt = None,
+      isAdmin = false)) map (_ ⇒ SeqState())
+  }
 
 }
 
 object GroupExtension extends ExtensionId[GroupExtensionImpl] {
   override def createExtension(system: ExtendedActorSystem): GroupExtensionImpl = new GroupExtensionImpl(system)
 }
+
