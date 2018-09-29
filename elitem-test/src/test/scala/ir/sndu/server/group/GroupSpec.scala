@@ -8,7 +8,7 @@ import ir.sndu.server.misc.ResponseSeqDate
 import ir.sndu.server.model.group.Group
 import ir.sndu.server.peer.ApiUserOutPeer
 import ir.sndu.server.rpc.groups.{ RequestInviteUser, RequestKickUser }
-import ir.sndu.server.{ GrpcBaseSuit, UserInfo }
+import ir.sndu.server.{ GrpcBaseSuit, ClientData }
 
 import scala.util.Random
 
@@ -23,7 +23,7 @@ class GroupSpec extends GrpcBaseSuit
 
   def create: Unit = {
     val clientData = createUser()
-    val UserInfo(user1, token1, _) = clientData
+    val ClientData(user1, token1, _) = clientData
 
     val apiGroup = {
       implicit val client = clientData
@@ -43,9 +43,9 @@ class GroupSpec extends GrpcBaseSuit
 
   def invite: Unit = {
     val clientData1 = createUser()
-    val UserInfo(user1, token1, _) = clientData1
+    val ClientData(user1, token1, _) = clientData1
     val clientData2 = createUser()
-    val UserInfo(user2, token2, _) = clientData2
+    val ClientData(user2, token2, _) = clientData2
 
     val apiGroup = {
       implicit val client = clientData1
@@ -61,9 +61,9 @@ class GroupSpec extends GrpcBaseSuit
 
   def kick: Unit = {
     val clientData1 = createUser()
-    val UserInfo(user1, token1, _) = clientData1
+    val ClientData(user1, token1, _) = clientData1
     val clientData2 = createUser()
-    val UserInfo(user2, token2, _) = clientData2
+    val ClientData(user2, token2, _) = clientData2
 
     val apiGroup = {
       implicit val client = clientData1

@@ -1,6 +1,6 @@
 package ir.sndu.server.messaging
 
-import ir.sndu.server.{ GrpcBaseSuit, UserInfo }
+import ir.sndu.server.{ GrpcBaseSuit, ClientData }
 import ir.sndu.server.auth.AuthHelper
 import ir.sndu.server.message.{ ApiMessage, ApiTextMessage }
 import ir.sndu.server.peer.{ ApiOutPeer, ApiPeerType }
@@ -12,10 +12,10 @@ class DialogSpec extends GrpcBaseSuit
   "load dialog" should "" in loadDialog
 
   def loadDialog(): Unit = {
-    implicit val userInfo1: UserInfo = createUser()
-    val UserInfo(user1, token1, _) = userInfo1
-    val UserInfo(user2, token2, _) = createUser()
-    val UserInfo(user3, token3, _) = createUser()
+    implicit val userInfo1: ClientData = createUser()
+    val ClientData(user1, token1, _) = userInfo1
+    val ClientData(user2, token2, _) = createUser()
+    val ClientData(user3, token3, _) = createUser()
 
     val outPeer2 = ApiOutPeer(ApiPeerType.Private, user2.id)
     val outPeer3 = ApiOutPeer(ApiPeerType.Private, user3.id)
