@@ -6,7 +6,7 @@ import ir.sndu.server.{ GrpcBaseSuit, UserInfo }
 import scala.util.Random
 
 trait AuthHelper {
-  self: GrpcBaseSuit =>
+  self: GrpcBaseSuit ⇒
 
   def createUser(): UserInfo = {
     val number = Random.nextLong()

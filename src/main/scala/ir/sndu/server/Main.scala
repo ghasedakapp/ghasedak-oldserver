@@ -12,6 +12,8 @@ import ir.sndu.server.group.GroupExtension
 import ir.sndu.server.messaging.MessagingServiceGrpc
 import ir.sndu.server.rpc.auth.AuthServiceImpl
 import ir.sndu.server.rpc.contacts.ContactServiceImpl
+import ir.sndu.server.rpc.group.GroupServiceImpl
+import ir.sndu.server.rpc.groups.GroupServiceGrpc
 import ir.sndu.server.rpc.messaging.MessagingServiceImpl
 import ir.sndu.server.rpc.user.UsersServiceImpl
 import ir.sndu.server.rpc.users.UserServiceGrpc
@@ -50,6 +52,7 @@ object ServiceDescriptors {
       AuthServiceGrpc.bindService(new AuthServiceImpl, ec),
       MessagingServiceGrpc.bindService(new MessagingServiceImpl, ec),
       ContactServiceGrpc.bindService(new ContactServiceImpl, ec),
-      UserServiceGrpc.bindService(new UsersServiceImpl(), ec))
+      UserServiceGrpc.bindService(new UsersServiceImpl(), ec),
+      GroupServiceGrpc.bindService(new GroupServiceImpl(), ec))
   }
 }

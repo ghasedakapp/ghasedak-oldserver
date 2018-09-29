@@ -7,7 +7,7 @@ import ir.sndu.server.{ GrpcBaseSuit, UserInfo }
 import scala.util.Random
 
 trait MessagingHelper {
-  self: GrpcBaseSuit =>
+  self: GrpcBaseSuit ⇒
 
   def befrest(peer: ApiOutPeer, msg: ApiMessage)(implicit info: UserInfo): Unit = {
     messagingStub.sendMessage(RequestSendMessage(

@@ -5,12 +5,14 @@ import ir.sndu.server.auth.AuthServiceGrpc
 import ir.sndu.server.config.{ AppType, ElitemConfigFactory }
 import ir.sndu.server.contacts.ContactServiceGrpc
 import ir.sndu.server.messaging.MessagingServiceGrpc
+import ir.sndu.server.rpc.groups.GroupServiceGrpc
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.{ FlatSpec, Matchers }
+import org.scalatest.{ FlatSpec, Inside, Matchers }
 
 class GrpcBaseSuit extends FlatSpec
   with Matchers
-  with ScalaFutures {
+  with ScalaFutures
+  with Inside {
 
   protected val conf = ElitemConfigFactory.load(AppType.Test)
 
@@ -22,5 +24,6 @@ class GrpcBaseSuit extends FlatSpec
   protected implicit val authStub = AuthServiceGrpc.blockingStub(channel)
   protected implicit val messagingStub = MessagingServiceGrpc.blockingStub(channel)
   protected implicit val contactStub = ContactServiceGrpc.blockingStub(channel)
+  protected implicit val groupStub = GroupServiceGrpc.blockingStub(channel)
 
 }
