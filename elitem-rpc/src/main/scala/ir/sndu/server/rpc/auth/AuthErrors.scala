@@ -4,5 +4,9 @@ import io.grpc.Status
 import ir.sndu.server.rpc.RpcError
 
 object AuthErrors {
+
+  val MissingToken = RpcError(Status.UNAUTHENTICATED, "MISSING_TOKEN")
+
   val InvalidToken = RpcError(Status.UNAUTHENTICATED, "INVALID_TOKEN")
+
 }

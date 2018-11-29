@@ -1,4 +1,3 @@
-import com.typesafe.sbt.packager.Keys.bashScriptExtraDefines
 import ir.sndu.Dependencies
 import scalariform.formatter.preferences._
 
@@ -8,18 +7,16 @@ scalaSource in ProtocPlugin.ProtobufConfig := sourceManaged.value
 
 enablePlugins(JavaAppPackaging)
 
-
-
 lazy val commonSettings = Seq(
   organization := "ir.elitem",
   scalaVersion := "2.12.3",
   mainClass in Compile := Some("ir.sndu.server.Main"),
   PB.targets in Compile := Seq(
-      scalapb.gen() -> (sourceManaged  in Compile).value),
+    scalapb.gen() -> (sourceManaged in Compile).value),
   PB.includePaths in Compile ++= Seq(
     file("elitem-model/src/main/protobuf")
   ),
-    scalaSource in ProtocPlugin.ProtobufConfig := sourceManaged.value,
+  scalaSource in ProtocPlugin.ProtobufConfig := sourceManaged.value,
   scalariformPreferences := scalariformPreferences.value
     .setPreference(RewriteArrowSymbols, true)
     .setPreference(AlignParameters, true)
@@ -27,14 +24,13 @@ lazy val commonSettings = Seq(
     .setPreference(SpacesAroundMultiImports, true)
 )
 
-
 lazy val root = (project in file("."))
   .settings(
     commonSettings,
     Packaging.packagingSettings
   )
-  .dependsOn(commons, core, rpc, cli)
-  .aggregate(core,persist,rpc, commons, model, cli)
+  .dependsOn(core, persist, rpc, commons, model, cli)
+  .aggregate(core, persist, rpc, commons, model, cli)
 
 lazy val core = elitemModule("elitem-core")
   .settings(
@@ -76,7 +72,6 @@ lazy val test = elitemModule("elitem-test")
     libraryDependencies ++= Dependencies.test
   )
   .dependsOn(root, commons, core, rpc, persist, model)
-
 
 def elitemModule(name: String): Project = {
   Project(id = name, base = file(name))

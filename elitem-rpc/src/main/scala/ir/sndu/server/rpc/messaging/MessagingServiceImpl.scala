@@ -1,6 +1,6 @@
 package ir.sndu.server.rpc.messaging
 
-import java.time.{ Instant, LocalDateTime, ZoneId, ZoneOffset }
+import java.time.{ Instant, LocalDateTime, ZoneId }
 
 import akka.actor.ActorSystem
 import akka.event.{ Logging, LoggingAdapter }
@@ -12,37 +12,42 @@ import ir.sndu.server.message.{ ApiMessage, ApiMessageContainer }
 import ir.sndu.server.messaging.MessagingServiceGrpc.MessagingService
 import ir.sndu.server.messaging._
 import ir.sndu.server.peer.{ ApiOutPeer, ApiPeer }
-import ir.sndu.server.rpc.auth.AuthHelper
+import ir.sndu.server.rpc.auth.helper.AuthHelper
+import ir.sndu.server.rpc.auth.helper.AuthHelper.ClientData
 import ir.sndu.server.user.UserExtension
 import slick.dbio._
+import slick.jdbc.PostgresProfile
 
-import scala.concurrent.Future
+import scala.concurrent.{ ExecutionContext, Future }
+
 class MessagingServiceImpl(implicit system: ActorSystem) extends MessagingService
   with AuthHelper {
-  implicit protected val ec = system.dispatcher
-  implicit protected val db = PostgresDb.db
-  implicit protected val log: LoggingAdapter = Logging.getLogger(system, this)
+
+  override implicit val ec: ExecutionContext = system.dispatcher
+
+  override val db: PostgresProfile.backend.Database = PostgresDb.db
+
+  override val log: LoggingAdapter = Logging.getLogger(system, this)
+
   protected val userExt = UserExtension(system)
 
   override def sendMessage(request: RequestSendMessage): Future[ResponseVoid] =
-    authorize(request.token) { userId ⇒
+    authorize { clientData: ClientData ⇒
       val (outPeer, randomId, message, _) = RequestSendMessage.unapply(request).get
-
-      withValidPeer(outPeer, userId) {
+      withValidPeer(outPeer, clientData.userId) {
         userExt.sendMessage(
-          userId,
+          clientData.userId,
           outPeer.map(p ⇒ ApiPeer(p.`type`, p.id)).get,
           randomId,
           message.get).map(_ ⇒ ResponseVoid())
       }
-
     }
 
   override def loadHistory(request: RequestLoadHistory): Future[ResponseLoadHistory] =
-    authorize(request.token) { userId ⇒
+    authorize { clientData: ClientData ⇒
       val (peer, date, limit, _) = RequestLoadHistory.unapply(request).get
       db.run(HistoryMessageRepo.findBefore(
-        userId,
+        clientData.userId,
         ApiPeer(peer.get.`type`, peer.get.id),
         LocalDateTime.ofInstant(Instant.ofEpochMilli(date), ZoneId.systemDefault()),
         limit)) map { history ⇒
@@ -51,19 +56,17 @@ class MessagingServiceImpl(implicit system: ActorSystem) extends MessagingServic
           msg.randomId,
           msg.date.atZone(ZoneId.systemDefault()).toInstant.toEpochMilli,
           Some(ApiMessage().mergeFrom(CodedInputStream.newInstance(msg.messageContentData)))))
-
       } map (ResponseLoadHistory(_))
     }
 
   override def loadDialogs(request: RequestLoadDialogs): Future[ResponseLoadDialogs] =
-    authorize(request.token) { userId ⇒
+    authorize { clientData: ClientData ⇒
       val action = for {
-        dialogs ← DialogRepo.find(userId, request.limit)
+        dialogs ← DialogRepo.find(clientData.userId, request.limit)
         fullDialogs ← DBIO.sequence(dialogs.map(d ⇒
           HistoryMessageRepo.find(d.userId, d.peer, Some(d.lastMessageDate), 1).headOption.map(d.toApi)))
 
       } yield ResponseLoadDialogs(fullDialogs)
-
       db.run(action)
     }
 
