@@ -6,8 +6,8 @@ import ir.sndu.persist.db.PostgresDb
 import ir.sndu.persist.repo.user.UserPhoneRepo
 import ir.sndu.server.apipeer._
 import ir.sndu.server.rpc.auth.helper.AuthHelper
-import ir.sndu.server.rpccontacts.ContactServiceGrpc.ContactService
-import ir.sndu.server.rpccontacts._
+import ir.sndu.server.rpccontact.ContactServiceGrpc.ContactService
+import ir.sndu.server.rpccontact._
 import slick.jdbc.PostgresProfile
 
 import scala.concurrent.{ ExecutionContext, Future }

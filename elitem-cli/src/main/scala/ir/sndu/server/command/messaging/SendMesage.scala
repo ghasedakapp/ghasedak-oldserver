@@ -6,7 +6,7 @@ import ir.sndu.server.GrpcStubs._
 import ir.sndu.server.apimessage.{ ApiMessage, ApiTextMessage }
 import ir.sndu.server.command.AuthHelper._
 import ir.sndu.server.command.{ ClientData, CommandBase }
-import ir.sndu.server.rpccontacts.RequestSearchContacts
+import ir.sndu.server.rpccontact.RequestSearchContacts
 import ir.sndu.server.rpcmessaging.RequestSendMessage
 import picocli.CommandLine
 

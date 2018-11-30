@@ -2,7 +2,7 @@ package ir.sndu.server.group
 
 import ir.sndu.server.apigroup.{ ApiGroup, ApiGroupType }
 import ir.sndu.server.apipeer.ApiUserOutPeer
-import ir.sndu.server.rpcgroups.RequestCreateGroup
+import ir.sndu.server.rpcgroup.RequestCreateGroup
 import ir.sndu.server.{ ClientData, GrpcBaseSuit }
 
 import scala.util.Random

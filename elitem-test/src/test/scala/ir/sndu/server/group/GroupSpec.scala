@@ -6,7 +6,7 @@ import ir.sndu.server.apigroup.ApiGroupOutPeer
 import ir.sndu.server.apipeer.ApiUserOutPeer
 import ir.sndu.server.auth.AuthHelper
 import ir.sndu.server.model.group.Group
-import ir.sndu.server.rpcgroups.{ RequestInviteUser, RequestKickUser }
+import ir.sndu.server.rpcgroup._
 import ir.sndu.server.rpcmisc.ResponseSeqDate
 import ir.sndu.server.{ ClientData, GrpcBaseSuit }
 

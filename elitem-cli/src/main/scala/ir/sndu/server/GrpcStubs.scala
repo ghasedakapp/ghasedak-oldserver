@@ -2,7 +2,7 @@ package ir.sndu.server
 
 import io.grpc.{ ManagedChannel, ManagedChannelBuilder }
 import ir.sndu.server.rpcauth.AuthServiceGrpc
-import ir.sndu.server.rpccontacts.ContactServiceGrpc
+import ir.sndu.server.rpccontact.ContactServiceGrpc
 import ir.sndu.server.rpcmessaging.MessagingServiceGrpc
 import ir.sndu.server.rpcuser.UserServiceGrpc
 

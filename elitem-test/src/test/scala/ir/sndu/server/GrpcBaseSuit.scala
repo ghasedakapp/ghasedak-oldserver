@@ -4,8 +4,8 @@ import com.typesafe.config.Config
 import io.grpc.{ ManagedChannel, ManagedChannelBuilder }
 import ir.sndu.server.config.{ AppType, ElitemConfigFactory }
 import ir.sndu.server.rpcauth.AuthServiceGrpc
-import ir.sndu.server.rpccontacts.ContactServiceGrpc
-import ir.sndu.server.rpcgroups.GroupServiceGrpc
+import ir.sndu.server.rpccontact.ContactServiceGrpc
+import ir.sndu.server.rpcgroup.GroupServiceGrpc
 import ir.sndu.server.rpcmessaging.MessagingServiceGrpc
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{ FlatSpec, Inside, Matchers }

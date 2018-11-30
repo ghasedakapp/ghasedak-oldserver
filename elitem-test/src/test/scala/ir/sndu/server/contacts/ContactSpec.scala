@@ -2,7 +2,7 @@ package ir.sndu.server.contacts
 
 import ir.sndu.server.apipeer._
 import ir.sndu.server.auth.AuthHelper
-import ir.sndu.server.rpccontacts.RequestSearchContacts
+import ir.sndu.server.rpccontact.RequestSearchContacts
 import ir.sndu.server.{ ClientData, GrpcBaseSuit }
 
 class ContactSpec extends GrpcBaseSuit

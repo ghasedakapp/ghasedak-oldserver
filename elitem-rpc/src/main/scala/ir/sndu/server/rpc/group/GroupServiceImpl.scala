@@ -6,8 +6,8 @@ import ir.sndu.persist.db.PostgresDb
 import ir.sndu.server.group.GroupExtension
 import ir.sndu.server.rpc.auth.helper.AuthHelper
 import ir.sndu.server.rpc.auth.helper.AuthHelper.ClientData
-import ir.sndu.server.rpcgroups.GroupServiceGrpc.GroupService
-import ir.sndu.server.rpcgroups._
+import ir.sndu.server.rpcgroup.GroupServiceGrpc.GroupService
+import ir.sndu.server.rpcgroup._
 import ir.sndu.server.rpcmisc._
 import slick.jdbc.PostgresProfile
 
