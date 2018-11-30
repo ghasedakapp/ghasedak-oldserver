@@ -2,13 +2,14 @@ package ir.sndu.server.model.user
 
 import java.time.LocalDateTime
 
-import ir.sndu.server.users.{ ApiSex, ApiUser }
+import ir.sndu.server.apiuser._
 
 sealed trait UserState {
   def toInt: Int
 }
 
 object UserState {
+
   @SerialVersionUID(1L)
   case object Registered extends UserState {
     def toInt = 1
@@ -44,7 +45,7 @@ case class User(
   about:       Option[String]        = None,
   deletedAt:   Option[LocalDateTime] = None,
   isBot:       Boolean               = false) {
-  def toApi(): ApiUser = {
+  def toApi: ApiUser = {
     ApiUser(
       id,
       name,

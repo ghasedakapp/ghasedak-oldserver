@@ -1,10 +1,10 @@
 package ir.sndu.persist.repo.dialog
 
-import java.time.{ LocalDateTime, ZoneId, ZoneOffset }
+import java.time.{ LocalDateTime, ZoneId }
 
 import ir.sndu.persist.repo.TypeMapper._
+import ir.sndu.server.apipeer._
 import ir.sndu.server.model.dialog.UserDialog
-import ir.sndu.server.peer.{ ApiPeer, ApiPeerType }
 import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.ExecutionContext

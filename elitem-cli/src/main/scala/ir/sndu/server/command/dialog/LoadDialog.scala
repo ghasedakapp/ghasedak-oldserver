@@ -4,13 +4,13 @@ import java.time.{ Instant, ZoneOffset }
 
 import ir.sndu.server.GrpcStubs._
 import ir.sndu.server.PeerHelper
+import ir.sndu.server.apimessage.ApiDialog
+import ir.sndu.server.apipeer._
+import ir.sndu.server.apiuser.ApiUser
 import ir.sndu.server.command.AuthHelper._
 import ir.sndu.server.command.{ ClientData, CommandBase }
-import ir.sndu.server.message.ApiDialog
-import ir.sndu.server.messaging.RequestLoadDialogs
-import ir.sndu.server.peer.{ ApiPeer, ApiPeerType, ApiUserOutPeer }
-import ir.sndu.server.rpc.users.RequestLoadFullUsers
-import ir.sndu.server.users.ApiUser
+import ir.sndu.server.rpcmessaging.RequestLoadDialogs
+import ir.sndu.server.rpcuser.RequestLoadFullUsers
 import org.iq80.leveldb.DB
 import picocli.CommandLine
 
@@ -29,6 +29,7 @@ class LoadDialog extends CommandBase {
 
   import ir.sndu.server.ApiConversions._
   import ir.sndu.server.db.DbHelper._
+
   private def getUser(userPeer: ApiUserOutPeer)(implicit db: DB): Option[ApiUser] =
     db.getBytes(userPeer.userId.toString).map(ApiUser.parseFrom)
 
@@ -51,6 +52,7 @@ class LoadDialog extends CommandBase {
       if (message.size > 20) message.substring(0, 15) + "..." else message,
       Instant.ofEpochMilli(dialog.date).atZone(ZoneOffset.ofHoursMinutes(4, 30)).toString)
   }
+
   private def load(limit: Int)(implicit client: ClientData): Unit =
     leveldb { implicit db ⇒
       val rsp = messagingStub.loadDialogs(RequestLoadDialogs(limit))

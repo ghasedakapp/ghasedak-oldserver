@@ -1,19 +1,19 @@
 package ir.sndu.server.model.group
 
-import java.time.{Instant, LocalDateTime}
+import java.time.LocalDateTime
 
-import ir.sndu.server.groups.ApiGroupType
+import ir.sndu.server.apigroup.ApiGroupType
 
 case class Group(
-  id:            Int,
-  creatorUserId: Int,
-  accessHash:    Long,
-  title:         String,
-  createdAt:     LocalDateTime,
-  typ:            ApiGroupType,
-  about:         Option[String],
-  topic:         Option[String]
-)
+                  id: Int,
+                  creatorUserId: Int,
+                  accessHash: Long,
+                  title: String,
+                  createdAt: LocalDateTime,
+                  typ: ApiGroupType,
+                  about: Option[String],
+                  topic: Option[String]
+                )
 
 object Group {
   def fromFull(fullGroup: FullGroup): Group =
@@ -30,18 +30,18 @@ object Group {
 }
 
 case class FullGroup(
-                      id:                   Int,
-                      creatorUserId:        Int,
-                      accessHash:           Long,
-                      title:                String,
-                      createdAt:            LocalDateTime,
-                      typ:            ApiGroupType,
-                      about:                Option[String],
-                      topic:                Option[String],
-                      titleChangerUserId:   Int,
-                      titleChangedAt:       LocalDateTime,
-                      titleChangeRandomId:  Long,
-                      avatarChangerUserId:  Int,
-                      avatarChangedAt:      LocalDateTime,
+                      id: Int,
+                      creatorUserId: Int,
+                      accessHash: Long,
+                      title: String,
+                      createdAt: LocalDateTime,
+                      typ: ApiGroupType,
+                      about: Option[String],
+                      topic: Option[String],
+                      titleChangerUserId: Int,
+                      titleChangedAt: LocalDateTime,
+                      titleChangeRandomId: Long,
+                      avatarChangerUserId: Int,
+                      avatarChangedAt: LocalDateTime,
                       avatarChangeRandomId: Long,
-)
+                    )

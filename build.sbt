@@ -29,33 +29,56 @@ lazy val root = (project in file("."))
     commonSettings,
     Packaging.packagingSettings
   )
-  .dependsOn(core, persist, rpc, commons, model, cli)
-  .aggregate(core, persist, rpc, commons, model, cli)
+  .dependsOn(model, sdk, struct, core, rpc, persist, commons, runtime, test, cli)
+  .aggregate(model, sdk, struct, core, rpc, persist, commons, runtime, test, cli)
+
+// Every protobuf that transfer between client and server
+lazy val sdk = elitemModule("elitem-sdk")
+  .settings(
+    libraryDependencies ++= Dependencies.sdk
+  )
+
+// Every protobuf that transfer between just servers
+lazy val struct = elitemModule("elitem-struct")
+  .settings(
+    libraryDependencies ++= Dependencies.struct
+  )
+  .dependsOn(sdk)
+
+lazy val model = elitemModule("elitem-model")
+  .settings(
+    libraryDependencies ++= Dependencies.model
+  )
+  .dependsOn(sdk, struct)
 
 lazy val core = elitemModule("elitem-core")
   .settings(
     libraryDependencies ++= Dependencies.core
-  ).dependsOn(model, persist)
-
-lazy val persist = elitemModule("elitem-persist")
-  .settings(
-    libraryDependencies ++= Dependencies.persist
-  ).dependsOn(model, commons)
+  ).dependsOn(persist)
 
 lazy val rpc = elitemModule("elitem-rpc")
   .settings(
     libraryDependencies ++= Dependencies.rpc
   ).dependsOn(core, persist)
 
-lazy val model = elitemModule("elitem-model")
+lazy val persist = elitemModule("elitem-persist")
   .settings(
-    libraryDependencies ++= Dependencies.model
-  )
+    libraryDependencies ++= Dependencies.persist
+  ).dependsOn(model, commons)
 
 lazy val commons = elitemModule("elitem-commons")
   .settings(
     libraryDependencies ++= Dependencies.commons
   )
+
+lazy val runtime = elitemModule("elitem-runtime")
+  .dependsOn(model, sdk, struct, core, rpc, persist, commons)
+
+lazy val test = elitemModule("elitem-test")
+  .settings(
+    libraryDependencies ++= Dependencies.test
+  )
+  .dependsOn(runtime)
 
 lazy val cli = elitemModule("elitem-cli")
   .settings(
@@ -65,13 +88,7 @@ lazy val cli = elitemModule("elitem-cli")
     ),
     mainClass in Compile := Some("ir.sndu.server.CliMain")
   )
-  .dependsOn(model, commons)
-
-lazy val test = elitemModule("elitem-test")
-  .settings(
-    libraryDependencies ++= Dependencies.test
-  )
-  .dependsOn(root, commons, core, rpc, persist, model)
+  .dependsOn(runtime)
 
 def elitemModule(name: String): Project = {
   Project(id = name, base = file(name))

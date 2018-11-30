@@ -1,10 +1,10 @@
 package ir.sndu.server
 
 import io.grpc.{ ManagedChannel, ManagedChannelBuilder }
-import ir.sndu.server.auth.AuthServiceGrpc
-import ir.sndu.server.contacts.ContactServiceGrpc
-import ir.sndu.server.messaging.MessagingServiceGrpc
-import ir.sndu.server.rpc.users.UserServiceGrpc
+import ir.sndu.server.rpcauth.AuthServiceGrpc
+import ir.sndu.server.rpccontacts.ContactServiceGrpc
+import ir.sndu.server.rpcmessaging.MessagingServiceGrpc
+import ir.sndu.server.rpcuser.UserServiceGrpc
 
 object GrpcStubs {
   private val channel: ManagedChannel =

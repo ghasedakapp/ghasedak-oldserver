@@ -3,14 +3,15 @@ package ir.sndu.server.command.messaging
 import io.grpc.StatusRuntimeException
 import ir.sndu.server.ElitemConsole.withError
 import ir.sndu.server.GrpcStubs._
+import ir.sndu.server.apimessage.{ ApiMessage, ApiTextMessage }
 import ir.sndu.server.command.AuthHelper._
 import ir.sndu.server.command.{ ClientData, CommandBase }
-import ir.sndu.server.contacts.RequestSearchContacts
-import ir.sndu.server.message.{ ApiMessage, ApiTextMessage }
-import ir.sndu.server.messaging.RequestSendMessage
+import ir.sndu.server.rpccontacts.RequestSearchContacts
+import ir.sndu.server.rpcmessaging.RequestSendMessage
 import picocli.CommandLine
 
 import scala.util.Random
+
 @CommandLine.Command(
   name = "sendmessage",
   description = Array("Send Message to Specific user by phone number"))

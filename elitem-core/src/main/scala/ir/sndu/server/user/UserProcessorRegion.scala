@@ -2,6 +2,7 @@ package ir.sndu.server.user
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.cluster.sharding.{ ClusterSharding, ClusterShardingSettings, ShardRegion }
+import ir.sndu.server.UserEnvelope
 
 object UserProcessorRegion {
 
@@ -18,6 +19,7 @@ object UserProcessorRegion {
   }
 
   private val typeName = "UserProcessor"
+
   private def start(props: Props)(implicit system: ActorSystem): ActorRef =
     ClusterSharding(system).start(
       typeName = typeName,

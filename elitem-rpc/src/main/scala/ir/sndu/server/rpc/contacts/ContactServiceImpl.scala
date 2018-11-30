@@ -4,10 +4,10 @@ import akka.actor.ActorSystem
 import akka.event.{ Logging, LoggingAdapter }
 import ir.sndu.persist.db.PostgresDb
 import ir.sndu.persist.repo.user.UserPhoneRepo
-import ir.sndu.server.contacts.ContactServiceGrpc.ContactService
-import ir.sndu.server.contacts.{ RequestSearchContacts, ResponseSearchContacts }
-import ir.sndu.server.peer.{ ApiOutPeer, ApiPeerType }
+import ir.sndu.server.apipeer._
 import ir.sndu.server.rpc.auth.helper.AuthHelper
+import ir.sndu.server.rpccontacts.ContactServiceGrpc.ContactService
+import ir.sndu.server.rpccontacts._
 import slick.jdbc.PostgresProfile
 
 import scala.concurrent.{ ExecutionContext, Future }

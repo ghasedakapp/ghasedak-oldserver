@@ -2,7 +2,7 @@ syntax = 'proto3';
 
 package ir.sndu.server;
 
-import "api/peer.proto";
+import "api/apipeer.proto";
 
 message ApiMessage {
     oneof message {

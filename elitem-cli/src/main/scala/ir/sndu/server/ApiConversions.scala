@@ -1,6 +1,6 @@
 package ir.sndu.server
 
-import ir.sndu.server.peer.{ ApiOutPeer, ApiPeer, ApiPeerType, ApiUserOutPeer }
+import ir.sndu.server.apipeer._
 
 object ApiConversions {
   implicit class RichApiPeer(peer: ApiPeer) {

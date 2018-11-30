@@ -4,11 +4,11 @@ import akka.actor.ActorSystem
 import akka.event.{ Logging, LoggingAdapter }
 import ir.sndu.persist.db.PostgresDb
 import ir.sndu.server.group.GroupExtension
-import ir.sndu.server.misc.{ ResponseSeq, ResponseSeqDate }
 import ir.sndu.server.rpc.auth.helper.AuthHelper
 import ir.sndu.server.rpc.auth.helper.AuthHelper.ClientData
-import ir.sndu.server.rpc.groups.GroupServiceGrpc.GroupService
-import ir.sndu.server.rpc.groups._
+import ir.sndu.server.rpcgroups.GroupServiceGrpc.GroupService
+import ir.sndu.server.rpcgroups._
+import ir.sndu.server.rpcmisc._
 import slick.jdbc.PostgresProfile
 
 import scala.concurrent.{ ExecutionContext, Future }

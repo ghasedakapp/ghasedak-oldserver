@@ -1,9 +1,10 @@
 package ir.sndu.server.messaging
 
-import ir.sndu.server.{ GrpcBaseSuit, ClientData }
+import ir.sndu.server.{ ClientData, GrpcBaseSuit }
 import ir.sndu.server.auth.AuthHelper
-import ir.sndu.server.message.{ ApiMessage, ApiTextMessage }
-import ir.sndu.server.peer.{ ApiOutPeer, ApiPeerType }
+import ir.sndu.server.apimessage.{ ApiMessage, ApiTextMessage }
+import ir.sndu.server.apipeer.{ ApiOutPeer, ApiPeerType }
+import ir.sndu.server.rpcmessaging.RequestLoadDialogs
 
 class DialogSpec extends GrpcBaseSuit
   with AuthHelper
@@ -30,14 +31,14 @@ class DialogSpec extends GrpcBaseSuit
     Thread.sleep(100)
     befrest(outPeer3, msg3)
 
-    val rspUser1 = messagingStub.loadDialogs(RequestLoadDialogs(10, token1))
+    val rspUser1 = messagingStub.loadDialogs(RequestLoadDialogs(10))
     rspUser1.dialogs.size shouldBe 2
     rspUser1.dialogs.map(_.message.get) shouldBe Seq(msg3, msg1)
 
-    val rspUser2 = messagingStub.loadDialogs(RequestLoadDialogs(10, token2))
+    val rspUser2 = messagingStub.loadDialogs(RequestLoadDialogs(10))
     rspUser2.dialogs.size shouldBe 1
 
-    val rspUser3 = messagingStub.loadDialogs(RequestLoadDialogs(10, token3))
+    val rspUser3 = messagingStub.loadDialogs(RequestLoadDialogs(10))
     rspUser3.dialogs.size shouldBe 1
     rspUser3.dialogs.map(_.message.get) shouldBe Seq(msg3)
 

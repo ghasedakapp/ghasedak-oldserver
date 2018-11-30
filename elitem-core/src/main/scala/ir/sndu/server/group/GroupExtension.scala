@@ -5,10 +5,9 @@ import java.time.{ LocalDateTime, ZoneOffset }
 import akka.actor.{ ActorSystem, ExtendedActorSystem, Extension, ExtensionId }
 import ir.sndu.persist.db.PostgresDb
 import ir.sndu.persist.repo.group.{ GroupRepo, GroupUserRepo }
-import ir.sndu.server.GroupCommands.CreateAck
-import ir.sndu.server.groups.{ ApiGroup, ApiGroupType }
+import ir.sndu.server.apigroup.{ ApiGroup, ApiGroupType }
 import ir.sndu.server.model.group.Group
-import ir.sndu.server.sequence.SeqState
+import ir.sndu.server.sequencestruct.SeqState
 import slick.jdbc.PostgresProfile
 
 import scala.concurrent.{ ExecutionContext, Future }

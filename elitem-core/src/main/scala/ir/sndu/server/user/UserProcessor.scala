@@ -1,19 +1,18 @@
 package ir.sndu.server.user
 
-import akka.actor.{ Actor, Props, Status }
+import akka.actor.{ Props, Status }
+import akka.pattern.pipe
 import ir.sndu.persist.db.PostgresDb
 import ir.sndu.server.Processor
-import ir.sndu.server.user.UserCommands.SendMessage
+import ir.sndu.server.apipeer._
+import ir.sndu.server.UserCommands.SendMessage
+import slick.jdbc.PostgresProfile.backend._
 
 import scala.concurrent.{ ExecutionContext, Future }
-import scala.util.{ Failure, Try }
-import akka.pattern.pipe
-import slick.jdbc.PostgresProfile
-import PostgresProfile.backend._
-import ir.sndu.server.peer.{ ApiPeer, ApiPeerType }
+import scala.util.Try
 
 object UserProcessor {
-  def props = Props(classOf[UserProcessor])
+  def props = Props(new UserProcessor())
 }
 
 class UserProcessor extends Processor

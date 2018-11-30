@@ -2,8 +2,7 @@ syntax = "proto3";
 
 package ir.sndu.server;
 
-import "api/file.proto";
-
+import "api/apifile.proto";
 
 enum ApiGroupType {
     General = 0;

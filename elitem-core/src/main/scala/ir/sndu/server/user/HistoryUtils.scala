@@ -1,11 +1,11 @@
 package ir.sndu.server.user
 
-import java.time.{ Instant, LocalDateTime, ZoneId, ZoneOffset }
+import java.time.LocalDateTime
 
 import ir.sndu.persist.repo.history.HistoryMessageRepo
-import ir.sndu.server.message.ApiMessage
+import ir.sndu.server.apimessage.ApiMessage
+import ir.sndu.server.apipeer.ApiPeer
 import ir.sndu.server.model.history.HistoryMessage
-import ir.sndu.server.peer.ApiPeer
 import slick.dbio.DBIO
 
 import scala.concurrent.ExecutionContext

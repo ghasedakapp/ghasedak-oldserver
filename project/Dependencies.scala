@@ -70,6 +70,15 @@ object Dependencies {
     logback
   )
 
+  val sdk: Seq[ModuleID] = shared ++ grpc
+
+  val struct: Seq[ModuleID] = shared ++ Seq(
+    actor,
+    akkaTyped
+  )
+
+  val model: Seq[ModuleID] = shared
+
   val core: Seq[ModuleID] = shared ++ Seq(
     actor,
     ddata,
@@ -83,6 +92,10 @@ object Dependencies {
     persistCassandra
   )
 
+  val rpc: Seq[ModuleID] = shared ++ Seq(
+    jwt
+  ) ++ grpc
+
   val persist: Seq[ModuleID] = shared ++ Seq(
     slick,
     postgres,
@@ -91,13 +104,13 @@ object Dependencies {
     slickPg
   )
 
-  val rpc: Seq[ModuleID] = shared ++ Seq(
-    jwt
-  ) ++ grpc
-
-  val model: Seq[ModuleID] = shared
-
   val commons: Seq[ModuleID] = shared ++ Seq(config)
+
+  val test: Seq[ModuleID] = shared ++ Seq(
+    scalatic,
+    scalaTest,
+    akkaTest
+  )
 
   val cli: Seq[ModuleID] = shared ++ Seq(
     scopt,
@@ -105,11 +118,5 @@ object Dependencies {
     textIo,
     levelDB
   ) ++ grpc
-
-  val test: Seq[ModuleID] = shared ++ Seq(
-    scalatic,
-    scalaTest,
-    akkaTest
-  )
 
 }

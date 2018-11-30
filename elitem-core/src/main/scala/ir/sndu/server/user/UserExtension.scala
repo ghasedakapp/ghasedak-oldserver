@@ -5,12 +5,13 @@ import java.time.{ Instant, LocalDateTime, ZoneId }
 import akka.actor.{ ActorSystem, ExtendedActorSystem, Extension, ExtensionId, ExtensionIdProvider }
 import akka.util.Timeout
 import ir.sndu.persist.db.PostgresDb
-import ir.sndu.server.message.ApiMessage
-import ir.sndu.server.peer.{ ApiPeer, ApiPeerType }
-import ir.sndu.server.user.UserCommands.SendMessageAck
+import ir.sndu.server.apimessage.ApiMessage
+import ir.sndu.server.apipeer._
+import ir.sndu.server.UserCommands.SendMessageAck
 
 import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
+
 class UserExtensionImpl(system: ExtendedActorSystem) extends Extension {
   implicit private val _system: ActorSystem = system
   implicit private val timeout: Timeout = Timeout(30.seconds)

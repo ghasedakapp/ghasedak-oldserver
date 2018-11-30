@@ -3,7 +3,7 @@ package ir.sndu.server.user
 import java.time.LocalDateTime
 
 import ir.sndu.persist.repo.dialog.DialogRepo
-import ir.sndu.server.peer.ApiPeer
+import ir.sndu.server.apipeer.ApiPeer
 import slick.dbio.{ DBIOAction, Effect, NoStream }
 
 import scala.concurrent.ExecutionContext

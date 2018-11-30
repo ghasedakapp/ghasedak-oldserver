@@ -2,10 +2,11 @@ package ir.sndu.server.messaging
 
 import java.time.Instant
 
+import ir.sndu.server.apimessage.{ ApiMessage, ApiTextMessage }
+import ir.sndu.server.apipeer._
 import ir.sndu.server.auth.AuthHelper
 import ir.sndu.server.group.GroupHelper
-import ir.sndu.server.message.{ ApiMessage, ApiTextMessage }
-import ir.sndu.server.peer.{ ApiOutPeer, ApiPeerType, ApiUserOutPeer }
+import ir.sndu.server.rpcmessaging.{ RequestLoadHistory, RequestSendMessage, ResponseVoid }
 import ir.sndu.server.{ ClientData, GrpcBaseSuit }
 
 import scala.util.Random
@@ -26,8 +27,7 @@ class MessagingSpec extends GrpcBaseSuit
     val request = RequestSendMessage(
       Some(ApiOutPeer(ApiPeerType.Private, user2.id)),
       Random.nextLong(),
-      Some(ApiMessage().withTextMessage(ApiTextMessage("salam"))),
-      token1)
+      Some(ApiMessage().withTextMessage(ApiTextMessage("salam"))))
     messagingStub.sendMessage(request) shouldBe ResponseVoid()
   }
 
@@ -45,8 +45,7 @@ class MessagingSpec extends GrpcBaseSuit
     val request = RequestSendMessage(
       Some(ApiOutPeer(ApiPeerType.Group, apiGroup.id)),
       Random.nextLong(),
-      Some(ApiMessage().withTextMessage(ApiTextMessage("salam"))),
-      token1)
+      Some(ApiMessage().withTextMessage(ApiTextMessage("salam"))))
     messagingStub.sendMessage(request) shouldBe ResponseVoid()
   }
 
@@ -64,7 +63,7 @@ class MessagingSpec extends GrpcBaseSuit
     befrest(outPeer2, msg2)
 
     val rsp = messagingStub.loadHistory(RequestLoadHistory(
-      Some(outPeer2), Instant.now.minusSeconds(3600L).toEpochMilli, 10, token1))
+      Some(outPeer2), Instant.now.minusSeconds(3600L).toEpochMilli, 10))
 
     rsp.history.size shouldBe 2
     rsp.history.map(_.message.get) shouldBe Seq(msg1, msg2)

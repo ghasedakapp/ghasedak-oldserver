@@ -5,14 +5,13 @@ import java.nio.file.{ Files, Paths }
 
 import com.typesafe.config.{ Config, ConfigFactory }
 import ir.sndu.server.config.AppType.AppType
+
 object AppType extends Enumeration {
   type AppType = Value
   val Cli, Server, Test = Value
 }
 
 object ElitemConfigFactory {
-  //  private val log = LoggerFactory.getLogger(getClass)
-
   def load(app: AppType): Config = {
     val (configPath, logbackPath) = getPathes(app)
 

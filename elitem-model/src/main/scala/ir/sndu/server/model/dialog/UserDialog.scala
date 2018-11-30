@@ -1,11 +1,10 @@
 package ir.sndu.server.model.dialog
 
-import java.time.{ LocalDateTime, ZoneId, ZoneOffset }
+import java.time.{ LocalDateTime, ZoneId }
 
-import com.google.protobuf.CodedInputStream
-import ir.sndu.server.message.{ ApiDialog, ApiMessage }
+import ir.sndu.server.apimessage._
+import ir.sndu.server.apipeer.ApiPeer
 import ir.sndu.server.model.history.HistoryMessage
-import ir.sndu.server.peer.ApiPeer
 
 case class DialogCommon(
   dialogId:        String,

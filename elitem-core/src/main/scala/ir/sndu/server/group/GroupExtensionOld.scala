@@ -6,13 +6,14 @@ import akka.actor.{ ActorSystem, ExtendedActorSystem, Extension, ExtensionId }
 import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
 import akka.cluster.sharding.typed.{ ClusterShardingSettings, ShardingEnvelope }
 import akka.util.Timeout
-import ir.sndu.server.ActorRefConversions._
 import ir.sndu.server.GroupCommand
 import ir.sndu.server.GroupCommands.{ Create, CreateAck }
 
 import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
+
 class GroupExtensionOldImpl(system: ActorSystem) extends Extension {
+
   implicit val timeout: Timeout = 15.seconds
   implicit val scheduler = system.scheduler
   implicit val ec: ExecutionContext = system.dispatcher
@@ -33,7 +34,7 @@ class GroupExtensionOldImpl(system: ActorSystem) extends Extension {
   val entityRef: EntityRef[GroupCommand] =
     sharding.entityRefFor(GroupProcessor.ShardingTypeName, groupId.toString)
 
-  private def construct(r: ActorRef[CreateAck]): Create = Create(replyTo = r)
+  private def construct(r: ActorRef[CreateAck]): Create = Create()
 
   def create(): Future[CreateAck] = entityRef ? construct
 

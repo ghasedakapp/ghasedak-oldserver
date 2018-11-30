@@ -1,7 +1,8 @@
 package ir.sndu.server.auth
 
-import ir.sndu.server.users.ApiSex
-import ir.sndu.server.{ GrpcBaseSuit, ClientData }
+import ir.sndu.server.apiuser.ApiSex
+import ir.sndu.server.rpcauth.RequestSignUp
+import ir.sndu.server.{ ClientData, GrpcBaseSuit }
 
 import scala.util.Random
 

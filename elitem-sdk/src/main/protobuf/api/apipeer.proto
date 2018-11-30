@@ -19,7 +19,6 @@ message ApiUserOutPeer {
     int64 access_hash = 2;
 }
 
-
 message ApiPeer {
     ApiPeerType type = 1;
     int32 id = 2;

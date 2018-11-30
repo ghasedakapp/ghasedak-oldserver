@@ -1,8 +1,9 @@
 package ir.sndu.server.contacts
 
+import ir.sndu.server.apipeer._
 import ir.sndu.server.auth.AuthHelper
-import ir.sndu.server.peer.{ ApiOutPeer, ApiPeerType }
-import ir.sndu.server.{ GrpcBaseSuit, ClientData }
+import ir.sndu.server.rpccontacts.RequestSearchContacts
+import ir.sndu.server.{ ClientData, GrpcBaseSuit }
 
 class ContactSpec extends GrpcBaseSuit
   with AuthHelper {
@@ -12,7 +13,7 @@ class ContactSpec extends GrpcBaseSuit
   def searchContact(): Unit = {
     val ClientData(user1, token1, number) = createUser()
 
-    contactStub.searchContacts(RequestSearchContacts(number.toString, token1))
+    contactStub.searchContacts(RequestSearchContacts(number.toString))
       .peers shouldBe Seq(ApiOutPeer(ApiPeerType.Private, user1.id))
 
   }

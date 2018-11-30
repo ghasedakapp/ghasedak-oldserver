@@ -1,16 +1,16 @@
 package ir.sndu.server.command.history
 
-import java.time.{ Instant, LocalDateTime, ZoneId, ZoneOffset }
+import java.time.{ Instant, LocalDateTime, ZoneOffset }
 
-import ir.sndu.server.PeerHelper
-import ir.sndu.server.command.{ ClientData, CommandBase }
-import picocli.CommandLine
-import ir.sndu.server.GrpcStubs._
-import ir.sndu.server.messaging.RequestLoadHistory
 import ir.sndu.server.ApiConversions._
-import ir.sndu.server.command.AuthHelper.authenticate
-import ir.sndu.server.message.{ ApiMessage, ApiMessageContainer }
 import ir.sndu.server.ElitemConsole._
+import ir.sndu.server.GrpcStubs._
+import ir.sndu.server.PeerHelper
+import ir.sndu.server.apimessage.ApiMessageContainer
+import ir.sndu.server.command.AuthHelper.authenticate
+import ir.sndu.server.command.{ ClientData, CommandBase }
+import ir.sndu.server.rpcmessaging.RequestLoadHistory
+import picocli.CommandLine
 
 @CommandLine.Command(
   name = "history",

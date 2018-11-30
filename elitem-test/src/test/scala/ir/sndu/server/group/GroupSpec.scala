@@ -2,13 +2,13 @@ package ir.sndu.server.group
 
 import ir.sndu.persist.db.PostgresDb
 import ir.sndu.persist.repo.group.GroupRepo
+import ir.sndu.server.apigroup.ApiGroupOutPeer
+import ir.sndu.server.apipeer.ApiUserOutPeer
 import ir.sndu.server.auth.AuthHelper
-import ir.sndu.server.groups.ApiGroupOutPeer
-import ir.sndu.server.misc.ResponseSeqDate
 import ir.sndu.server.model.group.Group
-import ir.sndu.server.peer.ApiUserOutPeer
-import ir.sndu.server.rpc.groups.{ RequestInviteUser, RequestKickUser }
-import ir.sndu.server.{ GrpcBaseSuit, ClientData }
+import ir.sndu.server.rpcgroups.{ RequestInviteUser, RequestKickUser }
+import ir.sndu.server.rpcmisc.ResponseSeqDate
+import ir.sndu.server.{ ClientData, GrpcBaseSuit }
 
 import scala.util.Random
 
@@ -55,8 +55,7 @@ class GroupSpec extends GrpcBaseSuit
     groupStub.inviteUser(RequestInviteUser(
       Some(ApiGroupOutPeer(apiGroup.id)),
       Some(ApiUserOutPeer(user2.id)),
-      Random.nextLong(),
-      token1)) shouldBe ResponseSeqDate()
+      Random.nextLong())) shouldBe ResponseSeqDate()
   }
 
   def kick: Unit = {
@@ -73,14 +72,12 @@ class GroupSpec extends GrpcBaseSuit
     groupStub.inviteUser(RequestInviteUser(
       Some(ApiGroupOutPeer(apiGroup.id)),
       Some(ApiUserOutPeer(user2.id)),
-      Random.nextLong(),
-      token1))
+      Random.nextLong()))
 
     groupStub.kickUser(RequestKickUser(
       Some(ApiGroupOutPeer(apiGroup.id)),
       Some(ApiUserOutPeer(user2.id)),
-      Random.nextLong(),
-      token1)) shouldBe ResponseSeqDate()
+      Random.nextLong())) shouldBe ResponseSeqDate()
 
   }
 }

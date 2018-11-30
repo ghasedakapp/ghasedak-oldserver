@@ -1,10 +1,10 @@
 package ir.sndu.persist.repo.history
 
-import java.time.{ LocalDateTime, ZoneId, ZoneOffset }
+import java.time.{ LocalDateTime, ZoneId }
 
 import ir.sndu.persist.repo.TypeMapper._
+import ir.sndu.server.apipeer._
 import ir.sndu.server.model.history.HistoryMessage
-import ir.sndu.server.peer.{ ApiPeer, ApiPeerType }
 import slick.dbio.Effect.{ Read, Write }
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.Tag

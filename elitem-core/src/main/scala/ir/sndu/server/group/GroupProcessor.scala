@@ -1,23 +1,16 @@
 package ir.sndu.server.group
 
-import java.time.{ LocalDateTime, ZoneOffset }
-
 import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.scaladsl.adapter._
 import akka.cluster.sharding.typed.scaladsl.EntityTypeKey
 import akka.event.Logging
 import ir.sndu.persist.db.PostgresDb
-import ir.sndu.persist.repo.group.{ GroupRepo, GroupUserRepo }
 import ir.sndu.server.GroupCommand
-import ir.sndu.server.GroupCommands.{ Create, CreateAck, DeleteGroup, Invite, Kick }
-import ir.sndu.server.ImplicitActorRef._
-import ir.sndu.server.model.group.Group
-import ir.sndu.server.sequence.{ SeqState, SeqStateDate }
+import ir.sndu.server.GroupCommands.{ Create, DeleteGroup, Invite, Kick }
 import slick.jdbc.PostgresProfile
 
 import scala.concurrent.ExecutionContext
-import scala.util.Random
 
 case object StopOffice extends GroupCommand
 
@@ -37,15 +30,15 @@ object GroupProcessor {
           Behaviors.same
 
         case d: DeleteGroup ⇒
-          d.replyTo ! SeqState()
+          //          d.replyTo ! SeqState()
           Behaviors.same
 
         case i: Invite ⇒
-          i.replyTo ! SeqStateDate()
+          //          i.replyTo ! SeqStateDate()
           Behaviors.same
 
         case k: Kick ⇒
-          k.replyTo ! SeqStateDate()
+          //          k.replyTo ! SeqStateDate()
           Behaviors.same
 
         case StopOffice ⇒

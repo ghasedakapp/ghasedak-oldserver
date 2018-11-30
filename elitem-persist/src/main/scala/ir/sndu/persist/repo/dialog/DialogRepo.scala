@@ -3,11 +3,11 @@ package ir.sndu.persist.repo.dialog
 import java.time.LocalDateTime
 
 import ir.sndu.persist.repo.TypeMapper._
+import ir.sndu.server.apipeer._
 import ir.sndu.server.model.dialog.{ Dialog, DialogCommon, UserDialog }
-import ir.sndu.server.peer.{ ApiPeer, ApiPeerType }
+import ir.sndu.server.utils._
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.Tag
-import ir.sndu.server.utils._
 
 import scala.concurrent.ExecutionContext
 
@@ -96,7 +96,6 @@ final class UserDialogTable(tag: Tag) extends Table[UserDialog](tag, "user_dialo
 }
 
 object DialogRepo extends UserDialogOperations with DialogCommonOperations {
-  import ImplicitTimes._
   private val dialogs = for {
     c ← DialogCommonRepo.dialogCommon
     u ← UserDialogRepo.userDialogs if c.dialogId === repDialogId(u.userId, u.peerId, u.peerType)
