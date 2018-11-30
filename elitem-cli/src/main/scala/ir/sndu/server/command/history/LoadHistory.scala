@@ -32,7 +32,7 @@ class LoadHistory extends CommandBase {
     messagingStub.loadHistory(RequestLoadHistory(
       Some(peer.toOutPeer(client.userId)),
       System.currentTimeMillis(),
-      limit, client.token)).history
+      limit)).history
   }
 
   private def formatMessages(messages: Seq[ApiMessageContainer]): Seq[String] = {

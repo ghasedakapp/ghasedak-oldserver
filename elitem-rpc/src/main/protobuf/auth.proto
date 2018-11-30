@@ -4,7 +4,6 @@ package ir.sndu.server;
 
 import "api/users.proto";
 
-
 service AuthService {
   rpc StartPhoneAuth (RequestStartPhoneAuth) returns (ResponseStartPhoneAuth) {}
   rpc SignUp (RequestSignUp) returns (ResponseAuth) {}

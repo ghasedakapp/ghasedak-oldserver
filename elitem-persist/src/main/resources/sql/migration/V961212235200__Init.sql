@@ -1,3 +1,26 @@
+CREATE TABLE tokens (
+  token_id VARCHAR (255) NOT NULL ,
+  token_key VARCHAR (255) NOT NULL ,
+  deleted_at TIMESTAMP ,
+  PRIMARY KEY (token_id)
+);
+
+CREATE TABLE auth_sessions (
+  user_id INT NOT NULL ,
+  token_id VARCHAR (255) NOT NULL ,
+  app_id INT NOT NULL ,
+  api_key VARCHAR (255) NOT NULL ,
+  device_hash TEXT NOT NULL ,
+  device_info TEXT NOT NULL ,
+  session_time TIMESTAMP NOT NULL ,
+  deleted_at TIMESTAMP NOT NULL ,
+  PRIMARY KEY (user_id, token_id)
+);
+
+CREATE INDEX idx_auth_sessions_token_id on auth_sessions (token_id);
+
+
+
 CREATE TABLE history_messages (
        user_id int NOT NULL,
        peer_type int NOT NULL,
@@ -71,14 +94,6 @@ CREATE TABLE user_phones (
   number bigint NOT NULL,
   title varchar(64) NOT NULL,
   PRIMARY KEY (user_id, id)
-);
-
-CREATE TABLE auth_ids (
-    id varchar(255) NOT NULL,
-    public_key_hash bigint,
-    user_id int,
-    deleted_at timestamp,
-    PRIMARY KEY (id)
 );
 
 CREATE TABLE groups (

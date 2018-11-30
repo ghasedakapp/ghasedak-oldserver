@@ -26,7 +26,7 @@ class GroupServiceImpl(implicit system: ActorSystem) extends GroupService
 
   override def createGroup(request: RequestCreateGroup): Future[ResponseCreateGroup] =
     authorize { clientData: ClientData ⇒
-      val (randomId, title, _, typ, _) = RequestCreateGroup.unapply(request).get
+      val (randomId, title, _, typ) = RequestCreateGroup.unapply(request).get
       groupExt.create(typ, clientData.userId, title, randomId, Seq.empty) map (group ⇒
         ResponseCreateGroup(group = Some(group)))
     }
@@ -36,13 +36,13 @@ class GroupServiceImpl(implicit system: ActorSystem) extends GroupService
 
   override def inviteUser(request: RequestInviteUser): Future[ResponseSeqDate] =
     authorize { clientData: ClientData ⇒
-      val (groupPeer, userPeer, _, _) = RequestInviteUser.unapply(request).get
+      val (groupPeer, userPeer, _) = RequestInviteUser.unapply(request).get
       groupExt.invite(groupPeer.get.id, userPeer.get.userId, clientData.userId) map (_ ⇒ ResponseSeqDate())
     }
 
   override def kickUser(request: RequestKickUser): Future[ResponseSeqDate] =
     authorize { _ ⇒
-      val (groupPeer, userPeer, _, _) = RequestKickUser.unapply(request).get
+      val (groupPeer, userPeer, _) = RequestKickUser.unapply(request).get
       groupExt.kick(groupPeer.get.id, userPeer.get.userId) map (_ ⇒ ResponseSeqDate())
     }
 }

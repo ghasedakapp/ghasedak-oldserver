@@ -20,7 +20,7 @@ class SendMesage extends CommandBase {
 
   private def send(number: Long, msg: String)(implicit client: ClientData): Unit = {
 
-    val peers = contactsStub.searchContacts(RequestSearchContacts(number.toString, client.token)).peers
+    val peers = contactsStub.searchContacts(RequestSearchContacts(number.toString)).peers
 
     if (peers.isEmpty)
       withError(System.err.println("Phone number does not exists"))
@@ -29,8 +29,7 @@ class SendMesage extends CommandBase {
         messagingStub.sendMessage(RequestSendMessage(
           outPeer = Some(peers.head),
           randomId = Random.nextLong(),
-          message = Some(ApiMessage().withTextMessage(ApiTextMessage(msg))),
-          client.token))
+          message = Some(ApiMessage().withTextMessage(ApiTextMessage(msg)))))
 
       } catch {
         case e: StatusRuntimeException if e.getStatus.getDescription == "MESSAGE_TO_SELF" ⇒

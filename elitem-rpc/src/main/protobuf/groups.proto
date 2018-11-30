@@ -18,7 +18,6 @@ message RequestCreateGroup {
     string title = 2;
     repeated ApiUserOutPeer users = 3;
     ApiGroupType groupType = 4;
-    string token = 5;
 }
 
 message ResponseCreateGroup {
@@ -28,24 +27,18 @@ message ResponseCreateGroup {
     int64 date = 4;
 }
 
-
 message RequestDeleteGroup {
     ApiGroupOutPeer group_peer = 1;
-    string token = 2;
 }
-
 
 message RequestInviteUser {
     ApiGroupOutPeer group_peer = 1;
     ApiUserOutPeer user_peer = 2;
     int64 random_id = 3;
-    string token = 4;
 }
-
 
 message RequestKickUser {
     ApiGroupOutPeer group_peer = 1;
     ApiUserOutPeer user_peer = 2;
     int64 random_id = 3;
-    string token = 4;
 }

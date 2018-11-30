@@ -22,6 +22,7 @@ object Dependencies {
     val actor = "com.typesafe.akka" %% "akka-actor" % V.akka
     val cluster = "com.typesafe.akka" %% "akka-cluster" % V.akka
     val sharding = "com.typesafe.akka" %% "akka-cluster-sharding" % V.akka
+    val ddata = "com.typesafe.akka" %% "akka-distributed-data" % V.akka
     val shardingTyped = "com.typesafe.akka" %% "akka-cluster-sharding-typed" % V.akka
     val persistTyped = "com.typesafe.akka" %% "akka-persistence-typed" % V.akka
     val akkaPersist = "com.typesafe.akka" %% "akka-persistence" % V.akka
@@ -71,6 +72,7 @@ object Dependencies {
 
   val core: Seq[ModuleID] = shared ++ Seq(
     actor,
+    ddata,
     cluster,
     sharding,
     akkaSlf4j,

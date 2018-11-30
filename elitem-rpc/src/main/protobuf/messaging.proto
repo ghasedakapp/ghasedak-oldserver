@@ -15,7 +15,6 @@ message RequestSendMessage{
     ApiOutPeer out_peer = 1;
     int64 random_id = 2;
     ApiMessage message = 3;
-    string token = 4;
 }
 
 message ResponseVoid{}
@@ -24,7 +23,6 @@ message RequestLoadHistory{
     ApiOutPeer peer = 1;
     int64 date = 2;
     int32 limit = 3;
-    string token = 4;
 }
 
 message ResponseLoadHistory{
@@ -33,7 +31,6 @@ message ResponseLoadHistory{
 
 message RequestLoadDialogs {
     int32 limit = 1;
-    string token = 2;
 }
 
 message ResponseLoadDialogs{

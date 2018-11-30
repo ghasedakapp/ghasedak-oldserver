@@ -2,7 +2,6 @@ syntax = "proto3";
 
 package ir.sndu.server;
 
-
 message ResponseSeq {
   int32 seq = 1;
   bytes state = 2;

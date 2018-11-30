@@ -33,7 +33,7 @@ class MessagingServiceImpl(implicit system: ActorSystem) extends MessagingServic
 
   override def sendMessage(request: RequestSendMessage): Future[ResponseVoid] =
     authorize { clientData: ClientData ⇒
-      val (outPeer, randomId, message, _) = RequestSendMessage.unapply(request).get
+      val (outPeer, randomId, message) = RequestSendMessage.unapply(request).get
       withValidPeer(outPeer, clientData.userId) {
         userExt.sendMessage(
           clientData.userId,
@@ -45,7 +45,7 @@ class MessagingServiceImpl(implicit system: ActorSystem) extends MessagingServic
 
   override def loadHistory(request: RequestLoadHistory): Future[ResponseLoadHistory] =
     authorize { clientData: ClientData ⇒
-      val (peer, date, limit, _) = RequestLoadHistory.unapply(request).get
+      val (peer, date, limit) = RequestLoadHistory.unapply(request).get
       db.run(HistoryMessageRepo.findBefore(
         clientData.userId,
         ApiPeer(peer.get.`type`, peer.get.id),

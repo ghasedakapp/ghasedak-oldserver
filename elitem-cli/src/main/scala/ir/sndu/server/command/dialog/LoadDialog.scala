@@ -35,8 +35,7 @@ class LoadDialog extends CommandBase {
   private def fillMissing(dialogs: Seq[ApiDialog])(implicit client: ClientData, db: DB) {
     val userPeers = dialogs.flatMap(_.peer.flatMap(p ⇒ p.toUserOutPeer))
     userStub.loadFullUsers(RequestLoadFullUsers(
-      userPeers.filter(getUser(_).isEmpty),
-      client.token)).fullUsers.foreach { u ⇒
+      userPeers.filter(getUser(_).isEmpty))).fullUsers.foreach { u ⇒
       db.putBytes(u.id.toString, u.toByteArray)
       //TODO load full groups
 
@@ -54,7 +53,7 @@ class LoadDialog extends CommandBase {
   }
   private def load(limit: Int)(implicit client: ClientData): Unit =
     leveldb { implicit db ⇒
-      val rsp = messagingStub.loadDialogs(RequestLoadDialogs(limit, client.token))
+      val rsp = messagingStub.loadDialogs(RequestLoadDialogs(limit))
       fillMissing(rsp.dialogs)
 
       val localDialogs = rsp.dialogs.map { dialog ⇒

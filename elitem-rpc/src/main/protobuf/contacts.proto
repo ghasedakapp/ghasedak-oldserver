@@ -10,7 +10,6 @@ service ContactService {
 
 message RequestSearchContacts{
     string query = 1;
-    string token = 2;
 }
 
 message ResponseSearchContacts{

@@ -18,9 +18,9 @@ import scala.concurrent.{ ExecutionContext, Future }
 
 object AuthHelper {
 
-  case class ClientData(userId: Int, tokenId: String, tokenKey: String, token: String)
+  private val TOKEN_CTX_KEY: Context.Key[String] = Context.key[String]("token")
 
-  val TOKEN_CTX_KEY: Context.Key[String] = Context.key[String]("token")
+  case class ClientData(userId: Int, tokenId: String, tokenKey: String, token: String)
 
   def generateClientData(jwt: DecodedJWT, tokenId: String, tokenKey: String, token: String): ClientData = {
     ClientData(
