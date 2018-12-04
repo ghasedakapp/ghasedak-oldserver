@@ -4,13 +4,13 @@ import java.time.{ Instant, ZoneOffset }
 
 import ir.sndu.server.GrpcStubs._
 import ir.sndu.server.PeerHelper
-import ir.sndu.server.apimessage.ApiDialog
-import ir.sndu.server.apipeer._
-import ir.sndu.server.apiuser.ApiUser
+import ir.sndu.api.message.ApiDialog
+import ir.sndu.api.peer._
+import ir.sndu.api.user.ApiUser
 import ir.sndu.server.command.AuthHelper._
 import ir.sndu.server.command.{ ClientData, CommandBase }
-import ir.sndu.server.rpcmessaging.RequestLoadDialogs
-import ir.sndu.server.rpcuser.RequestLoadFullUsers
+import ir.sndu.rpc.messaging.RequestLoadDialogs
+import ir.sndu.rpc.user.RequestLoadFullUsers
 import org.iq80.leveldb.DB
 import picocli.CommandLine
 

@@ -1,6 +1,6 @@
 package ir.sndu.persist.repo.group
 
-import ir.sndu.server.apigroup.ApiGroupType
+import ir.sndu.api.group.ApiGroupType
 import slick.ast.BaseTypedType
 import slick.jdbc.JdbcType
 import slick.jdbc.PostgresProfile.api._

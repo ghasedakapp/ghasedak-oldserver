@@ -2,9 +2,9 @@ package ir.sndu.server.messaging
 
 import ir.sndu.server.{ ClientData, GrpcBaseSuit }
 import ir.sndu.server.auth.AuthHelper
-import ir.sndu.server.apimessage.{ ApiMessage, ApiTextMessage }
-import ir.sndu.server.apipeer.{ ApiOutPeer, ApiPeerType }
-import ir.sndu.server.rpcmessaging.RequestLoadDialogs
+import ir.sndu.api.message._
+import ir.sndu.api.peer._
+import ir.sndu.rpc.messaging.RequestLoadDialogs
 
 class DialogSpec extends GrpcBaseSuit
   with AuthHelper

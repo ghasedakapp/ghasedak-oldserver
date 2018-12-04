@@ -2,8 +2,8 @@ package ir.sndu.server.model.dialog
 
 import java.time.{ LocalDateTime, ZoneId }
 
-import ir.sndu.server.apimessage._
-import ir.sndu.server.apipeer.ApiPeer
+import ir.sndu.api.message._
+import ir.sndu.api.peer.ApiPeer
 import ir.sndu.server.model.history.HistoryMessage
 
 case class DialogCommon(

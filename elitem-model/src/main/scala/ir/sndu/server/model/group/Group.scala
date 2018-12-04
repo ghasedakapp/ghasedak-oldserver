@@ -2,7 +2,7 @@ package ir.sndu.server.model.group
 
 import java.time.LocalDateTime
 
-import ir.sndu.server.apigroup.ApiGroupType
+import ir.sndu.api.group.ApiGroupType
 
 case class Group(
                   id: Int,

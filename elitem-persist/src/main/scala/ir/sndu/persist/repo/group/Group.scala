@@ -4,7 +4,7 @@ import java.time.LocalDateTime
 
 import ir.sndu.persist.repo.TypeMapper._
 import ir.sndu.persist.repo.group.GroupTypeColumnType._
-import ir.sndu.server.apigroup.ApiGroupType
+import ir.sndu.api.group.ApiGroupType
 import ir.sndu.server.model.group.{FullGroup, Group}
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.Tag

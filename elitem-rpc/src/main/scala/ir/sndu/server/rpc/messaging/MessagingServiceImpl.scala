@@ -8,12 +8,12 @@ import com.google.protobuf.CodedInputStream
 import ir.sndu.persist.db.PostgresDb
 import ir.sndu.persist.repo.dialog.DialogRepo
 import ir.sndu.persist.repo.history.HistoryMessageRepo
-import ir.sndu.server.apimessage._
-import ir.sndu.server.apipeer._
+import ir.sndu.api.message._
+import ir.sndu.api.peer._
 import ir.sndu.server.rpc.auth.helper.AuthHelper
 import ir.sndu.server.rpc.auth.helper.AuthHelper.ClientData
-import ir.sndu.server.rpcmessaging.MessagingServiceGrpc.MessagingService
-import ir.sndu.server.rpcmessaging._
+import ir.sndu.rpc.messaging.MessagingServiceGrpc.MessagingService
+import ir.sndu.rpc.messaging._
 import ir.sndu.server.user.UserExtension
 import slick.dbio._
 import slick.jdbc.PostgresProfile

@@ -1,8 +1,10 @@
 syntax = "proto3";
 
-package ir.sndu.server;
+package ir.sndu;
 
-import "api/apifile.proto";
+option java_package = "ir.sndu.api";
+
+import "api/file.proto";
 
 enum ApiGroupType {
     General = 0;

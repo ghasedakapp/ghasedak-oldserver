@@ -1,6 +1,6 @@
 package ir.sndu.server
 
-import ir.sndu.server.apipeer._
+import ir.sndu.api.peer._
 
 object PeerHelper {
   def toUniqueId(peer: ApiPeer): Long = peer.id.toLong * Math.pow(2, 32).toLong + peer.`type`.value

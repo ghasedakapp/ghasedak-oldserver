@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package ir.sndu;
+
+option java_package = "ir.sndu.rpc";
+
+import "api/user.proto";
+
+service AuthService {
+    rpc StartPhoneAuth (RequestStartPhoneAuth) returns (ResponseStartPhoneAuth) {
+    }
+    rpc SignUp (RequestSignUp) returns (ResponseAuth) {
+    }
+}
+
+message RequestStartPhoneAuth {
+    int64 phone_number = 1;
+    int32 app_id = 2;
+    string api_key = 3;
+    bytes device_hash = 4;
+    string device_title = 5;
+    string timezone = 6;
+    repeated string preferred_languages = 7;
+}
+
+message ResponseStartPhoneAuth {
+    string transaction_hash = 1;
+    bool is_registered = 2;
+}
+
+message RequestSignUp {
+    string transaction_hash = 1;
+    string name = 2;
+    ApiSex sex = 3;
+    int64 number = 4;
+}
+
+message ResponseAuth {
+    string token = 1;
+    ApiUser user = 2;
+}
+

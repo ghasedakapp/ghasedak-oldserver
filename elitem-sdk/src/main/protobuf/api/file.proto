@@ -1,6 +1,8 @@
 syntax = "proto3";
 
-package ir.sndu.server;
+package ir.sndu;
+
+option java_package = "ir.sndu.api";
 
 message FileLocation {
     int64 file_id = 1;

@@ -6,7 +6,7 @@ import scala.util.Try
 
 object CliConfigs {
   private val conf = ElitemConfigFactory.load(AppType.Cli)
-  val host = conf.getString("elitem.host")
-  val port = conf.getInt("elitem.port")
-  var dbPath = Try(conf.getString("services.leveldb.path")).getOrElse(".")
+  val host: String = conf.getString("elitem.host")
+  val port: Int = conf.getInt("elitem.port")
+  var dbPath: String = Try(conf.getString("services.leveldb.path")).getOrElse(".")
 }

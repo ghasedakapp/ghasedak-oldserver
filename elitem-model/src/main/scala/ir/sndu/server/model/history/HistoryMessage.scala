@@ -2,7 +2,7 @@ package ir.sndu.server.model.history
 
 import java.time.LocalDateTime
 
-import ir.sndu.server.apipeer.ApiPeer
+import ir.sndu.api.peer.ApiPeer
 
 case class HistoryMessage(
   userId:               Int,

@@ -4,8 +4,8 @@ import akka.actor.{ Props, Status }
 import akka.pattern.pipe
 import ir.sndu.persist.db.PostgresDb
 import ir.sndu.server.Processor
-import ir.sndu.server.apipeer._
-import ir.sndu.server.UserCommands.SendMessage
+import ir.sndu.api.peer._
+import ir.sndu.struct.UserCommands.SendMessage
 import slick.jdbc.PostgresProfile.backend._
 
 import scala.concurrent.{ ExecutionContext, Future }
@@ -36,7 +36,4 @@ class UserProcessor extends Processor
     case sm: SendMessage ⇒ sendMessage(sm)
   }
 
-  //  private def query: Receive = {
-  //
-  //  }
 }

@@ -6,6 +6,7 @@ import ir.sndu.server.command.dialog.LoadDialog
 import ir.sndu.server.command.history.LoadHistory
 import ir.sndu.server.command.messaging.SendMesage
 import picocli.CommandLine.{ Command, HelpCommand }
+
 @Command(
   name = "elitem",
   version = Array("Elitem v0.1 demo"),

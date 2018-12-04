@@ -1,8 +1,8 @@
 package ir.sndu.server.group
 
-import ir.sndu.server.apigroup.{ ApiGroup, ApiGroupType }
-import ir.sndu.server.apipeer.ApiUserOutPeer
-import ir.sndu.server.rpcgroup.RequestCreateGroup
+import ir.sndu.api.group._
+import ir.sndu.api.peer.ApiUserOutPeer
+import ir.sndu.rpc.group.RequestCreateGroup
 import ir.sndu.server.{ ClientData, GrpcBaseSuit }
 
 import scala.util.Random

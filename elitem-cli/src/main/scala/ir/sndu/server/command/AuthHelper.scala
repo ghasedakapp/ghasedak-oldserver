@@ -2,7 +2,7 @@ package ir.sndu.server.command
 
 import ir.sndu.server.ElitemConsole.withError
 import ir.sndu.server.db.DbHelper._
-import ir.sndu.server.apiuser.ApiUser
+import ir.sndu.api.user.ApiUser
 
 case class ClientData(token: String, userId: Int)
 object AuthHelper {

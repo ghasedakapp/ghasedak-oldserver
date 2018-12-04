@@ -1,10 +1,14 @@
 syntax = "proto3";
 
-package ir.sndu.server;
+package ir.sndu;
+
+option java_package = "ir.sndu.struct";
+
 import "google/protobuf/wrappers.proto";
 import "scalapb/scalapb.proto";
-import "api/apipeer.proto";
-import "api/apimessage.proto";
+
+import "api/peer.proto";
+import "api/message.proto";
 
 option (scalapb.options) = {
     single_file: true
@@ -18,10 +22,10 @@ message UserCommands {
     message SendMessage {
         option (scalapb.message).extends = "UserCommand";
         int32 user_id = 1;
-        ir.sndu.server.ApiPeer peer = 2;
+        ApiPeer peer = 2;
         int64 randomId = 3;
         google.protobuf.Int64Value date = 4;
-        ir.sndu.server.ApiMessage message = 5;
+        ApiMessage message = 5;
     }
     message SendMessageAck {
     }

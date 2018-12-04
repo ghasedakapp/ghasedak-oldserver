@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package ir.sndu;
+
+option java_package = "ir.sndu.rpc";
+
+message ResponseSeq {
+    int32 seq = 1;
+    bytes state = 2;
+}
+
+message ResponseSeqDate {
+    int32 seq = 1;
+    bytes state = 2;
+    int64 date = 3;
+}
+

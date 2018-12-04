@@ -3,7 +3,7 @@ package ir.sndu.persist.repo.dialog
 import java.time.LocalDateTime
 
 import ir.sndu.persist.repo.TypeMapper._
-import ir.sndu.server.apipeer._
+import ir.sndu.api.peer._
 import ir.sndu.server.model.dialog.DialogCommon
 import slick.jdbc.PostgresProfile.api._
 

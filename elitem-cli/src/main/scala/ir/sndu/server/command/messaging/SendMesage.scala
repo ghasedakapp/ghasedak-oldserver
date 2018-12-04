@@ -3,11 +3,11 @@ package ir.sndu.server.command.messaging
 import io.grpc.StatusRuntimeException
 import ir.sndu.server.ElitemConsole.withError
 import ir.sndu.server.GrpcStubs._
-import ir.sndu.server.apimessage.{ ApiMessage, ApiTextMessage }
+import ir.sndu.api.message._
 import ir.sndu.server.command.AuthHelper._
 import ir.sndu.server.command.{ ClientData, CommandBase }
-import ir.sndu.server.rpccontact.RequestSearchContacts
-import ir.sndu.server.rpcmessaging.RequestSendMessage
+import ir.sndu.rpc.contact.RequestSearchContacts
+import ir.sndu.rpc.messaging.RequestSendMessage
 import picocli.CommandLine
 
 import scala.util.Random

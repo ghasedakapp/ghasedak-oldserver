@@ -1,16 +1,22 @@
 syntax = "proto3";
 
-package ir.sndu.server;
+package ir.sndu;
 
-import "api/apipeer.proto";
-import "api/apigroup.proto";
-import "rpc/rpcmisc.proto";
+option java_package = "ir.sndu.rpc";
+
+import "api/peer.proto";
+import "api/group.proto";
+import "rpc/misc.proto";
 
 service GroupService {
-    rpc CreateGroup(RequestCreateGroup) returns (ResponseCreateGroup) {}
-    rpc DeleteGroup(RequestDeleteGroup) returns (ResponseSeq) {}
-    rpc InviteUser(RequestInviteUser) returns (ResponseSeqDate) {}
-    rpc KickUser(RequestKickUser) returns (ResponseSeqDate) {}
+    rpc CreateGroup (RequestCreateGroup) returns (ResponseCreateGroup) {
+    }
+    rpc DeleteGroup (RequestDeleteGroup) returns (ResponseSeq) {
+    }
+    rpc InviteUser (RequestInviteUser) returns (ResponseSeqDate) {
+    }
+    rpc KickUser (RequestKickUser) returns (ResponseSeqDate) {
+    }
 }
 
 message RequestCreateGroup {

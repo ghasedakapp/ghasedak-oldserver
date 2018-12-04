@@ -4,11 +4,11 @@ import java.time.LocalDateTime
 import java.util.concurrent.ThreadLocalRandom
 
 import ir.sndu.persist.db.PostgresDb
-import ir.sndu.persist.repo.user.{ UserPhoneRepo, UserRepo }
+import ir.sndu.persist.repo.user._
 import ir.sndu.server.GrpcBaseSuit
-import ir.sndu.server.apiuser.ApiSex
-import ir.sndu.server.model.user.{ Sex, User, UserState }
-import ir.sndu.server.rpcauth.RequestSignUp
+import ir.sndu.api.user.ApiSex
+import ir.sndu.server.model.user._
+import ir.sndu.rpc.auth.RequestSignUp
 
 import scala.util.Random
 

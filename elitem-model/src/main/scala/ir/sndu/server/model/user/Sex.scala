@@ -8,7 +8,7 @@ sealed trait Sex {
 object Sex {
   @SerialVersionUID(1L)
   case object NoSex extends Sex {
-    val toOption = None
+    val toOption: None.type = None
     val toInt = 0
   }
 
@@ -23,6 +23,7 @@ object Sex {
     val toOption = Some(Female)
     val toInt = 2
   }
+
   def fromInt(i: Int): Sex = i match {
     case 0 ⇒ NoSex
     case 1 ⇒ Male

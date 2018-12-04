@@ -1,8 +1,8 @@
 package ir.sndu.server.messaging
 
-import ir.sndu.server.apimessage.{ ApiMessage, ApiTextMessage }
-import ir.sndu.server.apipeer.ApiOutPeer
-import ir.sndu.server.rpcmessaging.RequestSendMessage
+import ir.sndu.api.message._
+import ir.sndu.api.peer.ApiOutPeer
+import ir.sndu.rpc.messaging.RequestSendMessage
 import ir.sndu.server.{ ClientData, GrpcBaseSuit }
 
 import scala.util.Random

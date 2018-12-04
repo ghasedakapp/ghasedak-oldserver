@@ -1,6 +1,8 @@
 syntax = "proto3";
 
-package ir.sndu.server;
+package ir.sndu;
+
+option java_package = "ir.sndu.struct";
 
 option (scalapb.options) = {
     single_file: true
@@ -12,7 +14,7 @@ option (scalapb.options) = {
 
 import "google/protobuf/wrappers.proto";
 import "scalapb/scalapb.proto";
-import "api/apigroup.proto";
+import "api/group.proto";
 
 message GroupCommands {
 

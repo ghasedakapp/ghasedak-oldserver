@@ -2,12 +2,12 @@ package ir.sndu.server.group
 
 import akka.actor.typed.scaladsl.adapter._
 import akka.actor.typed.{ ActorRef, Props }
-import akka.actor.{ ActorSystem, ExtendedActorSystem, Extension, ExtensionId }
+import akka.actor.{ ActorSystem, ExtendedActorSystem, Extension, ExtensionId, Scheduler }
 import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, EntityRef }
 import akka.cluster.sharding.typed.{ ClusterShardingSettings, ShardingEnvelope }
 import akka.util.Timeout
-import ir.sndu.server.GroupCommand
-import ir.sndu.server.GroupCommands.{ Create, CreateAck }
+import ir.sndu.struct.GroupCommand
+import ir.sndu.struct.GroupCommands._
 
 import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
@@ -15,9 +15,9 @@ import scala.concurrent.{ ExecutionContext, Future }
 class GroupExtensionOldImpl(system: ActorSystem) extends Extension {
 
   implicit val timeout: Timeout = 15.seconds
-  implicit val scheduler = system.scheduler
+  implicit val scheduler: Scheduler = system.scheduler
   implicit val ec: ExecutionContext = system.dispatcher
-  implicit val _sys = system
+  implicit val _sys: ActorSystem = system
 
   private val sharding = ClusterSharding(system.toTyped)
 

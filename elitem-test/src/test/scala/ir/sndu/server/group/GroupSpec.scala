@@ -2,12 +2,12 @@ package ir.sndu.server.group
 
 import ir.sndu.persist.db.PostgresDb
 import ir.sndu.persist.repo.group.GroupRepo
-import ir.sndu.server.apigroup.ApiGroupOutPeer
-import ir.sndu.server.apipeer.ApiUserOutPeer
+import ir.sndu.api.group.ApiGroupOutPeer
+import ir.sndu.api.peer.ApiUserOutPeer
 import ir.sndu.server.auth.AuthHelper
 import ir.sndu.server.model.group.Group
-import ir.sndu.server.rpcgroup._
-import ir.sndu.server.rpcmisc.ResponseSeqDate
+import ir.sndu.rpc.group._
+import ir.sndu.rpc.misc.ResponseSeqDate
 import ir.sndu.server.{ ClientData, GrpcBaseSuit }
 
 import scala.util.Random

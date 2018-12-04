@@ -2,7 +2,7 @@ package ir.sndu.server.user
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.cluster.sharding.{ ClusterSharding, ClusterShardingSettings, ShardRegion }
-import ir.sndu.server.UserEnvelope
+import ir.sndu.struct.UserEnvelope
 
 object UserProcessorRegion {
 

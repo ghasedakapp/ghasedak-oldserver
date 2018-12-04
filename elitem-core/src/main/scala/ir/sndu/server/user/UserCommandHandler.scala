@@ -2,7 +2,7 @@ package ir.sndu.server.user
 
 import java.time.{ Instant, LocalDateTime, ZoneId }
 
-import ir.sndu.server.UserCommands.{ SendMessage, SendMessageAck }
+import ir.sndu.struct.UserCommands._
 
 import scala.concurrent.Future
 

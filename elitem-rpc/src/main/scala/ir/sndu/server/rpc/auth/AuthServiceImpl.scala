@@ -4,8 +4,8 @@ import akka.actor.ActorSystem
 import akka.event.{ Logging, LoggingAdapter }
 import ir.sndu.persist.db.PostgresDb
 import ir.sndu.server.rpc.auth.helper.AuthHelper
-import ir.sndu.server.rpcauth.AuthServiceGrpc.AuthService
-import ir.sndu.server.rpcauth._
+import ir.sndu.rpc.auth.AuthServiceGrpc.AuthService
+import ir.sndu.rpc.auth._
 import slick.jdbc.PostgresProfile
 
 import scala.concurrent.{ ExecutionContext, Future }

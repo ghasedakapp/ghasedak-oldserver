@@ -3,11 +3,11 @@ package ir.sndu.server.group
 import java.time.{ LocalDateTime, ZoneOffset }
 
 import akka.actor.{ ActorSystem, ExtendedActorSystem, Extension, ExtensionId }
+import ir.sndu.api.group._
 import ir.sndu.persist.db.PostgresDb
 import ir.sndu.persist.repo.group.{ GroupRepo, GroupUserRepo }
-import ir.sndu.server.apigroup.{ ApiGroup, ApiGroupType }
 import ir.sndu.server.model.group.Group
-import ir.sndu.server.sequencestruct.SeqState
+import ir.sndu.struct.sequence.SeqState
 import slick.jdbc.PostgresProfile
 
 import scala.concurrent.{ ExecutionContext, Future }

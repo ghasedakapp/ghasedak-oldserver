@@ -2,10 +2,10 @@ package ir.sndu.server.command.auth
 
 import ir.sndu.server.ElitemConsole.withError
 import ir.sndu.server.GrpcStubs._
-import ir.sndu.server.apiuser.ApiSex
+import ir.sndu.api.user.ApiSex
 import ir.sndu.server.command.CommandBase
 import ir.sndu.server.db.DbHelper._
-import ir.sndu.server.rpcauth.RequestSignUp
+import ir.sndu.rpc.auth.RequestSignUp
 import org.iq80.leveldb.DB
 import picocli.CommandLine
 

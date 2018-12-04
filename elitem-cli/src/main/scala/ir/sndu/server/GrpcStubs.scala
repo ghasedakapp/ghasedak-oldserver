@@ -1,16 +1,16 @@
 package ir.sndu.server
 
 import io.grpc.{ ManagedChannel, ManagedChannelBuilder }
-import ir.sndu.server.rpcauth.AuthServiceGrpc
-import ir.sndu.server.rpccontact.ContactServiceGrpc
-import ir.sndu.server.rpcmessaging.MessagingServiceGrpc
-import ir.sndu.server.rpcuser.UserServiceGrpc
+import ir.sndu.rpc.auth.AuthServiceGrpc
+import ir.sndu.rpc.contact.ContactServiceGrpc
+import ir.sndu.rpc.messaging.MessagingServiceGrpc
+import ir.sndu.rpc.user.UserServiceGrpc
 
 object GrpcStubs {
   private val channel: ManagedChannel =
     ManagedChannelBuilder.forAddress(CliConfigs.host, CliConfigs.port).usePlaintext(true).build
-  val authStub = AuthServiceGrpc.blockingStub(channel)
-  val messagingStub = MessagingServiceGrpc.blockingStub(channel)
-  val contactsStub = ContactServiceGrpc.blockingStub(channel)
-  val userStub = UserServiceGrpc.blockingStub(channel)
+  val authStub: AuthServiceGrpc.AuthServiceBlockingStub = AuthServiceGrpc.blockingStub(channel)
+  val messagingStub: MessagingServiceGrpc.MessagingServiceBlockingStub = MessagingServiceGrpc.blockingStub(channel)
+  val contactsStub: ContactServiceGrpc.ContactServiceBlockingStub = ContactServiceGrpc.blockingStub(channel)
+  val userStub: UserServiceGrpc.UserServiceBlockingStub = UserServiceGrpc.blockingStub(channel)
 }

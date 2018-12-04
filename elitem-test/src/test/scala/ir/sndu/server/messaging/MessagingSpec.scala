@@ -2,12 +2,12 @@ package ir.sndu.server.messaging
 
 import java.time.Instant
 
-import ir.sndu.server.apimessage.{ ApiMessage, ApiTextMessage }
-import ir.sndu.server.apipeer._
+import ir.sndu.api.message._
+import ir.sndu.api.peer._
 import ir.sndu.server.auth.AuthHelper
 import ir.sndu.server.group.GroupHelper
-import ir.sndu.server.rpcmessaging.{ RequestLoadHistory, RequestSendMessage, ResponseVoid }
-import ir.sndu.server.{ ClientData, GrpcBaseSuit }
+import ir.sndu.rpc.messaging._
+import ir.sndu.server._
 
 import scala.util.Random
 
@@ -15,6 +15,7 @@ class MessagingSpec extends GrpcBaseSuit
   with AuthHelper
   with MessagingHelper
   with GroupHelper {
+
   behavior of "Messaging Service"
   it should "send private message" in sendPrivateMessage
   it should "send group message" in sendGroupMessage

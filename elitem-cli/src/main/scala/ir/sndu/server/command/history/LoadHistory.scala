@@ -2,14 +2,14 @@ package ir.sndu.server.command.history
 
 import java.time.{ Instant, LocalDateTime, ZoneOffset }
 
+import ir.sndu.api.message.ApiMessageContainer
+import ir.sndu.rpc.messaging.RequestLoadHistory
 import ir.sndu.server.ApiConversions._
 import ir.sndu.server.ElitemConsole._
 import ir.sndu.server.GrpcStubs._
 import ir.sndu.server.PeerHelper
-import ir.sndu.server.apimessage.ApiMessageContainer
 import ir.sndu.server.command.AuthHelper.authenticate
-import ir.sndu.server.command.{ ClientData, CommandBase }
-import ir.sndu.server.rpcmessaging.RequestLoadHistory
+import ir.sndu.server.command._
 import picocli.CommandLine
 
 @CommandLine.Command(
@@ -39,7 +39,6 @@ class LoadHistory extends CommandBase {
     messages.flatMap(m ⇒ m.message.map(_.getTextMessage.text +
       "  |  " +
       LocalDateTime.ofInstant(Instant.ofEpochMilli(m.date), ZoneOffset.ofHoursMinutes(4, 30))))
-
   }
 
   override def run(): Unit =
