@@ -5,6 +5,7 @@ CREATE TABLE auth_phone_transactions (
   api_key          VARCHAR(255) NOT NULL,
   device_hash      TEXT         NOT NULL,
   device_info      TEXT         NOT NULL,
+  created_at       TIMESTAMP    NOT NULL,
   deleted_at       TIMESTAMP,
   PRIMARY KEY (transaction_hash)
 );

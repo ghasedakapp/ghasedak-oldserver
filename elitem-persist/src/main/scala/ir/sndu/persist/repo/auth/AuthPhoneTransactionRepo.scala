@@ -23,6 +23,8 @@ class AuthPhoneTransactionTable(tag: Tag) extends Table[AuthPhoneTransaction](ta
 
   def deviceInfo = column[String]("device_info")
 
+  def createdAt = column[LocalDateTime]("created_at")
+
   def deletedAt = column[Option[LocalDateTime]]("deleted_at")
 
   override def * = (
@@ -32,6 +34,7 @@ class AuthPhoneTransactionTable(tag: Tag) extends Table[AuthPhoneTransaction](ta
     apiKey,
     deviceHash,
     deviceInfo,
+    createdAt,
     deletedAt) <> (AuthPhoneTransaction.tupled, AuthPhoneTransaction.unapply)
 
 }
@@ -52,6 +55,10 @@ object AuthPhoneTransactionRepo {
 
   def create(transaction: AuthPhoneTransaction): FixedSqlAction[Int, NoStream, Effect.Write] =
     phoneTransactions += transaction
+
+  def update(transactionHash: String, localDateTime: LocalDateTime): FixedSqlAction[Int, NoStream, Effect.Write] =
+    phoneTransactions.filter(_.transactionHash === transactionHash).map(_.createdAt)
+      .update(localDateTime)
 
   def find(transactionHash: String): SqlAction[Option[AuthPhoneTransaction], NoStream, Effect.Read] =
     byHash(transactionHash).result.headOption

@@ -6,7 +6,8 @@ import cats.instances.{ EitherInstances, FutureInstances }
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.language.implicitConversions
 
-trait FutureResult[ErrorCase] extends FutureInstances with EitherInstances {
+trait FutureResult[ErrorCase <: Throwable] extends FutureInstances
+  with EitherInstances with ConvertResult[ErrorCase] {
 
   type Result[A] = EitherT[Future, ErrorCase, A]
 
@@ -37,4 +38,5 @@ trait FutureResult[ErrorCase] extends FutureInstances with EitherInstances {
 
   def fromFutureBoolean(failure: ErrorCase)(foa: Future[Boolean])(implicit ec: ExecutionContext): Result[Unit] =
     Result[Unit](foa.map(r ⇒ if (r) Right(()) else Left(failure)))
+
 }

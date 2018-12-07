@@ -1,8 +1,10 @@
 package ir.sndu.persist.repo.user
 
 import ir.sndu.server.model.user.UserPhone
+import slick.dbio.Effect
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.Tag
+import slick.sql.FixedSqlStreamingAction
 
 class UserPhoneTable(tag: Tag) extends Table[UserPhone](tag, "user_phones") {
 
@@ -21,5 +23,12 @@ class UserPhoneTable(tag: Tag) extends Table[UserPhone](tag, "user_phones") {
 object UserPhoneRepo {
 
   val phones = TableQuery[UserPhoneTable]
+
+  val byPhoneNumber = Compiled { number: Rep[Long] ⇒
+    phones.filter(_.number === number)
+  }
+
+  def findByPhoneNumber(number: Long): FixedSqlStreamingAction[Seq[UserPhone], UserPhone, Effect.Read] =
+    byPhoneNumber(number).result
 
 }
