@@ -35,4 +35,8 @@ object UserRepo {
 
   val activeUsers = users.filter(_.deletedAt.nonEmpty)
 
+  def isDeleted(userId: Int): DBIO[Boolean] =
+    users.filter(_.id === userId).filter(_.deletedAt.nonEmpty).exists.result
+
 }
+

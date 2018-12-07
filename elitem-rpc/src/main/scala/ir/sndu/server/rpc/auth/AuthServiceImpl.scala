@@ -8,7 +8,7 @@ import akka.actor.ActorSystem
 import akka.event.{ Logging, LoggingAdapter }
 import ir.sndu.persist.db.PostgresDb
 import ir.sndu.persist.repo.auth.AuthPhoneTransactionRepo
-import ir.sndu.persist.repo.user.UserPhoneRepo
+import ir.sndu.persist.repo.user.{ UserPhoneRepo, UserRepo }
 import ir.sndu.rpc.auth.AuthServiceGrpc.AuthService
 import ir.sndu.rpc.auth._
 import ir.sndu.server.model.auth.AuthPhoneTransaction
@@ -34,6 +34,9 @@ class AuthServiceImpl(implicit system: ActorSystem) extends AuthService
     case _ ⇒ CommonRpcError.InternalError
   }
 
+  protected def forbidDeletedUser(userId: Int): Result[Unit] =
+    fromDBIOBoolean(AuthRpcErrors.UserIsDeleted)(UserRepo.isDeleted(userId).map(!_))
+
   private def getOptAuthTransactionWithExpire(optAuthTransaction: Option[AuthPhoneTransaction]): Result[Option[AuthPhoneTransaction]] = {
     optAuthTransaction match {
       case Some(transaction) ⇒
@@ -54,6 +57,7 @@ class AuthServiceImpl(implicit system: ActorSystem) extends AuthService
     val action = for {
       normalizedPhone ← fromOption(AuthRpcErrors.InvalidPhoneNumber)(normalizeLong(request.phoneNumber).headOption)
       optPhone ← fromDBIO(UserPhoneRepo.findByPhoneNumber(normalizedPhone).headOption)
+      _ ← optPhone map (p ⇒ forbidDeletedUser(p.userId)) getOrElse point(())
       optAuthTransaction ← fromDBIO(AuthPhoneTransactionRepo.findByPhoneAndDeviceHash(normalizedPhone, request.deviceHash))
       optAuthTransactionWithExpire ← getOptAuthTransactionWithExpire(optAuthTransaction)
       transactionHash ← optAuthTransactionWithExpire match {
