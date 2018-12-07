@@ -84,7 +84,7 @@ lazy val cli = elitemModule("elitem-cli")
   .settings(
     libraryDependencies ++= Dependencies.cli,
     PB.protoSources in Compile ++= Seq(
-      file("elitem-rpc/src/main/protobuf")
+      file("elitem-concurrent/src/main/protobuf")
     ),
     mainClass in Compile := Some("ir.sndu.server.CliMain")
   )

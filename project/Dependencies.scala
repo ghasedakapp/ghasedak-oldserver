@@ -52,6 +52,9 @@ object Dependencies {
     val textIo = "org.beryx" % "text-io" % "3.1.3" % "runtime"
     val levelDB = "org.iq80.leveldb" % "leveldb" % "0.10"
 
+    val libPhoneNumber = "com.googlecode.libphonenumber" % "libphonenumber" % "7.0.+"
+    val cats = "org.typelevel" %% "cats-core" % "1.5.0"
+
   }
 
   object Test {
@@ -104,7 +107,12 @@ object Dependencies {
     slickPg
   )
 
-  val commons: Seq[ModuleID] = shared ++ Seq(config)
+  val commons: Seq[ModuleID] = shared ++ Seq(
+    cats,
+    slick,
+    config,
+    libPhoneNumber
+  )
 
   val test: Seq[ModuleID] = shared ++ Seq(
     scalatic,

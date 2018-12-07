@@ -33,17 +33,15 @@ object ElitemConfigFactory {
   }
 
   private def setConfig(configPath: String): Unit = {
-    if (Files.exists(Paths.get(configPath)))
+    if (Files.exists(Paths.get(configPath))) {
       System.setProperty("config.file", configPath)
-    //    else
-    //      log.warn("Config file does not exists in: {}", configPath)
+    }
   }
 
   private def setLogback(logbackPath: String): Unit = {
-    if (Files.exists(Paths.get(logbackPath)))
+    if (Files.exists(Paths.get(logbackPath))) {
       System.setProperty("logback.configurationFile", logbackPath)
-    //    else
-    //      log.warn("Logback file does not exists in: {}", logbackPath)
+    }
   }
 
 }

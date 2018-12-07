@@ -7,7 +7,7 @@ import ir.sndu.server.model.auth.AuthSession
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.Tag
 
-final class AuthSessionTable(tag: Tag) extends Table[AuthSession](tag, "auth_sessions") {
+class AuthSessionTable(tag: Tag) extends Table[AuthSession](tag, "auth_sessions") {
 
   def userId = column[Int]("user_id", O.PrimaryKey)
 
@@ -25,7 +25,7 @@ final class AuthSessionTable(tag: Tag) extends Table[AuthSession](tag, "auth_ses
 
   def deletedAt = column[Option[LocalDateTime]]("deleted_at")
 
-  def * = (userId, tokenId, appId, apiKey, deviceHash, deviceInfo,
+  override def * = (userId, tokenId, appId, apiKey, deviceHash, deviceInfo,
     sessionTime, deletedAt) <> ((AuthSession.apply _).tupled, AuthSession.unapply)
 }
 

@@ -20,10 +20,8 @@ class AuthServiceImpl(implicit system: ActorSystem) extends AuthService
   override val log: LoggingAdapter = Logging.getLogger(system, this)
 
   override def startPhoneAuth(request: RequestStartPhoneAuth): Future[ResponseStartPhoneAuth] = {
+
     Future.successful(ResponseStartPhoneAuth())
   }
 
-  override def signUp(request: RequestSignUp): Future[ResponseAuth] = {
-    Future.successful(ResponseAuth())
-  }
 }

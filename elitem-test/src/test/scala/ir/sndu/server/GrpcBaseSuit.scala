@@ -24,11 +24,5 @@ class GrpcBaseSuit extends FlatSpec
 
   protected implicit val authStub: AuthServiceGrpc.AuthServiceBlockingStub =
     AuthServiceGrpc.blockingStub(channel)
-  protected implicit val messagingStub: MessagingServiceGrpc.MessagingServiceBlockingStub =
-    MessagingServiceGrpc.blockingStub(channel)
-  protected implicit val contactStub: ContactServiceGrpc.ContactServiceBlockingStub =
-    ContactServiceGrpc.blockingStub(channel)
-  protected implicit val groupStub: GroupServiceGrpc.GroupServiceBlockingStub =
-    GroupServiceGrpc.blockingStub(channel)
 
 }

@@ -8,10 +8,10 @@ import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.JWTVerificationException
 import com.auth0.jwt.interfaces.DecodedJWT
 import io.grpc.Context
-import ir.sndu.persist.repo.auth.TokenRepo
-import ir.sndu.server.model.auth.Token
-import ir.sndu.server.rpc.CommonsError._
-import ir.sndu.server.rpc.auth.AuthErrors
+import ir.sndu.persist.repo.auth.AuthTokenRepo
+import ir.sndu.server.model.auth.AuthToken
+import ir.sndu.server.rpc.auth.AuthRpcErrors
+import ir.sndu.server.rpc.common.CommonRpcError._
 import slick.jdbc.PostgresProfile
 
 import scala.concurrent.{ ExecutionContext, Future }
@@ -32,7 +32,7 @@ object AuthHelper {
 
 trait AuthHelper {
 
-  import AuthErrors._
+  import AuthRpcErrors._
   import AuthHelper._
 
   implicit val ec: ExecutionContext
@@ -47,7 +47,7 @@ trait AuthHelper {
       case Some(token) ⇒
         try {
           val tokenId = JWT.decode(token).getClaim("tokenId").asString()
-          db.run(TokenRepo.find(tokenId)) flatMap {
+          db.run(AuthTokenRepo.find(tokenId)) flatMap {
             case None ⇒ Future.failed(InvalidToken)
             case Some(tokenKey) ⇒
               val algorithm = Algorithm.HMAC512(tokenKey)
@@ -82,8 +82,8 @@ trait AuthHelper {
       .withClaim("tokenId", tokenId)
       .withClaim("userId", userId.toString)
       .sign(algorithm)
-    val token = Token(tokenId, tokenId, None)
-    db.run(TokenRepo.create(token)) map (_ ⇒ tokenStr)
+    val token = AuthToken(tokenId, tokenId, None)
+    db.run(AuthTokenRepo.create(token)) map (_ ⇒ tokenStr)
   }
 
 }
