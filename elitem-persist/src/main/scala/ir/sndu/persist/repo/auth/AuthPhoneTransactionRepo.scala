@@ -25,6 +25,8 @@ class AuthPhoneTransactionTable(tag: Tag) extends Table[AuthPhoneTransaction](ta
 
   def createdAt = column[LocalDateTime]("created_at")
 
+  def codeHash = column[String]("code_hash")
+
   def deletedAt = column[Option[LocalDateTime]]("deleted_at")
 
   override def * = (
@@ -35,6 +37,7 @@ class AuthPhoneTransactionTable(tag: Tag) extends Table[AuthPhoneTransaction](ta
     deviceHash,
     deviceInfo,
     createdAt,
+    codeHash,
     deletedAt) <> (AuthPhoneTransaction.tupled, AuthPhoneTransaction.unapply)
 
 }

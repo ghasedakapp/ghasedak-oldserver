@@ -16,7 +16,7 @@ import slick.jdbc.PostgresProfile
 
 import scala.concurrent.{ ExecutionContext, Future }
 
-object AuthHelper {
+object AuthTokenHelper {
 
   private val TOKEN_CTX_KEY: Context.Key[String] = Context.key[String]("token")
 
@@ -30,10 +30,10 @@ object AuthHelper {
 
 }
 
-trait AuthHelper {
+trait AuthTokenHelper {
 
   import AuthRpcErrors._
-  import AuthHelper._
+  import AuthTokenHelper._
 
   implicit val ec: ExecutionContext
 
