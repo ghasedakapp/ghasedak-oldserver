@@ -1,11 +1,13 @@
 package ir.sndu.server.frontend
 
-import io.grpc.{ BindableService, Server, ServerBuilder, ServerServiceDefinition }
+import io.grpc.{ Server, ServerBuilder, ServerServiceDefinition }
 import org.slf4j.LoggerFactory
 
 object GrpcFrontend {
+
   private var server: Option[Server] = None
   private val logger = LoggerFactory.getLogger(getClass)
+
   def start(host: String, port: Int, services: Seq[ServerServiceDefinition]): Unit = {
     val serverBuilder = ServerBuilder.forPort(port)
     services foreach serverBuilder.addService
@@ -19,7 +21,8 @@ object GrpcFrontend {
     }
   }
 
-  private def stop(): Unit =
+  private def stop(): Unit = {
     server foreach (_.shutdown)
+  }
 
 }

@@ -1,7 +1,7 @@
 package ir.sndu.server.frontend
 
 import com.typesafe.config.Config
-import io.grpc.{ BindableService, ServerServiceDefinition }
+import io.grpc.ServerServiceDefinition
 
 import scala.collection.JavaConverters._
 
@@ -29,7 +29,7 @@ case class Endpoint(typ: EndpointTypes.EndpointType, interface: String, port: In
 
 object Frontend {
 
-  def start(services: Seq[ServerServiceDefinition])(implicit config: Config) = {
+  def start(services: Seq[ServerServiceDefinition])(implicit config: Config): Unit = {
     config.getConfigList("endpoints").asScala.map(Endpoint.fromConfig) foreach (startEndpoint(_, services))
   }
 
@@ -37,6 +37,6 @@ object Frontend {
     endpoint.typ match {
       case EndpointTypes.Grpc ⇒ GrpcFrontend.start(endpoint.interface, endpoint.port, services)
     }
-
   }
+
 }

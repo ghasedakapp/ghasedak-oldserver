@@ -5,14 +5,13 @@ import java.nio.file.{ Files, Paths }
 
 import com.typesafe.config.{ Config, ConfigFactory }
 import ir.sndu.server.config.AppType.AppType
+
 object AppType extends Enumeration {
   type AppType = Value
   val Cli, Server, Test = Value
 }
 
 object ElitemConfigFactory {
-  //  private val log = LoggerFactory.getLogger(getClass)
-
   def load(app: AppType): Config = {
     val (configPath, logbackPath) = getPathes(app)
 
@@ -34,17 +33,15 @@ object ElitemConfigFactory {
   }
 
   private def setConfig(configPath: String): Unit = {
-    if (Files.exists(Paths.get(configPath)))
+    if (Files.exists(Paths.get(configPath))) {
       System.setProperty("config.file", configPath)
-    //    else
-    //      log.warn("Config file does not exists in: {}", configPath)
+    }
   }
 
   private def setLogback(logbackPath: String): Unit = {
-    if (Files.exists(Paths.get(logbackPath)))
+    if (Files.exists(Paths.get(logbackPath))) {
       System.setProperty("logback.configurationFile", logbackPath)
-    //    else
-    //      log.warn("Logback file does not exists in: {}", logbackPath)
+    }
   }
 
 }

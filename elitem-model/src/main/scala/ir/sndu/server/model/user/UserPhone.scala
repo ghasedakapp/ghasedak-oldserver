@@ -5,5 +5,4 @@ case class UserPhone(
   id:         Int,
   userId:     Int,
   accessSalt: String,
-  number:     Long,
-  title:      String)
+  number:     Long)
