@@ -74,7 +74,7 @@ trait AuthTokenHelper {
   def authorize[T](f: ClientData ⇒ Future[T]): Future[T] =
     authorize(Option(TOKEN_CTX_KEY.get()))(f)
 
-  def generateToken(userId: Int): Future[String] = {
+  def generateToken(userId: Int): Future[(String, String)] = {
     val tokenKey = UUID.randomUUID().toString
     val algorithm = Algorithm.HMAC512(tokenKey)
     val tokenId = UUID.randomUUID().toString + userId
@@ -83,7 +83,7 @@ trait AuthTokenHelper {
       .withClaim("userId", userId.toString)
       .sign(algorithm)
     val token = AuthToken(tokenId, tokenId, None)
-    db.run(AuthTokenRepo.create(token)) map (_ ⇒ tokenStr)
+    db.run(AuthTokenRepo.create(token)) map (_ ⇒ (tokenId, tokenStr))
   }
 
 }

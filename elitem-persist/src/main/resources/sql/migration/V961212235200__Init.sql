@@ -7,6 +7,7 @@ CREATE TABLE auth_phone_transactions (
   device_info      TEXT         NOT NULL,
   created_at       TIMESTAMP    NOT NULL,
   code_hash        VARCHAR(255) NOT NULL,
+  is_checked       BOOLEAN      NOT NULL,
   deleted_at       TIMESTAMP,
   PRIMARY KEY (transaction_hash)
 );
@@ -35,7 +36,6 @@ CREATE INDEX idx_auth_sessions_token_id
 
 CREATE TABLE users (
   id           INT          NOT NULL,
-  access_salt  TEXT         NOT NULL,
   name         VARCHAR(255) NOT NULL,
   country_code VARCHAR(2)   NOT NULL,
   created_at   TIMESTAMP    NOT NULL,
@@ -47,8 +47,6 @@ CREATE TABLE users (
 
 CREATE TABLE user_phones (
   user_id     INT          NOT NULL,
-  id          INT          NOT NULL,
-  access_salt VARCHAR(255) NOT NULL,
   number      BIGINT       NOT NULL,
-  PRIMARY KEY (user_id, id)
+  PRIMARY KEY (user_id)
 );

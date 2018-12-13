@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package ir.sndu;
+
+option java_package = "ir.sndu.api";
+
+import "api/user.proto";
+
+message ApiAuth {
+    string token = 1;
+    ApiUser user = 2;
+}

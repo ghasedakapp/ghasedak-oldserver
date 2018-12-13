@@ -29,4 +29,4 @@ case class AuthSession(
   deviceHash:  String,
   deviceInfo:  String,
   sessionTime: LocalDateTime,
-  deletedAt:   Option[LocalDateTime])
+  deletedAt:   Option[LocalDateTime] = None)

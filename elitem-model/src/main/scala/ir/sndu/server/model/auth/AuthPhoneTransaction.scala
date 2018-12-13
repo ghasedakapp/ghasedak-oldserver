@@ -12,4 +12,5 @@ case class AuthPhoneTransaction(
   deviceInfo:      String,
   createdAt:       LocalDateTime,
   codeHash:        String,
+  isChecked:       Boolean,
   deletedAt:       Option[LocalDateTime] = None)

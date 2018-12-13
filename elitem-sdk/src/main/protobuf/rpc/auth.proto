@@ -4,8 +4,12 @@ package ir.sndu;
 
 option java_package = "ir.sndu.rpc";
 
+import "api/auth.proto";
+
 service AuthService {
     rpc StartPhoneAuth (RequestStartPhoneAuth) returns (ResponseStartPhoneAuth) {
+    }
+    rpc ValidatePhoneCode (RequestValidatePhoneCode) returns (ResponseValidatePhoneCode) {
     }
 }
 
@@ -19,5 +23,14 @@ message RequestStartPhoneAuth {
 
 message ResponseStartPhoneAuth {
     string transaction_hash = 1;
-    bool is_registered = 2;
+}
+
+message RequestValidatePhoneCode {
+    string transaction_hash = 1;
+    string code = 2;
+}
+
+message ResponseValidatePhoneCode {
+    bool is_registered = 1;
+    ApiAuth api_auth = 2;
 }
