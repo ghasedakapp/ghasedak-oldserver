@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package ir.sndu.rpc;
+
+option java_package = "ir.sndu.rpc.messaging";
+option java_multiple_files = true;
+option (scalapb.options) = {
+  flat_package: true
+};
+
+import "scalapb/scalapb.proto";
+import "api/messaging.proto";
+import "api/peer.proto";
+
+service MessagingService {
+    rpc SendMessage (RequestSendMessage) returns (ResponseVoid) {}
+    rpc LoadDialogs (RequestLoadDialogs) returns (ResponseLoadDialogs) {}
+}
+
+message RequestSendMessage {
+    ir.sndu.api.ApiPeer peer = 1; //Destination peer for message
+    int64 random_id = 2; //Message random id (generated on client side)
+    ir.sndu.api.ApiMessage message = 3; //The message
+}
+
+message ResponseVoid {}
+
+message RequestLoadDialogs {
+    int64 min_date = 1; //start date of conversation loading. Use 0 to load latest messages
+    int32 limit = 2; //limit maximum amount of messages (max is 10)
+}
+message ResponseLoadDialogs {
+    repeated ir.sndu.api.ApiDialog dialogs = 1;
+}

@@ -14,7 +14,8 @@ lazy val commonSettings = Seq(
   PB.targets in Compile := Seq(
     scalapb.gen() -> (sourceManaged in Compile).value),
   PB.includePaths in Compile ++= Seq(
-    file("elitem-model/src/main/protobuf")
+    file("elitem-model/src/main/protobuf"),
+    file("elitem-sdk/src/main/protobuf")
   ),
   scalaSource in ProtocPlugin.ProtobufConfig := sourceManaged.value,
   scalariformPreferences := scalariformPreferences.value
