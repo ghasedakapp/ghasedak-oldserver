@@ -7,7 +7,7 @@ import ir.sndu.persist.repo.TypeMapper._
 import ir.sndu.server.model.user.User
 import slick.dbio.Effect
 import slick.lifted.Tag
-import slick.sql.FixedSqlStreamingAction
+import slick.sql.{ FixedSqlAction, FixedSqlStreamingAction }
 
 final class UserTable(tag: Tag) extends Table[User](tag, "users") {
 
@@ -34,6 +34,9 @@ object UserRepo {
   private val users = TableQuery[UserTable]
 
   private val activeUsers = users.filter(_.deletedAt.nonEmpty)
+
+  def create(user: User): FixedSqlAction[Int, NoStream, Effect.Write] =
+    users += user
 
   def find(id: Int): FixedSqlStreamingAction[Seq[User], User, Effect.Read] =
     activeUsers.filter(_.id === id).result
