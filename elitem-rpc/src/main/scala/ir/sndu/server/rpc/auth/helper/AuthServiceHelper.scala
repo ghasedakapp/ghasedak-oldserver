@@ -16,6 +16,8 @@ import scala.concurrent.Future
 trait AuthServiceHelper {
   this: AuthServiceImpl ⇒
 
+  private val maximumValidCodeMinutes = 15 // for 15 minutes phone code is valid
+
   protected def forbidDeletedUser(userId: Int): Result[Unit] =
     fromDBIOBoolean(AuthRpcErrors.UserIsDeleted)(UserRepo.isDeleted(userId).map(!_))
 
@@ -25,11 +27,11 @@ trait AuthServiceHelper {
         val now = LocalDateTime.now(ZoneOffset.UTC)
         val until = now.until(transaction.createdAt, ChronoUnit.MINUTES)
         for {
-          _ ← if (until > 15)
+          _ ← if (until > maximumValidCodeMinutes)
             fromDBIO(AuthPhoneTransactionRepo.delete(transaction.transactionHash))
           else
             fromDBIO(AuthPhoneTransactionRepo.updateCreateAt(transaction.transactionHash, now))
-          newTransaction = if (until > 15) None else Some(transaction.copy(createdAt = now))
+          newTransaction = if (until > maximumValidCodeMinutes) None else Some(transaction.copy(createdAt = now))
         } yield newTransaction
       case None ⇒ point(optAuthTransaction)
     }
@@ -45,7 +47,7 @@ trait AuthServiceHelper {
     val until = now.until(transaction.createdAt, ChronoUnit.MINUTES)
     for {
       _ ← fromBoolean(AuthRpcErrors.InvalidAuthCode)(transaction.codeHash == code)
-      _ ← fromBoolean(AuthRpcErrors.PhoneCodeExpired)(until < 15)
+      _ ← fromBoolean(AuthRpcErrors.PhoneCodeExpired)(until < maximumValidCodeMinutes)
       _ ← fromDBIO(AuthPhoneTransactionRepo.updateIsChecked(transaction.transactionHash, isChecked = true))
     } yield ()
   }

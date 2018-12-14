@@ -21,7 +21,7 @@ object AuthSession {
 }
 
 @SerialVersionUID(1L)
-case class AuthSession(
+final case class AuthSession(
   userId:      Int,
   tokenId:     String,
   appId:       Int,

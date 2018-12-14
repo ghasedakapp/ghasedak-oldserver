@@ -21,7 +21,7 @@ import slick.jdbc.PostgresProfile
 
 import scala.concurrent.{ ExecutionContext, Future }
 
-class AuthServiceImpl(implicit system: ActorSystem) extends AuthService
+final class AuthServiceImpl(implicit system: ActorSystem) extends AuthService
   with AuthServiceHelper
   with AuthTokenHelper
   with DBIOResult[RpcError] {
@@ -77,6 +77,15 @@ class AuthServiceImpl(implicit system: ActorSystem) extends AuthService
       optUserPhone ← fromDBIO(UserPhoneRepo.findByPhoneNumber(transaction.phoneNumber).headOption)
       optApiAuth ← getOptApiAuth(transaction, optUserPhone)
     } yield ResponseValidatePhoneCode(optApiAuth.isDefined, optApiAuth)
+    val result = db.run(action.value)
+    result
+  }
+
+  override def signUpWithPhone(request: RequestSignUpWithPhone): Future[ResponseSignUpWithPhone] = {
+    val action: Result[ResponseSignUpWithPhone] = for {
+      transaction ← fromDBIOOption(AuthRpcErrors.PhoneCodeExpired)(AuthPhoneTransactionRepo.findByHash(request.transactionHash))
+      _ ← fromBoolean(AuthRpcErrors.NotValidated)(transaction.isChecked)
+    } yield ResponseSignUpWithPhone()
     val result = db.run(action.value)
     result
   }

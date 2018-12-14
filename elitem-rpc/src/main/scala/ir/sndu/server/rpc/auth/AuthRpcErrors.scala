@@ -17,6 +17,8 @@ object AuthRpcErrors {
 
   val PhoneCodeExpired = RpcError(Status.INTERNAL, "PHONE_CODE_EXPIRED")
 
+  val NotValidated = RpcError(Status.INTERNAL, "NOT_VALIDATED")
+
   val InvalidAuthCode = RpcError(Status.INTERNAL, "INVALID_AUTH_CODE")
 
 }
