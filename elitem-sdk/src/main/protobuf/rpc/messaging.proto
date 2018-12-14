@@ -15,6 +15,7 @@ import "api/peer.proto";
 service MessagingService {
     rpc SendMessage (RequestSendMessage) returns (ResponseVoid) {}
     rpc LoadDialogs (RequestLoadDialogs) returns (ResponseLoadDialogs) {}
+    rpc LoadHistory (RequestLoadHistory) returns (ResponseLoadHistory) {}
 }
 
 message RequestSendMessage {
@@ -29,6 +30,18 @@ message RequestLoadDialogs {
     int64 min_date = 1; //start date of conversation loading. Use 0 to load latest messages
     int32 limit = 2; //limit maximum amount of messages (max is 10)
 }
+
 message ResponseLoadDialogs {
     repeated ir.sndu.api.ApiDialog dialogs = 1;
+}
+
+message RequestLoadHistory {
+    ir.sndu.api.ApiPeer peer = 1; //Peer of conversation
+    int32 sequence_nr = 2; //start sequence number of messages for loading. Int.Max for loading from recent message
+    ir.sndu.api.ApiListLoadMode load_mode = 3; //Loading mode: Forward loading, backward or both ways
+    int32 limit = 4; //maximum amount of messages (max is 100)
+}
+
+message ResponseLoadHistory {
+    repeated ir.sndu.api.ApiMessageContainer history = 1; //Messages
 }

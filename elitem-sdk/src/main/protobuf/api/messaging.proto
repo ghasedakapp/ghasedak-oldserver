@@ -24,7 +24,7 @@ message ApiTextMessage {
 
 message ApiMessageContainer {
     int32 sender_user_id = 1; //Sender of message
-    int64 sequence_nr = 2; //Sequence Number of message
+    int32 sequence_nr = 2; //Sequence Number of message
     int64 date = 3; //Date of message
     ApiMessage message = 4; //Content of message
 }
@@ -34,4 +34,10 @@ message ApiDialog {
     int32 unread_count = 2; //Plain messages unread messages count
     int64 sort_date = 3; //Date of conversation for sorting
     ApiMessageContainer message = 4; //Top message of conversation
+}
+
+enum ApiListLoadMode {
+    BACKWARD = 0;
+    FORWARD = 1;
+    BOTH = 2;
 }
