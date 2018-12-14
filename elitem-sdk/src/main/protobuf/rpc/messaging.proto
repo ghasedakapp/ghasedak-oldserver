@@ -51,10 +51,10 @@ message ResponseLoadHistory {
 
 message RequestMessageReceived {
     ir.sndu.api.ApiPeer peer = 1; //Destination peer
-    int64 date = 2; //Maximum date of received messages
+    int32 sequence_nr = 2; //Maximum sequence number of received messages
 }
 
 message RequestMessageRead {
     ir.sndu.api.ApiPeer peer = 1; //Destination peer
-    int64 date = 2; //Maximum date of received messages
+    int32 sequence_nr = 2; //Maximum sequence number of received messages
 }
