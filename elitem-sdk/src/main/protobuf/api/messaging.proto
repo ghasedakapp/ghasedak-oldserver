@@ -14,20 +14,12 @@ import "api/peer.proto";
 message ApiMessage {
     oneof message {
         ApiTextMessage text_message = 1;
-        ApiDocumentMessage doc_message = 2;
     }
 }
 
 message ApiTextMessage {
     string text = 1; //the text @note Contains sensitive data!!!
     repeated int32 mentions = 2; //User mentions in message
-}
-
-message ApiDocumentMessage {
-    int64 file_id = 1;
-    int32 file_size = 2;
-    string name = 3;
-    string mime_type = 4;
 }
 
 message ApiMessageContainer {
