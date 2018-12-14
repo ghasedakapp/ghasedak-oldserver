@@ -25,10 +25,9 @@ message ApiTextMessage {
 
 message ApiDocumentMessage {
     int64 file_id = 1;
-    int64 access_hash = 2;
-    int32 file_size = 3;
-    string name = 4;
-    string mime_type = 5;
+    int32 file_size = 2;
+    string name = 3;
+    string mime_type = 4;
 }
 
 message ApiMessageContainer {
