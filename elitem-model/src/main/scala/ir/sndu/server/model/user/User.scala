@@ -3,9 +3,8 @@ package ir.sndu.server.model.user
 import java.time.LocalDateTime
 
 @SerialVersionUID(1L)
-case class User(
+final case class User(
   id:          Int,
-  accessSalt:  String,
   name:        String,
   countryCode: String,
   createdAt:   LocalDateTime,

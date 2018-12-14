@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package ir.sndu;
+
+option java_package = "ir.sndu.api";
+
+import "google/protobuf/wrappers.proto";
+
+message ApiUser {
+    int32 id = 1;
+    string name = 2;
+    google.protobuf.StringValue local_name = 3;
+    google.protobuf.StringValue nickname = 4;
+    google.protobuf.StringValue about = 5;
+    google.protobuf.Int64Value phone_number = 6;
+}

@@ -2,10 +2,12 @@ package ir.sndu.persist.repo.auth
 
 import java.time.LocalDateTime
 
+import com.github.tminglei.slickpg.ExPostgresProfile.api._
 import ir.sndu.persist.repo.TypeMapper._
 import ir.sndu.server.model.auth.AuthSession
-import slick.jdbc.PostgresProfile.api._
+import slick.dbio.Effect
 import slick.lifted.Tag
+import slick.sql.FixedSqlAction
 
 class AuthSessionTable(tag: Tag) extends Table[AuthSession](tag, "auth_sessions") {
 
@@ -31,8 +33,11 @@ class AuthSessionTable(tag: Tag) extends Table[AuthSession](tag, "auth_sessions"
 
 object AuthSessionRepo {
 
-  val sessions = TableQuery[AuthSessionTable]
+  private val sessions = TableQuery[AuthSessionTable]
 
-  val activeSessions = sessions.filter(_.deletedAt.isEmpty)
+  private val activeSessions = sessions.filter(_.deletedAt.isEmpty)
+
+  def create(authSession: AuthSession): FixedSqlAction[Int, NoStream, Effect.Write] =
+    sessions += authSession
 
 }

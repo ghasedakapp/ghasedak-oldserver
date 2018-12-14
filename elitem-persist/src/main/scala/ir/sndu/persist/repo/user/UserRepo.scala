@@ -2,16 +2,16 @@ package ir.sndu.persist.repo.user
 
 import java.time.LocalDateTime
 
+import com.github.tminglei.slickpg.ExPostgresProfile.api._
 import ir.sndu.persist.repo.TypeMapper._
 import ir.sndu.server.model.user.User
-import slick.jdbc.PostgresProfile.api._
+import slick.dbio.Effect
 import slick.lifted.Tag
+import slick.sql.FixedSqlStreamingAction
 
-class UserTable(tag: Tag) extends Table[User](tag, "users") {
+final class UserTable(tag: Tag) extends Table[User](tag, "users") {
 
   def id = column[Int]("id", O.PrimaryKey)
-
-  def accessSalt = column[String]("access_salt")
 
   def name = column[String]("name")
 
@@ -25,15 +25,18 @@ class UserTable(tag: Tag) extends Table[User](tag, "users") {
 
   def deletedAt = column[Option[LocalDateTime]]("deleted_at")
 
-  def * = (id, accessSalt, name, countryCode, createdAt, nickname, about, deletedAt) <> (User.tupled, User.unapply)
+  def * = (id, name, countryCode, createdAt, nickname, about, deletedAt) <> (User.tupled, User.unapply)
 
 }
 
 object UserRepo {
 
-  val users = TableQuery[UserTable]
+  private val users = TableQuery[UserTable]
 
-  val activeUsers = users.filter(_.deletedAt.nonEmpty)
+  private val activeUsers = users.filter(_.deletedAt.nonEmpty)
+
+  def find(id: Int): FixedSqlStreamingAction[Seq[User], User, Effect.Read] =
+    activeUsers.filter(_.id === id).result
 
   def isDeleted(userId: Int): DBIO[Boolean] =
     users.filter(_.id === userId).filter(_.deletedAt.nonEmpty).exists.result

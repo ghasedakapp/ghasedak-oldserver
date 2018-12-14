@@ -21,7 +21,7 @@ object AuthSession {
 }
 
 @SerialVersionUID(1L)
-case class AuthSession(
+final case class AuthSession(
   userId:      Int,
   tokenId:     String,
   appId:       Int,
@@ -29,4 +29,4 @@ case class AuthSession(
   deviceHash:  String,
   deviceInfo:  String,
   sessionTime: LocalDateTime,
-  deletedAt:   Option[LocalDateTime])
+  deletedAt:   Option[LocalDateTime] = None)

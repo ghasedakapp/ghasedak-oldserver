@@ -5,8 +5,8 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import akka.event.{ Logging, LoggingAdapter }
-import ir.sndu.persist.db.PostgresDb
-import ir.sndu.persist.repo.auth.AuthPhoneTransactionRepo
+import ir.sndu.persist.db.DbExtension
+import ir.sndu.persist.repo.auth.{ AuthPhoneTransactionRepo, AuthTransactionRepo }
 import ir.sndu.persist.repo.user.UserPhoneRepo
 import ir.sndu.rpc.auth.AuthServiceGrpc.AuthService
 import ir.sndu.rpc.auth._
@@ -15,20 +15,19 @@ import ir.sndu.server.rpc.RpcError
 import ir.sndu.server.rpc.auth.helper.{ AuthServiceHelper, AuthTokenHelper }
 import ir.sndu.server.rpc.common.CommonRpcError
 import ir.sndu.server.utils.concurrent.DBIOResult
-import ir.sndu.server.utils.number.PhoneCodeGen._
 import ir.sndu.server.utils.number.PhoneNumberUtils._
 import slick.jdbc.PostgresProfile
 
 import scala.concurrent.{ ExecutionContext, Future }
 
-class AuthServiceImpl(implicit system: ActorSystem) extends AuthService
+final class AuthServiceImpl(implicit system: ActorSystem) extends AuthService
   with AuthServiceHelper
   with AuthTokenHelper
   with DBIOResult[RpcError] {
 
   override implicit val ec: ExecutionContext = system.dispatcher
 
-  override val db: PostgresProfile.backend.Database = PostgresDb.db
+  override val db: PostgresProfile.backend.Database = DbExtension(system).db
 
   override val log: LoggingAdapter = Logging.getLogger(system, this)
 
@@ -37,35 +36,58 @@ class AuthServiceImpl(implicit system: ActorSystem) extends AuthService
   }
 
   override def startPhoneAuth(request: RequestStartPhoneAuth): Future[ResponseStartPhoneAuth] = {
-    val action = for {
+    val action: Result[ResponseStartPhoneAuth] = for {
       _ ← fromBoolean(AuthRpcErrors.InvalidApiKey)(AuthSession.isValidApiKey(request.apiKey))
       normalizedPhone ← fromOption(AuthRpcErrors.InvalidPhoneNumber)(normalizeLong(request.phoneNumber).headOption)
-      optPhone ← fromDBIO(UserPhoneRepo.findByPhoneNumber(normalizedPhone).headOption)
-      _ ← optPhone map (p ⇒ forbidDeletedUser(p.userId)) getOrElse point(())
+      optUserPhone ← fromDBIO(UserPhoneRepo.findByPhoneNumber(normalizedPhone).headOption)
+      // todo: fix this (delete account)
+      _ ← optUserPhone map (p ⇒ forbidDeletedUser(p.userId)) getOrElse point(())
       optAuthTransaction ← fromDBIO(AuthPhoneTransactionRepo.findByPhoneAndDeviceHash(normalizedPhone, request.deviceHash))
       optAuthTransactionWithExpire ← getOptAuthTransactionWithExpire(optAuthTransaction)
-      codeHash = genPhoneCode(normalizedPhone)
       transactionHash ← optAuthTransactionWithExpire match {
         case Some(transaction) ⇒ point(transaction.transactionHash)
         case None ⇒
           val phoneAuthTransaction = AuthPhoneTransaction(
-            normalizedPhone,
-            UUID.randomUUID().toString,
-            request.appId,
-            request.apiKey,
-            request.deviceHash,
-            request.deviceInfo,
-            LocalDateTime.now(ZoneOffset.UTC),
-            codeHash)
+            phoneNumber = normalizedPhone,
+            transactionHash = UUID.randomUUID().toString,
+            appId = request.appId,
+            apiKey = request.apiKey,
+            deviceHash = request.deviceHash,
+            deviceInfo = request.deviceInfo,
+            createdAt = LocalDateTime.now(ZoneOffset.UTC))
           for {
             _ ← fromDBIO(AuthPhoneTransactionRepo.create(phoneAuthTransaction))
           } yield phoneAuthTransaction.transactionHash
       }
-      _ ← sendSmsCode(normalizedPhone, codeHash)
-      isRegistered = optPhone.isDefined
-    } yield ResponseStartPhoneAuth(transactionHash, isRegistered)
+      _ ← sendSmsCode(normalizedPhone, transactionHash)
+    } yield ResponseStartPhoneAuth(transactionHash)
     val result = db.run(action.value)
     result
   }
 
+  override def validateCode(request: RequestValidateCode): Future[ResponseAuth] = {
+    val action: Result[ResponseAuth] = for {
+      transaction ← fromDBIOOption(AuthRpcErrors.PhoneCodeExpired)(AuthTransactionRepo.findChildren(request.transactionHash))
+      _ ← validatePhoneCode(transaction, request.code)
+      optApiAuth ← transaction match {
+        case apt: AuthPhoneTransaction ⇒
+          for {
+            // todo: fix this (delete account)
+            optUserPhone ← fromDBIO(UserPhoneRepo.findByPhoneNumber(apt.phoneNumber).headOption)
+            optApiAuth ← getOptApiAuth(apt, optUserPhone)
+          } yield optApiAuth
+      }
+    } yield ResponseAuth(optApiAuth.isDefined, optApiAuth)
+    val result = db.run(action.value)
+    result
+  }
+
+  override def signUp(request: RequestSignUp): Future[ResponseAuth] = {
+    val action: Result[ResponseAuth] = for {
+      transaction ← fromDBIOOption(AuthRpcErrors.PhoneCodeExpired)(AuthTransactionRepo.findChildren(request.transactionHash))
+      _ ← fromBoolean(AuthRpcErrors.NotValidated)(transaction.isChecked)
+    } yield ResponseAuth()
+    val result = db.run(action.value)
+    result
+  }
 }

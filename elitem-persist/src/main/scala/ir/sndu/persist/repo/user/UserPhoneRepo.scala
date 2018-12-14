@@ -1,30 +1,26 @@
 package ir.sndu.persist.repo.user
 
+import com.github.tminglei.slickpg.ExPostgresProfile.api._
 import ir.sndu.server.model.user.UserPhone
 import slick.dbio.Effect
-import slick.jdbc.PostgresProfile.api._
 import slick.lifted.Tag
 import slick.sql.FixedSqlStreamingAction
 
-class UserPhoneTable(tag: Tag) extends Table[UserPhone](tag, "user_phones") {
+final class UserPhoneTable(tag: Tag) extends Table[UserPhone](tag, "user_phones") {
 
   def userId = column[Int]("user_id", O.PrimaryKey)
 
-  def id = column[Int]("id", O.PrimaryKey)
-
-  def accessSalt = column[String]("access_salt")
-
   def number = column[Long]("number")
 
-  def * = (id, userId, accessSalt, number) <> (UserPhone.tupled, UserPhone.unapply)
+  def * = (userId, number) <> (UserPhone.tupled, UserPhone.unapply)
 
 }
 
 object UserPhoneRepo {
 
-  val phones = TableQuery[UserPhoneTable]
+  private val phones = TableQuery[UserPhoneTable]
 
-  val byPhoneNumber = Compiled { number: Rep[Long] ⇒
+  private val byPhoneNumber = Compiled { number: Rep[Long] ⇒
     phones.filter(_.number === number)
   }
 
