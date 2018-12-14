@@ -29,7 +29,7 @@ object AuthTransactionRepo {
 
   val transactions = TableQuery[AuthTransactionTable]
 
-  private val active = transactions.filter(_.deletedAt.isEmpty).filter(_.isChecked === false)
+  private val active = transactions.filter(_.deletedAt.isEmpty)
 
   def find(transactionHash: String): SqlAction[Option[AuthTransaction], NoStream, Effect.Read] =
     active.filter(_.transactionHash === transactionHash).result.headOption

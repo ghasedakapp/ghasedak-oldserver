@@ -30,7 +30,7 @@ object AuthPhoneTransactionRepo {
 
   private val phoneTransactions = TableQuery[AuthPhoneTransactionTable]
 
-  private val active = phoneTransactions.filter(_.deletedAt.isEmpty).filter(_.isChecked === false)
+  private val active = phoneTransactions.filter(_.deletedAt.isEmpty)
 
   private val byHash = Compiled { hash: Rep[String] ⇒
     active.filter(_.transactionHash === hash)
