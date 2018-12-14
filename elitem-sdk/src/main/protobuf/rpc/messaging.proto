@@ -12,8 +12,8 @@ import "scalapb/scalapb.proto";
 import "api/messaging.proto";
 
 service MessagingService {
-    rpc StartPhoneAuth (RequestSendMessage) returns (ResponseVoid) {
-    }
+    rpc SendMessage (RequestSendMessage) returns (ResponseVoid) {}
+    rpc LoadDialogs (RequestLoadDialogs) returns (ResponseLoadDialogs) {}
 }
 
 message RequestSendMessage {
@@ -22,5 +22,12 @@ message RequestSendMessage {
     ir.sndu.api.ApiMessage message = 3; //The message
 }
 
-message ResponseVoid {
+message ResponseVoid {}
+
+message RequestLoadDialogs {
+    int64 min_date = 1; //start date of conversation loading. Use 0 to load latest messages
+    int32 limit = 2; //limit maximum amount of messages (max is 10)
+}
+message ResponseLoadDialogs {
+    repeated ir.sndu.api.ApiDialog dialogs = 1;
 }

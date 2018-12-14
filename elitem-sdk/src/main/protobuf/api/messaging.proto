@@ -3,6 +3,7 @@ syntax = 'proto3';
 package ir.sndu.api;
 
 import "scalapb/scalapb.proto";
+import "api/peer.proto";
 
 option java_package = "ir.sndu.api.messaging";
 option java_multiple_files = true;
@@ -38,7 +39,7 @@ message ApiMessageContainer{
 }
 
 message ApiDialog{
-    int64 chat_id = 1;
+    ir.sndu.api.ApiPeer peer = 1;
     int32 unread_count = 2;
     int64 sort_date = 3;
     int32 sender_user_id = 4;
