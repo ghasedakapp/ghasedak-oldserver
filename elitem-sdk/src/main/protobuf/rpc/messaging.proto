@@ -10,6 +10,7 @@ option (scalapb.options) = {
 
 import "scalapb/scalapb.proto";
 import "api/messaging.proto";
+import "api/peer.proto";
 
 service MessagingService {
     rpc SendMessage (RequestSendMessage) returns (ResponseVoid) {}
@@ -17,7 +18,7 @@ service MessagingService {
 }
 
 message RequestSendMessage {
-    int64 chat_id = 1; //Destination chat for message
+    ir.sndu.api.ApiPeer peer = 1; //Destination peer for message
     int64 random_id = 2; //Message random id (generated on client side)
     ir.sndu.api.ApiMessage message = 3; //The message
 }
