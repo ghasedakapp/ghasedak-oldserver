@@ -5,14 +5,15 @@ import java.time.{ LocalDateTime, ZoneOffset }
 
 import ir.sndu.api.auth.ApiAuth
 import ir.sndu.api.user.ApiUser
-import ir.sndu.persist.repo.auth.{ AuthPhoneTransactionRepo, AuthSessionRepo, AuthTransactionRepo, GateAuthCodeRepo }
-import ir.sndu.persist.repo.user.UserRepo
+import ir.sndu.persist.repo.auth.{ AuthSessionRepo, AuthTransactionRepo, GateAuthCodeRepo }
+import ir.sndu.persist.repo.user.{ UserPhoneRepo, UserRepo }
 import ir.sndu.server.model.auth.{ AuthPhoneTransaction, AuthSession, AuthTransactionBase }
-import ir.sndu.server.model.user.UserPhone
+import ir.sndu.server.model.user.{ User, UserPhone }
 import ir.sndu.server.rpc.auth.{ AuthRpcErrors, AuthServiceImpl }
+import ir.sndu.server.utils.IdUtils._
+import ir.sndu.server.utils.StringUtils._
 import ir.sndu.server.utils.number.PhoneCodeGen.genPhoneCode
-
-import scala.concurrent.Future
+import ir.sndu.server.utils.number.PhoneNumberUtils._
 
 trait AuthServiceHelper {
   this: AuthServiceImpl ⇒
@@ -75,6 +76,24 @@ trait AuthServiceHelper {
             user.id, user.name, None, user.nickname, user.about, Some(userPhone.number))
         } yield Some(ApiAuth(token, Some(apiUser)))
     }
+  }
+
+  protected def newUserPhoneSignUp(transaction: AuthPhoneTransaction, name: String): Result[Option[ApiAuth]] = {
+    val phone = transaction.phoneNumber
+    for {
+      phoneAndCode ← fromOption(AuthRpcErrors.InvalidPhoneNumber)(normalizeWithCountry(phone).headOption)
+      (_, countryCode) = phoneAndCode
+      validName ← fromOption(AuthRpcErrors.InvalidName)(validName(name))
+      user = User(
+        id = nextIntId(),
+        name = validName,
+        countryCode = countryCode,
+        createdAt = LocalDateTime.now(ZoneOffset.UTC))
+      _ ← fromDBIO(UserRepo.create(user))
+      userPhone = UserPhone(user.id, phone)
+      _ ← fromDBIO(UserPhoneRepo.create(userPhone))
+      optApiAuth ← getOptApiAuth(transaction, Some(userPhone))
+    } yield optApiAuth
   }
 
 }

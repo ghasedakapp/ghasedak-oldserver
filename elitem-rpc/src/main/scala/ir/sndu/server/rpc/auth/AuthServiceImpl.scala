@@ -86,7 +86,10 @@ final class AuthServiceImpl(implicit system: ActorSystem) extends AuthService
     val action: Result[ResponseAuth] = for {
       transaction ← fromDBIOOption(AuthRpcErrors.PhoneCodeExpired)(AuthTransactionRepo.findChildren(request.transactionHash))
       _ ← fromBoolean(AuthRpcErrors.NotValidated)(transaction.isChecked)
-    } yield ResponseAuth()
+      optApiAuth ← transaction match {
+        case apt: AuthPhoneTransaction ⇒ newUserPhoneSignUp(apt, request.name)
+      }
+    } yield ResponseAuth(optApiAuth.isDefined, optApiAuth)
     val result = db.run(action.value)
     result
   }
