@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package ir.sndu.rpc;
+
+option java_package = "ir.sndu.rpc.messaging";
+option java_multiple_files = true;
+option (scalapb.options) = {
+  flat_package: true
+};
+
+import "scalapb/scalapb.proto";
+import "api/messaging.proto";
+
+service MessagingService {
+    rpc StartPhoneAuth (RequestSendMessage) returns (ResponseVoid) {
+    }
+}
+
+message RequestSendMessage {
+    int64 chat_id = 1; //Destination chat for message
+    int64 random_id = 2; //Message random id (generated on client side)
+    ir.sndu.api.ApiMessage message = 3; //The message
+}
+
+message ResponseVoid {
+}
