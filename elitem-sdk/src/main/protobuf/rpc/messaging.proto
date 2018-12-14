@@ -16,6 +16,8 @@ service MessagingService {
     rpc SendMessage (RequestSendMessage) returns (ResponseVoid) {}
     rpc LoadDialogs (RequestLoadDialogs) returns (ResponseLoadDialogs) {}
     rpc LoadHistory (RequestLoadHistory) returns (ResponseLoadHistory) {}
+    rpc MessageReceived (RequestMessageReceived) returns (ResponseVoid) {}
+    rpc MessageRead (RequestMessageRead) returns (ResponseVoid) {}
 }
 
 message RequestSendMessage {
@@ -44,4 +46,15 @@ message RequestLoadHistory {
 
 message ResponseLoadHistory {
     repeated ir.sndu.api.ApiMessageContainer history = 1; //Messages
+}
+
+
+message RequestMessageReceived {
+    ir.sndu.api.ApiPeer peer = 1; //Destination peer
+    int32 sequence_nr = 2; //Maximum sequence number of received messages
+}
+
+message RequestMessageRead {
+    ir.sndu.api.ApiPeer peer = 1; //Destination peer
+    int32 sequence_nr = 2; //Maximum sequence number of received messages
 }
