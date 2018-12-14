@@ -1,15 +1,15 @@
-syntax = 'proto3';
+syntax = "proto3";
 
 package ir.sndu.api;
-
-import "scalapb/scalapb.proto";
-import "api/peer.proto";
 
 option java_package = "ir.sndu.api.messaging";
 option java_multiple_files = true;
 option (scalapb.options) = {
   flat_package: true
 };
+
+import "scalapb/scalapb.proto";
+import "api/peer.proto";
 
 message ApiMessage {
     oneof message {

@@ -1,9 +1,14 @@
 syntax = "proto3";
 
-package ir.sndu;
+package ir.sndu.api;
 
-option java_package = "ir.sndu.api";
+option java_package = "ir.sndu.api.auth";
+option java_multiple_files = true;
+option (scalapb.options) = {
+  flat_package: true
+};
 
+import "scalapb/scalapb.proto";
 import "api/user.proto";
 
 message ApiAuth {

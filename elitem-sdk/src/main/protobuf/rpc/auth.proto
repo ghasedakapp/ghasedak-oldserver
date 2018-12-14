@@ -2,14 +2,13 @@ syntax = "proto3";
 
 package ir.sndu.rpc;
 
-import "scalapb/scalapb.proto";
-
 option java_package = "ir.sndu.rpc.auth";
 option java_multiple_files = true;
 option (scalapb.options) = {
   flat_package: true
 };
 
+import "scalapb/scalapb.proto";
 import "api/auth.proto";
 
 service AuthService {
@@ -45,5 +44,5 @@ message RequestSignUp {
 
 message ResponseAuth {
     bool is_registered = 1;
-    ApiAuth api_auth = 2;
+    ir.sndu.api.ApiAuth api_auth = 2;
 }

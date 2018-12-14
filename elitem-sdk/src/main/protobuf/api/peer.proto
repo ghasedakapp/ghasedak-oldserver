@@ -2,13 +2,13 @@ syntax = "proto3";
 
 package ir.sndu.api;
 
-import "scalapb/scalapb.proto";
-
 option java_package = "ir.sndu.api.peer";
 option java_multiple_files = true;
 option (scalapb.options) = {
   flat_package: true
 };
+
+import "scalapb/scalapb.proto";
 
 enum ApiPeerType {
     PeerType_Unknown = 0;
