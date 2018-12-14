@@ -1,15 +1,25 @@
-CREATE TABLE auth_phone_transactions (
-  phone_number     BIGINT       NOT NULL,
+CREATE TABLE auth_transactions (
   transaction_hash VARCHAR(255) NOT NULL,
   app_id           INT          NOT NULL,
   api_key          VARCHAR(255) NOT NULL,
   device_hash      TEXT         NOT NULL,
   device_info      TEXT         NOT NULL,
   created_at       TIMESTAMP    NOT NULL,
-  code_hash        VARCHAR(255) NOT NULL,
   is_checked       BOOLEAN      NOT NULL,
   deleted_at       TIMESTAMP,
   PRIMARY KEY (transaction_hash)
+);
+
+CREATE TABLE auth_phone_transactions (
+  phone_number     BIGINT       NOT NULL,
+  PRIMARY KEY (transaction_hash)
+) inherits(auth_transactions);
+
+CREATE TABLE gate_auth_codes (
+    transaction_hash VARCHAR (255) NOT NULL ,
+    code_hash VARCHAR (255) NOT NULL ,
+    is_deleted BOOLEAN NOT NULL ,
+    primary key(transaction_hash)
 );
 
 CREATE TABLE auth_tokens (

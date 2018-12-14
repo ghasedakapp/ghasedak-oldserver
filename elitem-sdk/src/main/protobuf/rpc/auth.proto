@@ -9,9 +9,9 @@ import "api/auth.proto";
 service AuthService {
     rpc StartPhoneAuth (RequestStartPhoneAuth) returns (ResponseStartPhoneAuth) {
     }
-    rpc ValidatePhoneCode (RequestValidatePhoneCode) returns (ResponseValidatePhoneCode) {
+    rpc ValidateCode (RequestValidateCode) returns (ResponseAuth) {
     }
-    rpc SignUpWithPhone (RequestSignUpWithPhone) returns (ResponseSignUpWithPhone) {
+    rpc SignUp (RequestSignUp) returns (ResponseAuth) {
     }
 }
 
@@ -27,21 +27,17 @@ message ResponseStartPhoneAuth {
     string transaction_hash = 1;
 }
 
-message RequestValidatePhoneCode {
+message RequestValidateCode {
     string transaction_hash = 1;
     string code = 2;
 }
 
-message ResponseValidatePhoneCode {
-    bool is_registered = 1;
-    ApiAuth api_auth = 2;
-}
-
-message RequestSignUpWithPhone {
+message RequestSignUp {
     string transaction_hash = 1;
     string name = 2;
 }
 
-message ResponseSignUpWithPhone {
+message ResponseAuth {
+    bool is_registered = 1;
     ApiAuth api_auth = 2;
 }

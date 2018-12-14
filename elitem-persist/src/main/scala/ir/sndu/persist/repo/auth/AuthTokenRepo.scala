@@ -2,10 +2,10 @@ package ir.sndu.persist.repo.auth
 
 import java.time.LocalDateTime
 
+import com.github.tminglei.slickpg.ExPostgresProfile.api._
 import ir.sndu.persist.repo.TypeMapper._
 import ir.sndu.server.model.auth.AuthToken
 import slick.dbio.Effect
-import slick.jdbc.PostgresProfile.api._
 import slick.lifted.Tag
 import slick.sql.{ FixedSqlAction, SqlAction }
 

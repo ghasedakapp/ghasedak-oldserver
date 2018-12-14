@@ -1,8 +1,8 @@
 package ir.sndu.persist.repo.user
 
+import com.github.tminglei.slickpg.ExPostgresProfile.api._
 import ir.sndu.server.model.user.UserPhone
 import slick.dbio.Effect
-import slick.jdbc.PostgresProfile.api._
 import slick.lifted.Tag
 import slick.sql.FixedSqlStreamingAction
 

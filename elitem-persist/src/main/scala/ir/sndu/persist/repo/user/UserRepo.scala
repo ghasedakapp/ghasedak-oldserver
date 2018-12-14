@@ -2,12 +2,12 @@ package ir.sndu.persist.repo.user
 
 import java.time.LocalDateTime
 
+import com.github.tminglei.slickpg.ExPostgresProfile.api._
 import ir.sndu.persist.repo.TypeMapper._
 import ir.sndu.server.model.user.User
 import slick.dbio.Effect
-import slick.jdbc.PostgresProfile.api._
 import slick.lifted.Tag
-import slick.sql.{ FixedSqlStreamingAction, SqlAction }
+import slick.sql.FixedSqlStreamingAction
 
 final class UserTable(tag: Tag) extends Table[User](tag, "users") {
 
