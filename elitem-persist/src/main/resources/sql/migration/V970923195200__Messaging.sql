@@ -1,14 +1,24 @@
-CREATE TABLE history_messages (
-       chat_id bigint NOT NULL,
+CREATE TABLE user_messages (
+       user_id int NOT NULL,
        peer_id int NOT NULL,
-       peer_type int NOT NULL,
        sequence_nr int NOT NULL,
        date timestamp NOT NULL,
        sender_user_id int NOT NULL,
        message_content_header int NOT NULL,
        message_content_data bytea NOT NULL,
        deleted_at timestamp,
-       PRIMARY KEY(chat_id, date, sender_user_id, sequence_nr)
+       PRIMARY KEY(user_id, peer_id, date, sender_user_id, sequence_nr)
+);
+
+CREATE TABLE group_messages (
+       group_id int NOT NULL,
+       sequence_nr int NOT NULL,
+       date timestamp NOT NULL,
+       sender_user_id int NOT NULL,
+       message_content_header int NOT NULL,
+       message_content_data bytea NOT NULL,
+       deleted_at timestamp,
+       PRIMARY KEY(group_id, date, sender_user_id, sequence_nr)
 );
 
 CREATE TABLE user_dialogs (
@@ -22,9 +32,9 @@ CREATE TABLE user_dialogs (
 );
 
 create table dialog_commons(
-    chat_id bigint NOT NULL,
+    dialog_id varchar(255) not null,
     last_message_date timestamp not null,
     last_received_seq int not null,
     last_read_seq int not null,
-    primary key(chat_id)
+    primary key(dialog_id)
 );
