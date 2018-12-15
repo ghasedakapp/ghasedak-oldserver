@@ -12,7 +12,7 @@ import scala.concurrent.ExecutionContext
 
 object ElitemServerBuilder {
 
-  def start(config: Config): Unit = {
+  def start(config: Config): ActorSystem = {
     implicit val system: ActorSystem =
       ActorSystem(config.getString("server-name"), config)
 
@@ -23,6 +23,8 @@ object ElitemServerBuilder {
     implicit val ex: ExecutionContext = system.dispatcher
 
     Frontend.start(ServiceDescriptors.services)(config)
+
+    system
   }
 
 }

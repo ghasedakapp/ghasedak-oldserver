@@ -37,7 +37,7 @@ CREATE TABLE auth_sessions (
   device_hash  TEXT         NOT NULL,
   device_info  TEXT         NOT NULL,
   session_time TIMESTAMP    NOT NULL,
-  deleted_at   TIMESTAMP    NOT NULL,
+  deleted_at   TIMESTAMP,
   PRIMARY KEY (user_id, token_id)
 );
 

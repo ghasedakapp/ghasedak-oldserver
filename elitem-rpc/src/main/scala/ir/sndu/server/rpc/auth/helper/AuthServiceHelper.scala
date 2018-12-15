@@ -27,7 +27,7 @@ trait AuthServiceHelper {
     optAuthTransaction match {
       case Some(transaction) ⇒
         val now = LocalDateTime.now(ZoneOffset.UTC)
-        val until = now.until(transaction.createdAt, ChronoUnit.MINUTES)
+        val until = transaction.createdAt.until(now, ChronoUnit.MINUTES)
         for {
           _ ← if (until > maximumValidCodeMinutes)
             fromDBIO(AuthTransactionRepo.delete(transaction.transactionHash))
@@ -47,13 +47,13 @@ trait AuthServiceHelper {
     } yield ()
   }
 
-  protected def validatePhoneCode(transaction: AuthTransactionBase, code: String): Result[Unit] = {
+  protected def validateCode(transaction: AuthTransactionBase, code: String): Result[Unit] = {
     val now = LocalDateTime.now(ZoneOffset.UTC)
-    val until = now.until(transaction.createdAt, ChronoUnit.MINUTES)
+    val until = transaction.createdAt.until(now, ChronoUnit.MINUTES)
     for {
-      gateAuthCode ← fromDBIOOption(AuthRpcErrors.PhoneCodeExpired)(GateAuthCodeRepo.find(transaction.transactionHash))
+      gateAuthCode ← fromDBIOOption(AuthRpcErrors.AuthCodeExpired)(GateAuthCodeRepo.find(transaction.transactionHash))
       _ ← fromBoolean(AuthRpcErrors.InvalidAuthCode)(gateAuthCode.codeHash == code)
-      _ ← fromBoolean(AuthRpcErrors.PhoneCodeExpired)(until < maximumValidCodeMinutes)
+      _ ← fromBoolean(AuthRpcErrors.AuthCodeExpired)(until < maximumValidCodeMinutes)
       _ ← fromDBIO(AuthTransactionRepo.updateSetChecked(transaction.transactionHash))
     } yield ()
   }
@@ -63,8 +63,9 @@ trait AuthServiceHelper {
       case None ⇒ point(None)
       case Some(userPhone) ⇒
         for {
+          userOpt ← fromDBIO(UserRepo.find(userPhone.userId))
           // todo: fix this (delete account)
-          user ← fromDBIO(UserRepo.find(userPhone.userId).head)
+          user = userOpt.get
           generatedToken ← fromFuture(generateToken(user.id))
           (tokenId, token) = generatedToken
           authSession = AuthSession(

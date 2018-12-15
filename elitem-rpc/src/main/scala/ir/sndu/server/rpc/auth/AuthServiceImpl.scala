@@ -32,7 +32,10 @@ final class AuthServiceImpl(implicit system: ActorSystem) extends AuthService
   override val log: LoggingAdapter = Logging.getLogger(system, this)
 
   implicit private def onFailure: PartialFunction[Throwable, RpcError] = {
-    case _ ⇒ CommonRpcError.InternalError
+    case rpcError: RpcError ⇒ rpcError
+    case ex ⇒
+      log.error(ex, "Internal error")
+      CommonRpcError.InternalError
   }
 
   override def startPhoneAuth(request: RequestStartPhoneAuth): Future[ResponseStartPhoneAuth] = {
@@ -67,8 +70,8 @@ final class AuthServiceImpl(implicit system: ActorSystem) extends AuthService
 
   override def validateCode(request: RequestValidateCode): Future[ResponseAuth] = {
     val action: Result[ResponseAuth] = for {
-      transaction ← fromDBIOOption(AuthRpcErrors.PhoneCodeExpired)(AuthTransactionRepo.findChildren(request.transactionHash))
-      _ ← validatePhoneCode(transaction, request.code)
+      transaction ← fromDBIOOption(AuthRpcErrors.AuthCodeExpired)(AuthTransactionRepo.findChildren(request.transactionHash))
+      _ ← validateCode(transaction, request.code)
       optApiAuth ← transaction match {
         case apt: AuthPhoneTransaction ⇒
           for {
@@ -84,7 +87,7 @@ final class AuthServiceImpl(implicit system: ActorSystem) extends AuthService
 
   override def signUp(request: RequestSignUp): Future[ResponseAuth] = {
     val action: Result[ResponseAuth] = for {
-      transaction ← fromDBIOOption(AuthRpcErrors.PhoneCodeExpired)(AuthTransactionRepo.findChildren(request.transactionHash))
+      transaction ← fromDBIOOption(AuthRpcErrors.AuthCodeExpired)(AuthTransactionRepo.findChildren(request.transactionHash))
       _ ← fromBoolean(AuthRpcErrors.NotValidated)(transaction.isChecked)
       optApiAuth ← transaction match {
         case apt: AuthPhoneTransaction ⇒ newUserPhoneSignUp(apt, request.name)
