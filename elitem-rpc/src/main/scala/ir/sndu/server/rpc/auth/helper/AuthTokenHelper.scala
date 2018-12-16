@@ -7,7 +7,7 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.JWTVerificationException
 import com.auth0.jwt.interfaces.DecodedJWT
-import io.grpc.Context
+import io.grpc.{ Context, Metadata }
 import ir.sndu.persist.repo.auth.AuthTokenRepo
 import ir.sndu.server.model.auth.AuthToken
 import ir.sndu.server.rpc.auth.AuthRpcErrors
@@ -18,7 +18,8 @@ import scala.concurrent.{ ExecutionContext, Future }
 
 object AuthTokenHelper {
 
-  private val TOKEN_CTX_KEY: Context.Key[String] = Context.key[String]("token")
+  val TOKEN_CTX_KEY: Context.Key[String] = Context.key[String]("token")
+  val TOKEN_METADATA_KEY: Metadata.Key[String] = Metadata.Key.of("token", Metadata.ASCII_STRING_MARSHALLER);
 
   case class ClientData(userId: Int, tokenId: String, tokenKey: String, token: String)
 

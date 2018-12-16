@@ -10,7 +10,7 @@ object GrpcFrontend {
 
   def start(host: String, port: Int, services: Seq[ServerServiceDefinition]): Unit = {
     val serverBuilder = ServerBuilder.forPort(port)
-    services foreach serverBuilder.addService
+    services foreach (serverBuilder.addService(_).intercept(new TokenServerInterceptor()))
     server = Some(serverBuilder.build().start)
     logger.info("Server started, listening on " + port)
 

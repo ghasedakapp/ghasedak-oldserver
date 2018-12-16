@@ -7,6 +7,7 @@ import com.typesafe.config.{ Config, ConfigFactory }
 import io.grpc.{ ManagedChannel, ManagedChannelBuilder }
 import ir.sndu.persist.db.DbExtension
 import ir.sndu.rpc.auth.AuthServiceGrpc
+import ir.sndu.rpc.messaging.MessagingServiceGrpc
 import ir.sndu.server.config.{ AppType, ElitemConfigFactory }
 import ir.sndu.server.utils.UserTestUtils
 import org.scalatest.concurrent.ScalaFutures
@@ -56,5 +57,8 @@ abstract class GrpcBaseSuit extends FlatSpec
 
   protected val authStub: AuthServiceGrpc.AuthServiceBlockingStub =
     AuthServiceGrpc.blockingStub(channel)
+
+  protected val messagingStub: MessagingServiceGrpc.MessagingServiceBlockingStub =
+    MessagingServiceGrpc.blockingStub(channel)
 
 }
