@@ -23,6 +23,7 @@ CREATE TABLE user_dialogs (
 create table dialog_commons(
     dialog_id varchar(255) not null,
     last_message_date timestamp not null,
+    last_message_seq int not null,
     last_received_seq int not null,
     last_read_seq int not null,
     primary key(dialog_id)

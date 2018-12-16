@@ -16,29 +16,33 @@ final class DialogCommonTable(tag: Tag) extends Table[DialogCommon](tag, "dialog
 
   def lastMessageDate = column[LocalDateTime]("last_message_date")
 
+  def lastMessageSeq = column[Int]("last_message_seq")
+
   def lastReceivedSeq = column[Int]("last_received_seq")
 
   def lastReadSeq = column[Int]("last_read_seq")
 
-  def * = (dialogId, lastMessageDate, lastReceivedSeq, lastReadSeq) <> (applyDialogCommon.tupled, unapplyDialogCommon)
+  def * = (dialogId, lastMessageDate, lastMessageSeq, lastReceivedSeq, lastReadSeq) <> (applyDialogCommon.tupled, unapplyDialogCommon)
 
-  def applyDialogCommon: (String, LocalDateTime, Int, Int) ⇒ DialogCommon = {
+  def applyDialogCommon: (String, LocalDateTime, Int, Int, Int) ⇒ DialogCommon = {
     case (
       dialogId,
       lastMessageDate,
+      lastMessageSeq,
       lastReceivedSeq,
       lastReadSeq) ⇒
       DialogCommon(
         dialogId = dialogId,
         lastMessageDate = lastMessageDate,
+        lastMessageSeq = lastMessageSeq,
         lastReceivedSeq = lastReceivedSeq,
         lastReadSeq = lastReadSeq)
   }
 
-  def unapplyDialogCommon: DialogCommon ⇒ Option[(String, LocalDateTime, Int, Int)] = { dc ⇒
+  def unapplyDialogCommon: DialogCommon ⇒ Option[(String, LocalDateTime, Int, Int, Int)] = { dc ⇒
     DialogCommon.unapply(dc).map {
-      case (dialogId, lastMessageDate, lastReceivedSeq, lastReadSeq) ⇒
-        (dialogId, lastMessageDate, lastReceivedSeq, lastReadSeq)
+      case (dialogId, lastMessageDate, lastMessageSeq, lastReceivedSeq, lastReadSeq) ⇒
+        (dialogId, lastMessageDate, lastMessageSeq, lastReceivedSeq, lastReadSeq)
     }
   }
 }
@@ -98,9 +102,10 @@ object DialogRepo extends UserDialogOperations with DialogCommonOperations {
   def create(
     userId:          Int,
     peer:            ApiPeer,
+    lastMessageSeq:  Int,
     lastMessageDate: LocalDateTime) = {
     createUserDialog(userId, peer, 0, 0) andThen
-      createCommon(DialogCommon(getDialogId(Some(userId), peer), lastMessageDate, 0, 0))
+      createCommon(DialogCommon(getDialogId(Some(userId), peer), lastMessageDate, lastMessageSeq, 0, 0))
   }
 
   def find(userId: Int, limit: Int)(implicit ec: ExecutionContext) = {

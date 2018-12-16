@@ -111,10 +111,10 @@ object HistoryMessageRepo {
   def findMetaAfter(userId: Int, peer: ApiPeer, date: LocalDateTime, limit: Long) =
     metaAfterC((userId, peer.`type`.value, peer.id, date, limit)).result
 
-  private val beforeC = Compiled { (userId: Rep[Int], peerId: Rep[Int], peerType: Rep[Int], date: Rep[LocalDateTime], limit: ConstColumn[Long]) ⇒
+  private val beforeC = Compiled { (userId: Rep[Int], peerId: Rep[Int], peerType: Rep[Int], seq: Rep[Int], limit: ConstColumn[Long]) ⇒
     byUserIdPeer(userId, peerType, peerId)
-      .filter(_.date <= date)
-      .sortBy(_.date.asc)
+      .filter(_.sequenceNr <= seq)
+      .sortBy(_.sequenceNr.asc)
       .take(limit)
   }
 
@@ -129,8 +129,8 @@ object HistoryMessageRepo {
     byUserIdPeer(userId, peerType, peerId).filter(_.sequenceNr === sequenceNr)
   }
 
-  def findBefore(userId: Int, peer: ApiPeer, date: LocalDateTime, limit: Long) =
-    beforeC((userId, peer.id, peer.`type`.value, date, limit)).result
+  def findBefore(userId: Int, peer: ApiPeer, seq: Int, limit: Long) =
+    beforeC((userId, peer.id, peer.`type`.value, seq, limit)).result
 
   def findBidi(userId: Int, peer: ApiPeer, date: LocalDateTime, limit: Long) =
     (beforeExclC.applied((userId, peer.`type`.value, peer.id, date, limit)) ++

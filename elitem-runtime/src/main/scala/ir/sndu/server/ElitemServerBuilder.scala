@@ -5,8 +5,10 @@ import akka.cluster.Cluster
 import com.typesafe.config.Config
 import io.grpc.ServerServiceDefinition
 import ir.sndu.rpc.auth.AuthServiceGrpc
+import ir.sndu.rpc.messaging.MessagingServiceGrpc
 import ir.sndu.server.frontend.Frontend
 import ir.sndu.server.rpc.auth.AuthServiceImpl
+import ir.sndu.server.rpc.messaging.MessagingServiceImpl
 
 import scala.concurrent.ExecutionContext
 
@@ -33,7 +35,8 @@ object ServiceDescriptors {
 
   def services(implicit system: ActorSystem, ec: ExecutionContext): Seq[ServerServiceDefinition] = {
     Seq(
-      AuthServiceGrpc.bindService(new AuthServiceImpl, ec))
+      AuthServiceGrpc.bindService(new AuthServiceImpl, ec),
+      MessagingServiceGrpc.bindService(new MessagingServiceImpl, ec))
   }
 
 }
