@@ -32,20 +32,20 @@ trait DialogCommonOperations extends DialogId {
 
   def commonExists(dialogId: String) = existsC(dialogId).result
 
-  def updateLastMessageDate(userId: Int, peer: ApiPeer, lastMessageDate: LocalDateTime)(implicit ec: ExecutionContext) =
+  def updateLastMessageDate(userId: Int, peer: ApiPeer, lastMessageSeq: Int, lastMessageDate: LocalDateTime)(implicit ec: ExecutionContext) =
     peer.`type` match {
       case ApiPeerType.PEER_TYPE_UNKNOWN | ApiPeerType.Unrecognized(_) ⇒ throw new RuntimeException("Unknown peer type")
-      case ApiPeerType.PRIVATE ⇒ updateLastMessageDatePrivate(userId: Int, peer: ApiPeer, lastMessageDate: LocalDateTime)
-      case ApiPeerType.GROUP ⇒ updateLastMessageDateGroup(peer, lastMessageDate)
+      case ApiPeerType.PRIVATE ⇒ updateLastMessageDatePrivate(userId: Int, peer: ApiPeer, lastMessageSeq, lastMessageDate: LocalDateTime)
+      case ApiPeerType.GROUP ⇒ updateLastMessageDateGroup(peer, lastMessageSeq, lastMessageDate)
 
     }
 
-  def updateLastMessageDatePrivate(userId: Int, peer: ApiPeer, lastMessageDate: LocalDateTime)(implicit ec: ExecutionContext) = {
+  def updateLastMessageDatePrivate(userId: Int, peer: ApiPeer, lastMessageSeq: Int, lastMessageDate: LocalDateTime)(implicit ec: ExecutionContext) = {
     requirePrivate(peer)
     byPKC.applied(getDialogId(Some(userId), peer)).map(_.lastMessageDate).update(lastMessageDate)
   }
 
-  def updateLastMessageDateGroup(peer: ApiPeer, lastMessageDate: LocalDateTime)(implicit ec: ExecutionContext) = {
+  def updateLastMessageDateGroup(peer: ApiPeer, lastMessageSeq: Int, lastMessageDate: LocalDateTime)(implicit ec: ExecutionContext) = {
     requireGroup(peer)
     byPKC.applied(getDialogId(None, peer))
       .map(_.lastMessageDate)

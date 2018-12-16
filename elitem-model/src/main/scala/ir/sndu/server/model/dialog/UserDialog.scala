@@ -9,6 +9,7 @@ import ir.sndu.server.model.history.HistoryMessage
 case class DialogCommon(
   dialogId:        String,
   lastMessageDate: LocalDateTime,
+  lastMessageSeq:  Int,
   lastReceivedSeq: Int,
   lastReadSeq:     Int)
 
@@ -24,6 +25,7 @@ case class Dialog(
   peer:                 ApiPeer,
   ownerLastReceivedSeq: Int,
   ownerLastReadSeq:     Int,
+  lastMessageSeq:       Int,
   lastMessageDate:      LocalDateTime,
   lastReceivedSeq:      Int,
   lastReadSeq:          Int,
@@ -33,7 +35,7 @@ case class Dialog(
     val msgDate = lastMessageDate.atZone(ZoneId.systemDefault()).toInstant.toEpochMilli
     ApiDialog(
       Some(peer),
-      0,
+      lastMessageSeq - ownerLastReadSeq,
       msgDate,
       Some(ApiMessageContainer(
         history.senderUserId,
@@ -52,6 +54,7 @@ object Dialog {
       ownerLastReceivedSeq = dialog.ownerLastReceivedSeq,
       ownerLastReadSeq = dialog.ownerLastReadSeq,
       lastMessageDate = common.lastMessageDate,
+      lastMessageSeq = common.lastMessageSeq,
       lastReceivedSeq = common.lastReceivedSeq,
       lastReadSeq = common.lastReadSeq,
       createdAt = dialog.createdAt)
