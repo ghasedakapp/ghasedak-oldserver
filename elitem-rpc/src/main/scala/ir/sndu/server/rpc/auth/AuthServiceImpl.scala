@@ -96,4 +96,15 @@ final class AuthServiceImpl(implicit system: ActorSystem) extends AuthService
     val result = db.run(action.value)
     result
   }
+
+  // Just for test
+  override def testAuth(request: RequestTestAuth): Future[ResponseTestAuth] = {
+    authorize { _ ⇒
+      if (request.exception) {
+        Future.failed(AuthRpcErrors.AuthTestError)
+      } else {
+        Future.successful(ResponseTestAuth(true))
+      }
+    }
+  }
 }

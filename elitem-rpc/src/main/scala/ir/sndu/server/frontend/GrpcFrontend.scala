@@ -1,6 +1,6 @@
 package ir.sndu.server.frontend
 
-import io.grpc.{ Server, ServerBuilder, ServerServiceDefinition }
+import io.grpc._
 import org.slf4j.LoggerFactory
 
 object GrpcFrontend {
@@ -10,7 +10,11 @@ object GrpcFrontend {
 
   def start(host: String, port: Int, services: Seq[ServerServiceDefinition]): Unit = {
     val serverBuilder = ServerBuilder.forPort(port)
-    services foreach (serverBuilder.addService(_).intercept(new TokenServerInterceptor()))
+
+    services foreach serverBuilder.addService
+
+    serverBuilder.intercept(new TokenServerInterceptor)
+
     server = Some(serverBuilder.build().start)
     logger.info("Server started, listening on " + port)
 

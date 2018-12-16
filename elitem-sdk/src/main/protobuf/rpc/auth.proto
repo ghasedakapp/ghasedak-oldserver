@@ -18,6 +18,9 @@ service AuthService {
     }
     rpc SignUp (RequestSignUp) returns (ResponseAuth) {
     }
+    // Just for test
+    rpc TestAuth (RequestTestAuth) returns (ResponseTestAuth) {
+    }
 }
 
 message RequestStartPhoneAuth {
@@ -45,4 +48,14 @@ message RequestSignUp {
 message ResponseAuth {
     bool is_registered = 1;
     ir.sndu.api.ApiAuth api_auth = 2;
+}
+
+// Just for test
+message RequestTestAuth {
+    bool exception = 1;
+}
+
+// Just for test
+message ResponseTestAuth {
+    bool auth = 1;
 }

@@ -11,13 +11,18 @@ import ir.sndu.rpc.messaging.MessagingServiceGrpc
 import ir.sndu.server.config.{ AppType, ElitemConfigFactory }
 import ir.sndu.server.utils.UserTestUtils
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.{ FlatSpec, Inside, Matchers }
+import org.scalatest.{ BeforeAndAfterAll, FlatSpec, Inside, Matchers }
 
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
+
+// todo: Config this for parallel execution (Akka)
 abstract class GrpcBaseSuit extends FlatSpec
   with Matchers
   with ScalaFutures
   with Inside
-  with UserTestUtils {
+  with UserTestUtils
+  with BeforeAndAfterAll {
 
   private def randomPort: Int = {
     val socket = new ServerSocket(0)
@@ -39,10 +44,12 @@ abstract class GrpcBaseSuit extends FlatSpec
          |    port: $randomGrpcPort
          |  }
          |]
-         |akka.remote.netty.port: $randomPort
+         |akka.remote.netty.port: $randomAkkaPort
       """.stripMargin))
       .withFallback(ElitemConfigFactory.load(AppType.Test))
   }
+
+  protected val randomAkkaPort: Int = randomPort
 
   protected val randomGrpcPort: Int = randomPort
 
@@ -60,5 +67,10 @@ abstract class GrpcBaseSuit extends FlatSpec
 
   protected val messagingStub: MessagingServiceGrpc.MessagingServiceBlockingStub =
     MessagingServiceGrpc.blockingStub(channel)
+
+  override def afterAll(): Unit = {
+    super.afterAll()
+    Await.result(system.terminate(), Duration.Inf)
+  }
 
 }

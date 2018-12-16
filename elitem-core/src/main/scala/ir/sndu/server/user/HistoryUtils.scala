@@ -41,4 +41,5 @@ object HistoryUtils {
         None))
     } yield newSeq
   }
+
 }

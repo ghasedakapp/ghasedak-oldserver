@@ -5,6 +5,8 @@ import ir.sndu.server.rpc.RpcError
 
 object AuthRpcErrors {
 
+  val AuthTestError = RpcError(Status.INTERNAL, "AUTH_TEST_ERROR")
+
   val InvalidApiKey = RpcError(Status.INTERNAL, "INVALID_API_KEY")
 
   val InvalidPhoneNumber = RpcError(Status.INTERNAL, "INVALID_PHONE_NUMBER")
