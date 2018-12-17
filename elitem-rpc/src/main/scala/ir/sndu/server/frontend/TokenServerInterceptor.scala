@@ -28,16 +28,6 @@ class TokenServerInterceptor extends ServerInterceptor {
         if (unAuthRequests.contains(requestName)) {
           serverCallHandler.startCall(serverCall, metadata)
         } else {
-          println("==============================")
-          println("==============================")
-          println("==============================")
-          println("==============================")
-          println("==============================")
-          println("==============================")
-          println("==============================")
-          println("==============================")
-          println("==============================")
-          println("==============================")
           serverCall.close(MissingToken.status, metadata)
           NOOP_LISTENER
         }
