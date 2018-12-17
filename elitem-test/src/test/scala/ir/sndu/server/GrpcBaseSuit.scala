@@ -8,6 +8,7 @@ import io.grpc.{ ManagedChannel, ManagedChannelBuilder }
 import ir.sndu.persist.db.DbExtension
 import ir.sndu.rpc.auth.AuthServiceGrpc
 import ir.sndu.rpc.messaging.MessagingServiceGrpc
+import ir.sndu.rpc.test.TestServiceGrpc
 import ir.sndu.server.config.{ AppType, ElitemConfigFactory }
 import ir.sndu.server.utils.UserTestUtils
 import org.scalatest.concurrent.ScalaFutures
@@ -16,7 +17,7 @@ import org.scalatest.{ BeforeAndAfterAll, FlatSpec, Inside, Matchers }
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
-// todo: Config this for parallel execution (Akka)
+// todo: Config this for parallel execution
 abstract class GrpcBaseSuit extends FlatSpec
   with Matchers
   with ScalaFutures
@@ -44,7 +45,7 @@ abstract class GrpcBaseSuit extends FlatSpec
          |    port: $randomGrpcPort
          |  }
          |]
-         |akka.remote.netty.port: $randomAkkaPort
+         |akka.remote.netty.tcp.port: $randomAkkaPort
       """.stripMargin))
       .withFallback(ElitemConfigFactory.load(AppType.Test))
   }
@@ -61,6 +62,9 @@ abstract class GrpcBaseSuit extends FlatSpec
 
   protected val channel: ManagedChannel =
     ManagedChannelBuilder.forAddress("127.0.0.1", randomGrpcPort).usePlaintext.build
+
+  protected val testStub: TestServiceGrpc.TestServiceBlockingStub =
+    TestServiceGrpc.blockingStub(channel)
 
   protected val authStub: AuthServiceGrpc.AuthServiceBlockingStub =
     AuthServiceGrpc.blockingStub(channel)
