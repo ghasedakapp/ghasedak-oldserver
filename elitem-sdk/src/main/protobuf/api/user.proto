@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package ir.sndu.api;
+package im.ghasedak.api;
 
-option java_package = "ir.sndu.api.user";
+option java_package = "im.ghasedak.api.user";
 option java_multiple_files = true;
 option (scalapb.options) = {
   flat_package: true

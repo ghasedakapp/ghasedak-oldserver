@@ -1,7 +1,7 @@
 package ir.sndu.server.rpc.messaging
 
 import akka.event.LoggingAdapter
-import ir.sndu.api.peer.ApiPeer
+import im.ghasedak.api.peer.ApiPeer
 
 import scala.concurrent.Future
 

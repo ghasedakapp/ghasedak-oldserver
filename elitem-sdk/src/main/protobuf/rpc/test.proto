@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package ir.sndu.rpc;
+package im.ghasedak.rpc;
 
-option java_package = "ir.sndu.rpc.test";
+option java_package = "im.ghasedak.rpc.test";
 option java_multiple_files = true;
 option (scalapb.options) = {
   flat_package: true

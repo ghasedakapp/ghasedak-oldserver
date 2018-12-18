@@ -7,8 +7,8 @@ import java.util.UUID
 import io.grpc.Status.Code
 import io.grpc.StatusRuntimeException
 import ir.sndu.persist.repo.auth.{ AuthTransactionRepo, GateAuthCodeRepo }
-import ir.sndu.rpc.auth.{ RequestSignUp, RequestStartPhoneAuth, RequestValidateCode }
-import ir.sndu.rpc.test.RequestTestAuth
+import im.ghasedak.rpc.auth.{ RequestSignUp, RequestStartPhoneAuth, RequestValidateCode }
+import im.ghasedak.rpc.test.RequestTestAuth
 import ir.sndu.server.GrpcBaseSuit
 
 import scala.util.{ Failure, Random, Try }

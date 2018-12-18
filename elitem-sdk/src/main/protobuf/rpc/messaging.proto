@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package ir.sndu.rpc;
+package im.ghasedak.rpc;
 
-option java_package = "ir.sndu.rpc.messaging";
+option java_package = "im.ghasedak.rpc.messaging";
 option java_multiple_files = true;
 option (scalapb.options) = {
   flat_package: true
@@ -26,9 +26,9 @@ service MessagingService {
 }
 
 message RequestSendMessage {
-    ir.sndu.api.ApiPeer peer = 1; // Destination peer for message
+    im.ghasedak.api.ApiPeer peer = 1; // Destination peer for message
     int64 random_id = 2; // Message random id (generated on client side)
-    ir.sndu.api.ApiMessage message = 3; // The message
+    im.ghasedak.api.ApiMessage message = 3; // The message
 }
 
 message ResponseVoid {
@@ -40,26 +40,26 @@ message RequestLoadDialogs {
 }
 
 message ResponseLoadDialogs {
-    repeated ir.sndu.api.ApiDialog dialogs = 1;
+    repeated im.ghasedak.api.ApiDialog dialogs = 1;
 }
 
 message RequestLoadHistory {
-    ir.sndu.api.ApiPeer peer = 1; // Peer of conversation
+    im.ghasedak.api.ApiPeer peer = 1; // Peer of conversation
     int32 sequence_nr = 2; // start sequence number of messages for loading. Int.Max for loading from recent message
-    ir.sndu.api.ApiListLoadMode load_mode = 3; // Loading mode: Forward loading, backward or both ways
+    im.ghasedak.api.ApiListLoadMode load_mode = 3; // Loading mode: Forward loading, backward or both ways
     int32 limit = 4; // maximum amount of messages (max is 100)
 }
 
 message ResponseLoadHistory {
-    repeated ir.sndu.api.ApiMessageContainer history = 1; // Messages
+    repeated im.ghasedak.api.ApiMessageContainer history = 1; // Messages
 }
 
 message RequestMessageReceived {
-    ir.sndu.api.ApiPeer peer = 1; // Destination peer
+    im.ghasedak.api.ApiPeer peer = 1; // Destination peer
     int32 sequence_nr = 2; // Maximum sequence number of received messages
 }
 
 message RequestMessageRead {
-    ir.sndu.api.ApiPeer peer = 1; // Destination peer
+    im.ghasedak.api.ApiPeer peer = 1; // Destination peer
     int32 sequence_nr = 2; // Maximum sequence number of received messages
 }

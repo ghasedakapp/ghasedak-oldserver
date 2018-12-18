@@ -3,8 +3,8 @@ package ir.sndu.server.rpc.test
 import akka.actor.ActorSystem
 import akka.event.{ Logging, LoggingAdapter }
 import ir.sndu.persist.db.DbExtension
-import ir.sndu.rpc.test.TestServiceGrpc.TestService
-import ir.sndu.rpc.test.{ RequestTestAuth, ResponseTestAuth }
+import im.ghasedak.rpc.test.TestServiceGrpc.TestService
+import im.ghasedak.rpc.test.{ RequestTestAuth, ResponseTestAuth }
 import ir.sndu.server.rpc.auth.helper.AuthTokenHelper
 import slick.jdbc.PostgresProfile
 

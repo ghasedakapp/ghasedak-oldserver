@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package ir.sndu.rpc;
+package im.ghasedak.rpc;
 
-option java_package = "ir.sndu.rpc.auth";
+option java_package = "im.ghasedak.rpc.auth";
 option java_multiple_files = true;
 option (scalapb.options) = {
   flat_package: true
@@ -44,5 +44,5 @@ message RequestSignUp {
 
 message ResponseAuth {
     bool is_registered = 1;
-    ir.sndu.api.ApiAuth api_auth = 2;
+    im.ghasedak.api.ApiAuth api_auth = 2;
 }

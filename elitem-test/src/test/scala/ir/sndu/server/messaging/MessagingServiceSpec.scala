@@ -1,8 +1,8 @@
 package ir.sndu.server.messaging
 
-import ir.sndu.api.messaging.{ ApiListLoadMode, ApiMessage, ApiTextMessage }
-import ir.sndu.api.peer.{ ApiPeer, ApiPeerType }
-import ir.sndu.rpc.messaging.{ RequestLoadDialogs, RequestLoadHistory, RequestSendMessage }
+import im.ghasedak.api.messaging.{ ApiListLoadMode, ApiMessage, ApiTextMessage }
+import im.ghasedak.api.peer.{ ApiPeer, ApiPeerType }
+import im.ghasedak.rpc.messaging.{ RequestLoadDialogs, RequestLoadHistory, RequestSendMessage }
 import ir.sndu.server.GrpcBaseSuit
 
 import scala.util.Random

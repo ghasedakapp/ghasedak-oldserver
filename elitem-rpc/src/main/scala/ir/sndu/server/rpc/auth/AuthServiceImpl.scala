@@ -8,8 +8,8 @@ import akka.event.{ Logging, LoggingAdapter }
 import ir.sndu.persist.db.DbExtension
 import ir.sndu.persist.repo.auth.{ AuthPhoneTransactionRepo, AuthTransactionRepo }
 import ir.sndu.persist.repo.user.UserPhoneRepo
-import ir.sndu.rpc.auth.AuthServiceGrpc.AuthService
-import ir.sndu.rpc.auth._
+import im.ghasedak.rpc.auth.AuthServiceGrpc.AuthService
+import im.ghasedak.rpc.auth._
 import ir.sndu.server.model.auth.{ AuthPhoneTransaction, AuthSession }
 import ir.sndu.server.rpc.RpcError
 import ir.sndu.server.rpc.auth.helper.{ AuthServiceHelper, AuthTokenHelper }

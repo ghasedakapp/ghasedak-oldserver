@@ -2,7 +2,7 @@ package ir.sndu.server.utils
 
 import io.grpc._
 import ir.sndu.persist.repo.auth.GateAuthCodeRepo
-import ir.sndu.rpc.auth.{ RequestSignUp, RequestStartPhoneAuth, RequestValidateCode }
+import im.ghasedak.rpc.auth.{ RequestSignUp, RequestStartPhoneAuth, RequestValidateCode }
 import ir.sndu.server.GrpcBaseSuit
 import ir.sndu.server.rpc.auth.helper.AuthTokenHelper
 import ir.sndu.server.utils.UserTestUtils.TestClientData

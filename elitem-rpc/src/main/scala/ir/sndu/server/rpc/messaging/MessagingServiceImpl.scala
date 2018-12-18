@@ -5,13 +5,13 @@ import java.time.{ Instant, LocalDateTime, ZoneId, ZoneOffset }
 import akka.actor.ActorSystem
 import akka.event.{ Logging, LoggingAdapter }
 import com.google.protobuf.CodedInputStream
-import ir.sndu.api.messaging.{ ApiMessage, ApiMessageContainer }
-import ir.sndu.api.peer.ApiPeer
+import im.ghasedak.api.messaging.{ ApiMessage, ApiMessageContainer }
+import im.ghasedak.api.peer.ApiPeer
 import ir.sndu.persist.db.DbExtension
 import ir.sndu.persist.repo.dialog.DialogRepo
 import ir.sndu.persist.repo.history.HistoryMessageRepo
-import ir.sndu.rpc.messaging.MessagingServiceGrpc.MessagingService
-import ir.sndu.rpc.messaging._
+import im.ghasedak.rpc.messaging.MessagingServiceGrpc.MessagingService
+import im.ghasedak.rpc.messaging._
 import ir.sndu.server.rpc.auth.helper.AuthTokenHelper
 import ir.sndu.server.user.UserExtension
 import slick.dbio.DBIO
