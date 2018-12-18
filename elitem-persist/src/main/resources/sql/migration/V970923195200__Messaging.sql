@@ -1,13 +1,14 @@
 CREATE TABLE history_messages (
        user_id int NOT NULL,
        peer_id int NOT NULL,
+       peer_type int NOT NULL,
        sequence_nr int NOT NULL,
        date timestamp NOT NULL,
        sender_user_id int NOT NULL,
        message_content_header int NOT NULL,
        message_content_data bytea NOT NULL,
        deleted_at timestamp,
-       PRIMARY KEY(user_id, peer_id, date, sender_user_id, sequence_nr)
+       PRIMARY KEY(user_id, peer_id,peer_type, date, sender_user_id, sequence_nr)
 );
 
 CREATE TABLE user_dialogs (
