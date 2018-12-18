@@ -4,9 +4,9 @@ import akka.actor.ActorSystem
 import akka.cluster.Cluster
 import com.typesafe.config.Config
 import io.grpc.ServerServiceDefinition
-import ir.sndu.rpc.auth.AuthServiceGrpc
-import ir.sndu.rpc.messaging.MessagingServiceGrpc
-import ir.sndu.rpc.test.TestServiceGrpc
+import im.ghasedak.rpc.auth.AuthServiceGrpc
+import im.ghasedak.rpc.messaging.MessagingServiceGrpc
+import im.ghasedak.rpc.test.TestServiceGrpc
 import ir.sndu.server.frontend.Frontend
 import ir.sndu.server.rpc.auth.AuthServiceImpl
 import ir.sndu.server.rpc.messaging.MessagingServiceImpl

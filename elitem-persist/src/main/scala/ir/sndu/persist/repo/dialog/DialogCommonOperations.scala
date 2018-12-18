@@ -2,7 +2,7 @@ package ir.sndu.persist.repo.dialog
 
 import java.time.LocalDateTime
 
-import ir.sndu.api.peer.{ ApiPeer, ApiPeerType }
+import im.ghasedak.api.peer.{ ApiPeer, ApiPeerType }
 import ir.sndu.persist.repo.TypeMapper._
 import ir.sndu.server.model.dialog.DialogCommon
 import slick.jdbc.PostgresProfile.api._

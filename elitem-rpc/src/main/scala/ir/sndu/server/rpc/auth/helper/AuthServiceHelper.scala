@@ -3,8 +3,8 @@ package ir.sndu.server.rpc.auth.helper
 import java.time.temporal.ChronoUnit
 import java.time.{ LocalDateTime, ZoneOffset }
 
-import ir.sndu.api.auth.ApiAuth
-import ir.sndu.api.user.ApiUser
+import im.ghasedak.api.auth.ApiAuth
+import im.ghasedak.api.user.ApiUser
 import ir.sndu.persist.repo.auth.{ AuthSessionRepo, AuthTransactionRepo, GateAuthCodeRepo }
 import ir.sndu.persist.repo.user.{ UserPhoneRepo, UserRepo }
 import ir.sndu.server.model.auth.{ AuthPhoneTransaction, AuthSession, AuthTransactionBase }

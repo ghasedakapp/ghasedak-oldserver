@@ -4,8 +4,8 @@ import java.time.{ Instant, LocalDateTime, ZoneOffset }
 
 import akka.actor.{ ActorSystem, ExtendedActorSystem, Extension, ExtensionId, ExtensionIdProvider }
 import akka.util.Timeout
-import ir.sndu.api.messaging.ApiMessage
-import ir.sndu.api.peer.{ ApiPeer, ApiPeerType }
+import im.ghasedak.api.messaging.ApiMessage
+import im.ghasedak.api.peer.{ ApiPeer, ApiPeerType }
 import ir.sndu.persist.db.DbExtension
 import slick.jdbc.PostgresProfile
 

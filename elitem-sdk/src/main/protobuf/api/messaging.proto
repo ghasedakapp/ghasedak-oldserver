@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package ir.sndu.api;
+package im.ghasedak.api;
 
-option java_package = "ir.sndu.api.messaging";
+option java_package = "im.ghasedak.api.messaging";
 option java_multiple_files = true;
 option (scalapb.options) = {
   flat_package: true
@@ -30,7 +30,7 @@ message ApiMessageContainer {
 }
 
 message ApiDialog {
-    ir.sndu.api.ApiPeer peer = 1; // Peer of conversation
+    im.ghasedak.api.ApiPeer peer = 1; // Peer of conversation
     int32 unread_count = 2; // Plain messages unread messages count
     int64 sort_date = 3; // Date of conversation for sorting
     ApiMessageContainer message = 4; // Top message of conversation

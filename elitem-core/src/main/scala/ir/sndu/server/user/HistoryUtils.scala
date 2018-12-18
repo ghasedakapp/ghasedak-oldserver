@@ -2,8 +2,8 @@ package ir.sndu.server.user
 
 import java.time.LocalDateTime
 
-import ir.sndu.api.messaging.ApiMessage
-import ir.sndu.api.peer.ApiPeer
+import im.ghasedak.api.messaging.ApiMessage
+import im.ghasedak.api.peer.ApiPeer
 import ir.sndu.persist.repo.history.HistoryMessageRepo
 import ir.sndu.server.model.history.HistoryMessage
 import slick.dbio.DBIO

@@ -1,6 +1,6 @@
 package ir.sndu.persist.repo.dialog
 
-import ir.sndu.api.peer.{ ApiPeer, ApiPeerType }
+import im.ghasedak.api.peer.{ ApiPeer, ApiPeerType }
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.{ Case, Rep }
 

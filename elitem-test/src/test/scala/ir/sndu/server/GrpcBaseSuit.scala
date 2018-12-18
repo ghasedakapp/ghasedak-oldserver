@@ -6,9 +6,9 @@ import akka.actor.ActorSystem
 import com.typesafe.config.{ Config, ConfigFactory }
 import io.grpc.{ ManagedChannel, ManagedChannelBuilder }
 import ir.sndu.persist.db.DbExtension
-import ir.sndu.rpc.auth.AuthServiceGrpc
-import ir.sndu.rpc.messaging.MessagingServiceGrpc
-import ir.sndu.rpc.test.TestServiceGrpc
+import im.ghasedak.rpc.auth.AuthServiceGrpc
+import im.ghasedak.rpc.messaging.MessagingServiceGrpc
+import im.ghasedak.rpc.test.TestServiceGrpc
 import ir.sndu.server.config.{ AppType, ElitemConfigFactory }
 import ir.sndu.server.utils.UserTestUtils
 import org.scalatest.concurrent.ScalaFutures

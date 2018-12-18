@@ -2,7 +2,7 @@ package ir.sndu.server.user
 
 import java.time.LocalDateTime
 
-import ir.sndu.api.peer.ApiPeer
+import im.ghasedak.api.peer.ApiPeer
 import ir.sndu.persist.repo.dialog.DialogRepo
 import slick.dbio.{ DBIOAction, Effect, NoStream }
 

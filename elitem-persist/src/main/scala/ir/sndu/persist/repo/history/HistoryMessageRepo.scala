@@ -2,7 +2,7 @@ package ir.sndu.persist.repo.history
 
 import java.time.{ LocalDateTime, ZoneId }
 
-import ir.sndu.api.peer.{ ApiPeer, ApiPeerType }
+import im.ghasedak.api.peer.{ ApiPeer, ApiPeerType }
 import ir.sndu.persist.repo.TypeMapper._
 import ir.sndu.server.model.history.HistoryMessage
 import slick.dbio.Effect.{ Read, Write }
@@ -114,7 +114,7 @@ object HistoryMessageRepo {
   private val beforeC = Compiled { (userId: Rep[Int], peerId: Rep[Int], peerType: Rep[Int], seq: Rep[Int], limit: ConstColumn[Long]) ⇒
     byUserIdPeer(userId, peerType, peerId)
       .filter(_.sequenceNr <= seq)
-      .sortBy(_.sequenceNr.asc)
+      .sortBy(_.sequenceNr.desc)
       .take(limit)
   }
 
