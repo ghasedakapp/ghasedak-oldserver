@@ -22,7 +22,8 @@ lazy val commonSettings = Seq(
     .setPreference(RewriteArrowSymbols, true)
     .setPreference(AlignParameters, true)
     .setPreference(AlignSingleLineCaseStatements, true)
-    .setPreference(SpacesAroundMultiImports, true)
+    .setPreference(SpacesAroundMultiImports, true),
+  parallelExecution in Test := false
 )
 
 lazy val root = (project in file("."))

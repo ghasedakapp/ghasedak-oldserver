@@ -8,6 +8,7 @@ import io.grpc.Status.Code
 import io.grpc.StatusRuntimeException
 import ir.sndu.persist.repo.auth.{ AuthTransactionRepo, GateAuthCodeRepo }
 import ir.sndu.rpc.auth.{ RequestSignUp, RequestStartPhoneAuth, RequestValidateCode }
+import ir.sndu.rpc.test.RequestTestAuth
 import ir.sndu.server.GrpcBaseSuit
 
 import scala.util.{ Failure, Random, Try }
@@ -35,6 +36,12 @@ class AuthServiceSpec extends GrpcBaseSuit {
   it should "successfully sign up" in signUp
 
   it should "sign up and after that sign in" in signUpAndSignIn
+
+  it should "authorized client after sign up" in authorizedAfterSignUp
+
+  it should "return right error in authorize method" in rightAuthorizeError
+
+  it should "return different transaction hash after validate" in differentThAfterValidate
 
   def startPhoneAuth(): Unit = {
     val request = RequestStartPhoneAuth(
@@ -182,6 +189,36 @@ class AuthServiceSpec extends GrpcBaseSuit {
     response5.apiAuth should not be None
     response5.apiAuth.get.user.get shouldEqual response3.apiAuth.get.user.get
     response5.apiAuth.get.token should not equal response3.apiAuth.get.token
+  }
+
+  def authorizedAfterSignUp(): Unit = {
+    val user = createUser()
+    val stub = testStub.withInterceptors(clientTokenInterceptor(user.token))
+    val response = stub.testAuth(RequestTestAuth())
+    response.auth shouldEqual true
+  }
+
+  def rightAuthorizeError(): Unit = {
+    val user = createUser()
+    val stub = testStub.withInterceptors(clientTokenInterceptor(user.token))
+    Try(stub.testAuth(RequestTestAuth(true))) match {
+      case Failure(ex: StatusRuntimeException) ⇒
+        ex.getStatus.getCode shouldEqual Code.INTERNAL
+        ex.getStatus.getDescription shouldEqual "AUTH_TEST_ERROR"
+    }
+  }
+
+  def differentThAfterValidate(): Unit = {
+    val request1 = RequestStartPhoneAuth(
+      generatePhoneNumber(), 1,
+      "4b654ds5b4654sd65b44s6d5b46s5d4b",
+      "device hash", "device info")
+    val response1 = authStub.startPhoneAuth(request1)
+    val codeGate = db.run(GateAuthCodeRepo.find(response1.transactionHash)).futureValue
+    val request2 = RequestValidateCode(response1.transactionHash, codeGate.get.codeHash)
+    val response2 = authStub.validateCode(request2)
+    val response3 = authStub.startPhoneAuth(request1)
+    response3.transactionHash should not equal response1.transactionHash
   }
 
 }

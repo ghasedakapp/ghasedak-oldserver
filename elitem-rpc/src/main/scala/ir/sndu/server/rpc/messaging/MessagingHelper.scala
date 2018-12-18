@@ -12,7 +12,7 @@ trait MessagingHelper {
   protected def withValidPeer[T](peer: Option[ApiPeer], senderUserId: Int)(f: ⇒ Future[T]): Future[T] = {
     if (peer.exists(_.id == senderUserId)) {
       log.warning("Attempt to send message to yourself")
-      Future.failed(MessagingRpcError.MessageToSelf)
+      Future.failed(MessagingRpcErrors.MessageToSelf)
     } else f
   }
 

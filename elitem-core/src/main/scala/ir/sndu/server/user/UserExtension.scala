@@ -1,6 +1,6 @@
 package ir.sndu.server.user
 
-import java.time.{ Instant, LocalDateTime, ZoneId, ZoneOffset }
+import java.time.{ Instant, LocalDateTime, ZoneOffset }
 
 import akka.actor.{ ActorSystem, ExtendedActorSystem, Extension, ExtensionId, ExtensionIdProvider }
 import akka.util.Timeout
@@ -11,14 +11,16 @@ import slick.jdbc.PostgresProfile
 
 import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
+
 class UserExtensionImpl(system: ExtendedActorSystem) extends Extension {
+
   implicit private val _system: ActorSystem = system
   implicit private val timeout: Timeout = Timeout(30.seconds)
   implicit val ec: ExecutionContext = system.dispatcher
   implicit val db: PostgresProfile.backend.Database = DbExtension(system).db
 
-  import HistoryUtils._
   import DialogUtils._
+  import HistoryUtils._
 
   private def calculateDate: Instant = {
     //TODO Avoids duplicate date
@@ -40,7 +42,6 @@ class UserExtensionImpl(system: ExtendedActorSystem) extends Extension {
       _ ← createOrUpdateDialog(peer.id, selfPeer, seq, msgLocalDate)
     } yield ()
     db.run(action)
-
   }
 
 }

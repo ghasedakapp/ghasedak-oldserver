@@ -30,6 +30,7 @@ case class Dialog(
   lastReceivedSeq:      Int,
   lastReadSeq:          Int,
   createdAt:            LocalDateTime) {
+
   def toApi(msgOpt: Option[HistoryMessage]): ApiDialog = {
     val history = msgOpt.getOrElse(HistoryMessage.empty(userId, peer, lastMessageDate))
     val msgDate = lastMessageDate.atZone(ZoneId.systemDefault()).toInstant.toEpochMilli

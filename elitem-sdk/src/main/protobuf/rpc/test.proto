@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package ir.sndu.rpc;
+
+option java_package = "ir.sndu.rpc.test";
+option java_multiple_files = true;
+option (scalapb.options) = {
+  flat_package: true
+};
+
+import "scalapb/scalapb.proto";
+
+service TestService {
+    rpc TestAuth (RequestTestAuth) returns (ResponseTestAuth) {
+    }
+}
+
+message RequestTestAuth {
+    bool exception = 1;
+}
+
+message ResponseTestAuth {
+    bool auth = 1;
+}

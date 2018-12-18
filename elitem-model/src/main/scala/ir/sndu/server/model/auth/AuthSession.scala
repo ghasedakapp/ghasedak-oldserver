@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 object AuthSession {
 
   private val apiKeys = Seq(
-    "4b654ds5b4654sd65b44s6d5b46s5d4b" // official
+    "4b654ds5b4654sd65b44s6d5b46s5d4b" // Test api Key
   )
 
   def isValidApiKey(apiKey: String): Boolean = apiKeys.contains(apiKey)

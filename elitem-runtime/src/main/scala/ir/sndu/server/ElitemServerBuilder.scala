@@ -6,9 +6,11 @@ import com.typesafe.config.Config
 import io.grpc.ServerServiceDefinition
 import ir.sndu.rpc.auth.AuthServiceGrpc
 import ir.sndu.rpc.messaging.MessagingServiceGrpc
+import ir.sndu.rpc.test.TestServiceGrpc
 import ir.sndu.server.frontend.Frontend
 import ir.sndu.server.rpc.auth.AuthServiceImpl
 import ir.sndu.server.rpc.messaging.MessagingServiceImpl
+import ir.sndu.server.rpc.test.TestServiceImpl
 
 import scala.concurrent.ExecutionContext
 
@@ -35,6 +37,7 @@ object ServiceDescriptors {
 
   def services(implicit system: ActorSystem, ec: ExecutionContext): Seq[ServerServiceDefinition] = {
     Seq(
+      TestServiceGrpc.bindService(new TestServiceImpl, ec),
       AuthServiceGrpc.bindService(new AuthServiceImpl, ec),
       MessagingServiceGrpc.bindService(new MessagingServiceImpl, ec))
   }

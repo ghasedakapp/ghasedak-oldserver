@@ -7,7 +7,7 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.JWTVerificationException
 import com.auth0.jwt.interfaces.DecodedJWT
-import io.grpc.Context
+import io.grpc.{ Context, Metadata, StatusRuntimeException }
 import ir.sndu.persist.repo.auth.AuthTokenRepo
 import ir.sndu.server.model.auth.AuthToken
 import ir.sndu.server.rpc.auth.AuthRpcErrors
@@ -18,7 +18,9 @@ import scala.concurrent.{ ExecutionContext, Future }
 
 object AuthTokenHelper {
 
-  private val TOKEN_CTX_KEY: Context.Key[String] = Context.key[String]("token")
+  val TOKEN_CONTEXT_KEY: Context.Key[String] = Context.key[String]("token")
+
+  val TOKEN_METADATA_KEY: Metadata.Key[String] = Metadata.Key.of("token", Metadata.ASCII_STRING_MARSHALLER);
 
   case class ClientData(userId: Int, tokenId: String, tokenKey: String, token: String)
 
@@ -57,11 +59,13 @@ trait AuthTokenHelper {
               val clientData = generateClientData(jwt, tokenId, tokenKey, token)
               f(clientData)
           } recoverWith {
-            case _: JWTVerificationException ⇒
-              log.warning("invalid token {}", token)
+            case ex: JWTVerificationException ⇒
+              log.error(ex, "invalid token {}", token)
               Future.failed(InvalidToken)
+            case ex: StatusRuntimeException ⇒
+              Future.failed(ex)
             case ex: Throwable ⇒
-              log.error(ex, "Error in authorize token {}", token)
+              log.error(ex, "Error in handling request")
               Future.failed(InternalError)
           }
         } catch {
@@ -73,7 +77,7 @@ trait AuthTokenHelper {
   }
 
   def authorize[T](f: ClientData ⇒ Future[T]): Future[T] =
-    authorize(Option(TOKEN_CTX_KEY.get()))(f)
+    authorize(Option(TOKEN_CONTEXT_KEY.get()))(f)
 
   def generateToken(userId: Int): Future[(String, String)] = {
     val tokenKey = UUID.randomUUID().toString
@@ -83,7 +87,7 @@ trait AuthTokenHelper {
       .withClaim("tokenId", tokenId)
       .withClaim("userId", userId.toString)
       .sign(algorithm)
-    val token = AuthToken(tokenId, tokenId, None)
+    val token = AuthToken(tokenId, tokenKey, None)
     db.run(AuthTokenRepo.create(token)) map (_ ⇒ (tokenId, tokenStr))
   }
 

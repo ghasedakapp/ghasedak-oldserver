@@ -37,7 +37,7 @@ object AuthPhoneTransactionRepo {
   }
 
   private val byPhoneAndDeviceHash = Compiled { (phone: Rep[Long], deviceHash: Rep[String]) ⇒
-    active.filter(t ⇒ t.phoneNumber === phone && t.deviceHash === deviceHash)
+    active.filter(t ⇒ t.phoneNumber === phone && t.deviceHash === deviceHash && t.isChecked === false)
   }
 
   def create(transaction: AuthPhoneTransaction): FixedSqlAction[Int, NoStream, Effect.Write] =

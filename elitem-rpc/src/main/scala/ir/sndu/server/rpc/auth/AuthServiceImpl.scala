@@ -96,4 +96,5 @@ final class AuthServiceImpl(implicit system: ActorSystem) extends AuthService
     val result = db.run(action.value)
     result
   }
+
 }
