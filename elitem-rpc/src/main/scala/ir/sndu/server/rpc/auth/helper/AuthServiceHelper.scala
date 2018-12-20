@@ -10,6 +10,7 @@ import ir.sndu.persist.repo.user.{ UserPhoneRepo, UserRepo }
 import ir.sndu.server.model.auth.{ AuthPhoneTransaction, AuthSession, AuthTransactionBase }
 import ir.sndu.server.model.user.{ User, UserPhone }
 import ir.sndu.server.rpc.auth.{ AuthRpcErrors, AuthServiceImpl }
+import ir.sndu.server.user.UserUtils
 import ir.sndu.server.utils.IdUtils._
 import ir.sndu.server.utils.StringUtils._
 import ir.sndu.server.utils.number.PhoneCodeGen.genPhoneCode
@@ -73,7 +74,8 @@ trait AuthServiceHelper {
             transaction.deviceHash, transaction.deviceInfo, LocalDateTime.now(ZoneOffset.UTC))
           _ ← fromDBIO(AuthSessionRepo.create(authSession))
           _ ← fromDBIO(AuthTransactionRepo.delete(transaction.transactionHash))
-          apiUser = ApiUser(user.id, user.name, None, user.nickname, Some(userPhone.number))
+          contactInfo ← fromDBIO(UserUtils.getUserContactInfo(user.id))
+          apiUser = ApiUser(user.id, user.name, user.name, Some(contactInfo), user.nickname)
         } yield Some(ApiAuth(token, Some(apiUser)))
     }
   }

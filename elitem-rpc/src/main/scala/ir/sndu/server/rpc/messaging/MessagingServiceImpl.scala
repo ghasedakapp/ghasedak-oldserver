@@ -1,17 +1,18 @@
 package ir.sndu.server.rpc.messaging
 
-import java.time.{ Instant, LocalDateTime, ZoneId, ZoneOffset }
+import java.time.ZoneOffset
 
 import akka.actor.ActorSystem
 import akka.event.{ Logging, LoggingAdapter }
 import com.google.protobuf.CodedInputStream
 import im.ghasedak.api.messaging.{ ApiMessage, ApiMessageContainer }
 import im.ghasedak.api.peer.ApiPeer
+import im.ghasedak.rpc.messaging.MessagingServiceGrpc.MessagingService
+import im.ghasedak.rpc.messaging._
+import im.ghasedak.rpc.misc.ResponseVoid
 import ir.sndu.persist.db.DbExtension
 import ir.sndu.persist.repo.dialog.DialogRepo
 import ir.sndu.persist.repo.history.HistoryMessageRepo
-import im.ghasedak.rpc.messaging.MessagingServiceGrpc.MessagingService
-import im.ghasedak.rpc.messaging._
 import ir.sndu.server.rpc.auth.helper.AuthTokenHelper
 import ir.sndu.server.user.UserExtension
 import slick.dbio.DBIO
@@ -46,14 +47,11 @@ final class MessagingServiceImpl(implicit system: ActorSystem) extends Messaging
 
   override def loadDialogs(request: RequestLoadDialogs): Future[ResponseLoadDialogs] =
     authorize { clientData ⇒
-      val (minDate, limit) = RequestLoadDialogs.unapply(request).get
-
       val action = for {
         dialogs ← DialogRepo.find(clientData.userId, request.limit)
         fullDialogs ← DBIO.sequence(dialogs.map(d ⇒
           HistoryMessageRepo.find(d.userId, d.peer, Some(d.lastMessageDate), 1).headOption.map(d.toApi)))
       } yield ResponseLoadDialogs(fullDialogs)
-
       db.run(action)
     }
 
@@ -70,12 +68,11 @@ final class MessagingServiceImpl(implicit system: ActorSystem) extends Messaging
           msg.sequenceNr,
           msg.date.atZone(ZoneOffset.UTC).toInstant.toEpochMilli,
           Some(ApiMessage().mergeFrom(CodedInputStream.newInstance(msg.messageContentData)))))
-
       } map (ResponseLoadHistory(_))
     }
 
   override def messageReceived(request: RequestMessageReceived): Future[ResponseVoid] =
-    authorize { clientData ⇒
+    authorize { _ ⇒
       val (peer, seq) = RequestMessageReceived.unapply(request).get
       Future.successful(ResponseVoid())
     }

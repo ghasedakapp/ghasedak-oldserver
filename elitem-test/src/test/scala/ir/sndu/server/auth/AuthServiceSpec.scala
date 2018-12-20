@@ -192,14 +192,14 @@ class AuthServiceSpec extends GrpcBaseSuit {
   }
 
   def authorizedAfterSignUp(): Unit = {
-    val user = createUser()
+    val user = createPhoneNumberUser()
     val stub = testStub.withInterceptors(clientTokenInterceptor(user.token))
     val response = stub.testAuth(RequestTestAuth())
     response.auth shouldEqual true
   }
 
   def rightAuthorizeError(): Unit = {
-    val user = createUser()
+    val user = createPhoneNumberUser()
     val stub = testStub.withInterceptors(clientTokenInterceptor(user.token))
     Try(stub.testAuth(RequestTestAuth(true))) match {
       case Failure(ex: StatusRuntimeException) ⇒

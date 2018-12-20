@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package im.ghasedak.api;
+
+option java_package = "im.ghasedak.api.contact";
+option java_multiple_files = true;
+option (scalapb.options) = {
+  flat_package: true
+};
+
+import "scalapb/scalapb.proto";
+import "google/protobuf/wrappers.proto";
+
+enum ApiContactType {
+    ApiContactType_UNKNOWN = 0;
+    ApiContactType_PHONE = 1;
+    ApiContactType_EMAIL = 2;
+    ApiContactType_BOTH = 3;
+}
+
+message ApiContact {
+    ApiContactType type = 1;
+    google.protobuf.Int64Value phone_number = 2;
+    google.protobuf.StringValue email = 3;
+}
+
+message ApiContactToAdd {
+    ApiContactType type = 1;
+    google.protobuf.StringValue name = 2;
+    google.protobuf.Int64Value phone_number = 3;
+    google.protobuf.StringValue email = 4;
+}

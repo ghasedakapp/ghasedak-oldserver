@@ -4,7 +4,7 @@ import com.github.tminglei.slickpg.ExPostgresProfile.api._
 import ir.sndu.server.model.user.UserPhone
 import slick.dbio.Effect
 import slick.lifted.Tag
-import slick.sql.{ FixedSqlAction, FixedSqlStreamingAction }
+import slick.sql.{ FixedSqlAction, FixedSqlStreamingAction, SqlAction }
 
 final class UserPhoneTable(tag: Tag) extends Table[UserPhone](tag, "user_phones") {
 
@@ -29,5 +29,8 @@ object UserPhoneRepo {
 
   def findByPhoneNumber(number: Long): FixedSqlStreamingAction[Seq[UserPhone], UserPhone, Effect.Read] =
     byPhoneNumber(number).result
+
+  def findNumber(userId: Int): SqlAction[Option[Long], NoStream, Effect.Read] =
+    phones.filter(_.userId === userId).map(_.number).result.headOption
 
 }

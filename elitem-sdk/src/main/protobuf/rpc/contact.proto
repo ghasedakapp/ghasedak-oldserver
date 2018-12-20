@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package im.ghasedak.rpc;
+
+option java_package = "im.ghasedak.rpc.contact";
+option java_multiple_files = true;
+option (scalapb.options) = {
+  flat_package: true
+};
+
+import "scalapb/scalapb.proto";
+import "api/contact.proto";
+import "api/user.proto";
+import "rpc/misc.proto";
+
+service ContactService {
+    rpc GetContacts (RequestGetContacts) returns (ResponseGetContacts){
+    }
+    rpc AddContact (RequestAddContact) returns (ResponseAddContact){
+    }
+    rpc RemoveContact (RequestRemoveContact) returns (ResponseVoid){
+    }
+}
+
+message RequestGetContacts {
+    int32 from = 1;
+    int32 limit = 2;
+}
+
+message ResponseGetContacts {
+    bool need_more = 1;
+    repeated im.ghasedak.api.ApiUser users = 2;
+}
+
+message RequestAddContact {
+    im.ghasedak.api.ApiContactToAdd contact = 1;
+}
+
+message ResponseAddContact {
+    im.ghasedak.api.ApiUser user = 1;
+}
+
+message RequestRemoveContact {
+    int32 user_id = 1;
+}

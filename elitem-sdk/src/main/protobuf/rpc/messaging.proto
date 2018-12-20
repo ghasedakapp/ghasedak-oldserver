@@ -11,6 +11,7 @@ option (scalapb.options) = {
 import "scalapb/scalapb.proto";
 import "api/messaging.proto";
 import "api/peer.proto";
+import "rpc/misc.proto";
 
 service MessagingService {
     rpc SendMessage (RequestSendMessage) returns (ResponseVoid) {
@@ -26,17 +27,14 @@ service MessagingService {
 }
 
 message RequestSendMessage {
-    im.ghasedak.api.ApiPeer peer = 1; // Destination peer for message
-    int64 random_id = 2; // Message random id (generated on client side)
-    im.ghasedak.api.ApiMessage message = 3; // The message
-}
-
-message ResponseVoid {
+    im.ghasedak.api.ApiPeer peer = 1;
+    int64 random_id = 2;
+    im.ghasedak.api.ApiMessage message = 3;
 }
 
 message RequestLoadDialogs {
-    int64 min_date = 1; // start date of conversation loading. Use 0 to load latest messages
-    int32 limit = 2; // limit maximum amount of messages (max is 10)
+    int64 min_date = 1;
+    int32 limit = 2;
 }
 
 message ResponseLoadDialogs {
@@ -44,22 +42,22 @@ message ResponseLoadDialogs {
 }
 
 message RequestLoadHistory {
-    im.ghasedak.api.ApiPeer peer = 1; // Peer of conversation
-    int32 sequence_nr = 2; // start sequence number of messages for loading. Int.Max for loading from recent message
-    im.ghasedak.api.ApiListLoadMode load_mode = 3; // Loading mode: Forward loading, backward or both ways
-    int32 limit = 4; // maximum amount of messages (max is 100)
+    im.ghasedak.api.ApiPeer peer = 1;
+    int32 sequence_nr = 2;
+    im.ghasedak.api.ApiListLoadMode load_mode = 3;
+    int32 limit = 4;
 }
 
 message ResponseLoadHistory {
-    repeated im.ghasedak.api.ApiMessageContainer history = 1; // Messages
+    repeated im.ghasedak.api.ApiMessageContainer history = 1;
 }
 
 message RequestMessageReceived {
-    im.ghasedak.api.ApiPeer peer = 1; // Destination peer
-    int32 sequence_nr = 2; // Maximum sequence number of received messages
+    im.ghasedak.api.ApiPeer peer = 1;
+    int32 sequence_nr = 2;
 }
 
 message RequestMessageRead {
-    im.ghasedak.api.ApiPeer peer = 1; // Destination peer
-    int32 sequence_nr = 2; // Maximum sequence number of received messages
+    im.ghasedak.api.ApiPeer peer = 1;
+    int32 sequence_nr = 2;
 }

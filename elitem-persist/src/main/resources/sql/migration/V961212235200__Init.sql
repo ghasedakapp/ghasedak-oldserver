@@ -59,3 +59,9 @@ CREATE TABLE user_phones (
   number      BIGINT       NOT NULL,
   PRIMARY KEY (user_id)
 );
+
+CREATE TABLE user_emails (
+  user_id     INT                NOT NULL,
+  email      VARCHAR (255)      NOT NULL,
+  PRIMARY KEY (user_id)
+);

@@ -5,13 +5,13 @@ import ir.sndu.persist.repo.auth.GateAuthCodeRepo
 import im.ghasedak.rpc.auth.{ RequestSignUp, RequestStartPhoneAuth, RequestValidateCode }
 import ir.sndu.server.GrpcBaseSuit
 import ir.sndu.server.rpc.auth.helper.AuthTokenHelper
-import ir.sndu.server.utils.UserTestUtils.TestClientData
+import ir.sndu.server.utils.UserTestUtils.PhoneNumberTestClientData
 
 import scala.util.Random
 
 object UserTestUtils {
 
-  case class TestClientData(userId: Int, token: String, phone: Long)
+  case class PhoneNumberTestClientData(userId: Int, token: String, phoneNumber: Long)
 
 }
 
@@ -36,7 +36,7 @@ trait UserTestUtils {
     75550000000L + scala.util.Random.nextInt(999999)
   }
 
-  protected def createUser(): TestClientData = {
+  protected def createPhoneNumberUser(): PhoneNumberTestClientData = {
     val phone = generatePhoneNumber()
     val request1 = RequestStartPhoneAuth(
       phone, 1,
@@ -50,10 +50,10 @@ trait UserTestUtils {
       response1.transactionHash,
       Random.alphanumeric.take(20).mkString)
     val response3 = authStub.signUp(request3)
-    TestClientData(
+    PhoneNumberTestClientData(
       response3.getApiAuth.getUser.id,
       response3.getApiAuth.token,
-      response3.getApiAuth.getUser.phoneNumber.get)
+      response3.getApiAuth.getUser.contactInfo.get.phoneNumber.get)
   }
 
 }
