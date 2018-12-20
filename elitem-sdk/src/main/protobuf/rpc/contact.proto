@@ -21,6 +21,8 @@ service ContactService {
     }
     rpc RemoveContact (RequestRemoveContact) returns (ResponseVoid){
     }
+    rpc SearchContacts (RequestSearchContacts) returns (ResponseSearchContacts){
+    }
 }
 
 message RequestGetContacts {
@@ -44,4 +46,12 @@ message ResponseAddContact {
 
 message RequestRemoveContact {
     int32 user_id = 1;
+}
+
+message RequestSearchContacts {
+    string query = 1;
+}
+
+message ResponseSearchContacts {
+    repeated im.ghasedak.api.ApiUser users = 2;
 }

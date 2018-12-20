@@ -11,7 +11,13 @@ option (scalapb.options) = {
 import "scalapb/scalapb.proto";
 import "google/protobuf/wrappers.proto";
 
+enum ApiContactType {
+    PHONE = 0;
+    EMAIL = 1;
+}
+
 message ApiContactInfo {
-    google.protobuf.Int64Value phone_number = 1;
-    google.protobuf.StringValue email = 2;
+    ApiContactType contact_type = 1;
+    google.protobuf.Int64Value phone_number = 2;
+    google.protobuf.StringValue email = 3;
 }

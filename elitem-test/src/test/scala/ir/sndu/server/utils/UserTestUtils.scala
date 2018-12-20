@@ -53,7 +53,7 @@ trait UserTestUtils {
     PhoneNumberTestClientData(
       response3.getApiAuth.getUser.id,
       response3.getApiAuth.token,
-      response3.getApiAuth.getUser.contactInfo.get.phoneNumber.get)
+      response3.getApiAuth.getUser.contactsInfo.head.getPhoneNumber)
   }
 
 }

@@ -74,8 +74,8 @@ trait AuthServiceHelper {
             transaction.deviceHash, transaction.deviceInfo, LocalDateTime.now(ZoneOffset.UTC))
           _ ← fromDBIO(AuthSessionRepo.create(authSession))
           _ ← fromDBIO(AuthTransactionRepo.delete(transaction.transactionHash))
-          contactInfo ← fromDBIO(UserUtils.getUserContactInfo(user.id))
-          apiUser = ApiUser(user.id, user.name, user.name, Some(contactInfo), user.nickname, user.about)
+          contactsInfo ← fromDBIO(UserUtils.getUserContactInfo(user.id))
+          apiUser = ApiUser(user.id, user.name, user.name, contactsInfo, user.nickname, user.about)
         } yield Some(ApiAuth(token, Some(apiUser)))
     }
   }
