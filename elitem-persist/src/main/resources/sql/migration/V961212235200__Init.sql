@@ -56,13 +56,13 @@ CREATE TABLE users (
 );
 
 CREATE TABLE user_phones (
-  user_id     INT          NOT NULL,
-  number      BIGINT       NOT NULL,
+  user_id           INT          NOT NULL,
+  phone_number      BIGINT       NOT NULL,
   PRIMARY KEY (user_id)
 );
 
 CREATE TABLE user_emails (
   user_id     INT                NOT NULL,
-  email      VARCHAR (255)      NOT NULL,
+  email       VARCHAR (255)      NOT NULL,
   PRIMARY KEY (user_id)
 );

@@ -49,7 +49,7 @@ trait UserDialogOperations {
   def findUsersVisible(userId: Rep[Int]) = notArchived.filter(_.userId === userId)
 
   def findGroupIds(userId: Int): FixedSqlStreamingAction[Seq[Int], Int, Effect.Read] =
-    idByPeerTypeC((userId, ApiPeerType.ApiPeerType_GROUP.value)).result
+    idByPeerTypeC((userId, ApiPeerType.GROUP.value)).result
 
   def findUsers(userId: Int, peer: ApiPeer): DBIO[Option[UserDialog]] =
     byPKC.applied((userId, peer.`type`.value, peer.id)).result.headOption

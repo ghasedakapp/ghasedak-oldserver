@@ -40,9 +40,9 @@ trait DialogCommonOperations extends DialogId {
 
   def updateLastMessageDate(userId: Int, peer: ApiPeer, lastMessageSeq: Int, lastMessageDate: LocalDateTime)(implicit ec: ExecutionContext): FixedSqlAction[Int, NoStream, Effect.Write] =
     peer.`type` match {
-      case ApiPeerType.ApiPeerType_UNKNOWN | ApiPeerType.Unrecognized(_) ⇒ throw new RuntimeException("Unknown peer type")
-      case ApiPeerType.ApiPeerType_PRIVATE                               ⇒ updateLastMessageDatePrivate(userId: Int, peer: ApiPeer, lastMessageSeq, lastMessageDate: LocalDateTime)
-      case ApiPeerType.ApiPeerType_GROUP                                 ⇒ updateLastMessageDateGroup(peer, lastMessageSeq, lastMessageDate)
+      case ApiPeerType.UNKNOWN | ApiPeerType.Unrecognized(_) ⇒ throw new RuntimeException("Unknown peer type")
+      case ApiPeerType.PRIVATE                               ⇒ updateLastMessageDatePrivate(userId: Int, peer: ApiPeer, lastMessageSeq, lastMessageDate: LocalDateTime)
+      case ApiPeerType.GROUP                                 ⇒ updateLastMessageDateGroup(peer, lastMessageSeq, lastMessageDate)
 
     }
 
@@ -78,8 +78,8 @@ trait DialogCommonOperations extends DialogId {
     byPKC.applied(getDialogId(None, peer)).map(_.lastReadSeq).update(lastReadSeq)
   }
 
-  def requirePrivate(peer: ApiPeer): Unit = require(peer.`type`.isApiPeerTypePrivate, "It should be private peer")
+  def requirePrivate(peer: ApiPeer): Unit = require(peer.`type`.isPrivate, "It should be private peer")
 
-  def requireGroup(peer: ApiPeer): Unit = require(peer.`type`.isApiPeerTypeGroup, "It should be group peer")
+  def requireGroup(peer: ApiPeer): Unit = require(peer.`type`.isGroup, "It should be group peer")
 
 }

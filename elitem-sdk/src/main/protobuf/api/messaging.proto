@@ -37,7 +37,7 @@ message ApiDialog {
 }
 
 enum ApiListLoadMode {
-    ApiListLoadMode_BACKWARD = 0;
-    ApiListLoadMode_FORWARD = 1;
-    ApiListLoadMode_BOTH = 2;
+    BACKWARD = 0;
+    FORWARD = 1;
+    BOTH = 2;
 }

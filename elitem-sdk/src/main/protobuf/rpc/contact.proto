@@ -9,6 +9,7 @@ option (scalapb.options) = {
 };
 
 import "scalapb/scalapb.proto";
+import "google/protobuf/wrappers.proto";
 import "api/contact.proto";
 import "api/user.proto";
 import "rpc/misc.proto";
@@ -33,7 +34,8 @@ message ResponseGetContacts {
 }
 
 message RequestAddContact {
-    im.ghasedak.api.ApiContactToAdd contact = 1;
+    google.protobuf.StringValue name = 1;
+    im.ghasedak.api.ApiContactInfo contact_info = 2;
 }
 
 message ResponseAddContact {

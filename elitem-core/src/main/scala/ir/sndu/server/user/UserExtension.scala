@@ -30,7 +30,7 @@ class UserExtensionImpl(system: ExtendedActorSystem) extends Extension {
   def sendMessage(userId: Int, peer: ApiPeer, randomId: Long, message: ApiMessage): Future[Unit] = {
     val msgDate = calculateDate
     val msgLocalDate = LocalDateTime.ofInstant(msgDate, ZoneOffset.UTC)
-    val selfPeer = ApiPeer(ApiPeerType.ApiPeerType_PRIVATE, userId)
+    val selfPeer = ApiPeer(ApiPeerType.PRIVATE, userId)
     val action = for {
       seq ← writeHistoryMessage(
         selfPeer,

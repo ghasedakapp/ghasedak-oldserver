@@ -10,9 +10,9 @@ final class UserPhoneTable(tag: Tag) extends Table[UserPhone](tag, "user_phones"
 
   def userId = column[Int]("user_id", O.PrimaryKey)
 
-  def number = column[Long]("number")
+  def phoneNumber = column[Long]("phone_number")
 
-  def * = (userId, number) <> (UserPhone.tupled, UserPhone.unapply)
+  def * = (userId, phoneNumber) <> (UserPhone.tupled, UserPhone.unapply)
 
 }
 
@@ -21,7 +21,7 @@ object UserPhoneRepo {
   private val phones = TableQuery[UserPhoneTable]
 
   private val byPhoneNumber = Compiled { number: Rep[Long] ⇒
-    phones.filter(_.number === number)
+    phones.filter(_.phoneNumber === number)
   }
 
   def create(userPhone: UserPhone): FixedSqlAction[Int, NoStream, Effect.Write] =
@@ -31,6 +31,6 @@ object UserPhoneRepo {
     byPhoneNumber(number).result
 
   def findNumber(userId: Int): SqlAction[Option[Long], NoStream, Effect.Read] =
-    phones.filter(_.userId === userId).map(_.number).result.headOption
+    phones.filter(_.userId === userId).map(_.phoneNumber).result.headOption
 
 }

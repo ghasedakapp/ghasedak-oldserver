@@ -11,9 +11,9 @@ option (scalapb.options) = {
 import "scalapb/scalapb.proto";
 
 enum ApiPeerType {
-    ApiPeerType_UNKNOWN = 0;
-    ApiPeerType_PRIVATE = 1;
-    ApiPeerType_GROUP = 2;
+    UNKNOWN = 0;
+    PRIVATE = 1;
+    GROUP = 2;
 }
 
 message ApiPeer {
