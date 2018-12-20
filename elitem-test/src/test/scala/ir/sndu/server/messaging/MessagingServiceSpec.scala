@@ -57,7 +57,6 @@ class MessagingServiceSpec extends GrpcBaseSuit {
       Some(msgToSaleh)))
     val dialogRspAli = stubAli.loadDialogs(RequestLoadDialogs(Long.MaxValue, 10))
     dialogRspAli.dialogs.map(_.message.get.message.get) shouldBe Seq(msgToSaleh, msgToAli)
-
   }
 
 }

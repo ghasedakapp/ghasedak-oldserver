@@ -21,11 +21,9 @@ final class UserTable(tag: Tag) extends Table[User](tag, "users") {
 
   def nickname = column[Option[String]]("nickname")
 
-  def about = column[Option[String]]("about")
-
   def deletedAt = column[Option[LocalDateTime]]("deleted_at")
 
-  def * = (id, name, countryCode, createdAt, nickname, about, deletedAt) <> (User.tupled, User.unapply)
+  def * = (id, name, countryCode, createdAt, nickname, deletedAt) <> (User.tupled, User.unapply)
 
 }
 

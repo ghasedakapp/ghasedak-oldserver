@@ -16,6 +16,5 @@ message ApiUser {
     string name = 2;
     google.protobuf.StringValue local_name = 3;
     google.protobuf.StringValue nickname = 4;
-    google.protobuf.StringValue about = 5;
     google.protobuf.Int64Value phone_number = 6;
 }
