@@ -18,4 +18,5 @@ message ApiUser {
     string local_name = 3;
     ApiContact contact_info = 4;
     google.protobuf.StringValue nickname = 5;
+    google.protobuf.StringValue about = 6;
 }

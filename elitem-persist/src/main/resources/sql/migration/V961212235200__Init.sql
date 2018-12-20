@@ -50,6 +50,7 @@ CREATE TABLE users (
   country_code VARCHAR(2)   NOT NULL,
   created_at   TIMESTAMP    NOT NULL,
   nickname     VARCHAR(255),
+  about        VARCHAR (255),
   deleted_at   TIMESTAMP,
   PRIMARY KEY (id)
 );
