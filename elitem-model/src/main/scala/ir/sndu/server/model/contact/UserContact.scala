@@ -14,3 +14,11 @@ case class UserPhoneContact(
   contactUserId: Int,
   name:          Option[String],
   isDeleted:     Boolean)
+
+@SerialVersionUID(1L)
+case class UserEmailContact(
+  email:         String,
+  ownerUserId:   Int,
+  contactUserId: Int,
+  name:          Option[String],
+  isDeleted:     Boolean)
