@@ -18,16 +18,11 @@ object Dependencies {
 
   object Compile {
 
-    val akkaTyped = "com.typesafe.akka" %% "akka-actor-typed" % V.akka
     val actor = "com.typesafe.akka" %% "akka-actor" % V.akka
     val cluster = "com.typesafe.akka" %% "akka-cluster" % V.akka
     val sharding = "com.typesafe.akka" %% "akka-cluster-sharding" % V.akka
     val ddata = "com.typesafe.akka" %% "akka-distributed-data" % V.akka
-    val shardingTyped = "com.typesafe.akka" %% "akka-cluster-sharding-typed" % V.akka
-    val persistTyped = "com.typesafe.akka" %% "akka-persistence-typed" % V.akka
-    val akkaPersist = "com.typesafe.akka" %% "akka-persistence" % V.akka
     val akkaSlf4j = "com.typesafe.akka" %% "akka-slf4j" % V.akka
-    val persistCassandra = "com.typesafe.akka" %% "akka-persistence-cassandra" % V.persistCassandra
 
     val config = "com.typesafe" % "config" % V.config
 
@@ -41,8 +36,6 @@ object Dependencies {
     val grpc = Seq("io.grpc" % "grpc-netty" % scalapb.compiler.Version.grpcJavaVersion,
       "com.thesamet.scalapb" %% "scalapb-runtime-grpc" % scalapb.compiler.Version.scalapbVersion)
 
-    val betterFile = "com.github.pathikrit" %% "better-files" % "3.4.0"
-
     val logback = "ch.qos.logback" % "logback-classic" % "1.2.3"
 
     val jwt = "com.auth0" % "java-jwt" % "3.4.1"
@@ -55,13 +48,13 @@ object Dependencies {
     val libPhoneNumber = "com.googlecode.libphonenumber" % "libphonenumber" % "7.0.+"
     val cats = "org.typelevel" %% "cats-core" % "1.5.0"
 
+    val caffeine =   "com.github.ben-manes.caffeine" % "caffeine" % "2.6.2",
   }
 
   object Test {
     val scalatic = "org.scalactic" %% "scalactic" % "3.0.5"
     val scalaTest = "org.scalatest" %% "scalatest" % "3.0.5" % "test"
     val akkaTest = "com.typesafe.akka" %% "akka-testkit" % V.akka % "test"
-    val persistCassTest = "com.typesafe.akka" %% "akka-persistence-cassandra-launcher" % V.persistCassandra % "test"
   }
 
   import Compile._
@@ -69,15 +62,13 @@ object Dependencies {
 
   val shared = Seq(
     scalapbRuntime,
-    betterFile,
     logback
   )
 
   val sdk: Seq[ModuleID] = shared ++ grpc
 
   val struct: Seq[ModuleID] = shared ++ Seq(
-    actor,
-    akkaTyped
+    actor
   )
 
   val model: Seq[ModuleID] = shared
@@ -88,11 +79,7 @@ object Dependencies {
     cluster,
     sharding,
     akkaSlf4j,
-    akkaTyped,
-    akkaPersist,
-    shardingTyped,
-    persistTyped,
-    persistCassandra
+    caffeine
   )
 
   val rpc: Seq[ModuleID] = shared ++ Seq(
