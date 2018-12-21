@@ -6,7 +6,7 @@ object Dependencies {
 
   object V {
 
-    val akka = "2.5.14"
+    val akka = "2.5.19"
     val slick = "3.2.1"
     val slickPg = "0.16.0"
     val postgres = "42.2.1"

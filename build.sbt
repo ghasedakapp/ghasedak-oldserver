@@ -9,7 +9,7 @@ enablePlugins(JavaAppPackaging)
 
 lazy val commonSettings = Seq(
   organization := "ir.elitem",
-  scalaVersion := "2.12.3",
+  scalaVersion := "2.12.8",
   mainClass in Compile := Some("ir.sndu.server.Main"),
   PB.targets in Compile := Seq(
     scalapb.gen() -> (sourceManaged in Compile).value),
