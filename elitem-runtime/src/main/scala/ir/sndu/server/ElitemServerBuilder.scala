@@ -3,12 +3,14 @@ package ir.sndu.server
 import akka.actor.ActorSystem
 import akka.cluster.Cluster
 import com.typesafe.config.Config
-import io.grpc.ServerServiceDefinition
 import im.ghasedak.rpc.auth.AuthServiceGrpc
+import im.ghasedak.rpc.contact.ContactServiceGrpc
 import im.ghasedak.rpc.messaging.MessagingServiceGrpc
 import im.ghasedak.rpc.test.TestServiceGrpc
+import io.grpc.ServerServiceDefinition
 import ir.sndu.server.frontend.Frontend
 import ir.sndu.server.rpc.auth.AuthServiceImpl
+import ir.sndu.server.rpc.contact.ContactServiceImpl
 import ir.sndu.server.rpc.messaging.MessagingServiceImpl
 import ir.sndu.server.rpc.test.TestServiceImpl
 
@@ -39,7 +41,8 @@ object ServiceDescriptors {
     Seq(
       TestServiceGrpc.bindService(new TestServiceImpl, ec),
       AuthServiceGrpc.bindService(new AuthServiceImpl, ec),
-      MessagingServiceGrpc.bindService(new MessagingServiceImpl, ec))
+      MessagingServiceGrpc.bindService(new MessagingServiceImpl, ec),
+      ContactServiceGrpc.bindService(new ContactServiceImpl(), ec))
   }
 
 }

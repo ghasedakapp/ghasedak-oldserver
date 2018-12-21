@@ -50,13 +50,19 @@ CREATE TABLE users (
   country_code VARCHAR(2)   NOT NULL,
   created_at   TIMESTAMP    NOT NULL,
   nickname     VARCHAR(255),
-  about        VARCHAR(255),
+  about        VARCHAR (255),
   deleted_at   TIMESTAMP,
   PRIMARY KEY (id)
 );
 
 CREATE TABLE user_phones (
-  user_id     INT          NOT NULL,
-  number      BIGINT       NOT NULL,
+  user_id           INT          NOT NULL,
+  phone_number      BIGINT       NOT NULL,
+  PRIMARY KEY (user_id)
+);
+
+CREATE TABLE user_emails (
+  user_id     INT                NOT NULL,
+  email       VARCHAR (255)      NOT NULL,
   PRIMARY KEY (user_id)
 );

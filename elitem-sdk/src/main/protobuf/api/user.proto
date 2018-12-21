@@ -10,12 +10,13 @@ option (scalapb.options) = {
 
 import "scalapb/scalapb.proto";
 import "google/protobuf/wrappers.proto";
+import "api/contact.proto";
 
 message ApiUser {
     int32 id = 1;
     string name = 2;
-    google.protobuf.StringValue local_name = 3;
-    google.protobuf.StringValue nickname = 4;
-    google.protobuf.StringValue about = 5;
-    google.protobuf.Int64Value phone_number = 6;
+    string local_name = 3;
+    repeated ApiContactRecord contacts_recoed = 4;
+    google.protobuf.StringValue nickname = 5;
+    google.protobuf.StringValue about = 6;
 }

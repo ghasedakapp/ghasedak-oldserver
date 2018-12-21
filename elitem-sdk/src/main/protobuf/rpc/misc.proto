@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package im.ghasedak.rpc;
+
+option java_package = "im.ghasedak.rpc.misc";
+option java_multiple_files = true;
+option (scalapb.options) = {
+  flat_package: true
+};
+
+import "scalapb/scalapb.proto";
+
+message ResponseVoid {
+}
