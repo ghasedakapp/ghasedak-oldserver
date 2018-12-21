@@ -6,7 +6,7 @@ import slick.lifted.Tag
 
 final class UnregisteredContactTable(tag: Tag) extends UnregisteredContactBaseTable[UnregisteredContact](tag, "unregistered_contacts") {
 
-  def * = (ownerUserId, name) <> (UnregisteredContact.tupled, UnregisteredContact.unapply)
+  def * = (ownerUserId, localName) <> (UnregisteredContact.tupled, UnregisteredContact.unapply)
 
 }
 

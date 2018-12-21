@@ -9,7 +9,7 @@ abstract class UserContactBaseTable[T](tag: Tag, tname: String) extends Table[T]
 
   def contactUserId = column[Int]("contact_user_id", O.PrimaryKey)
 
-  def name = column[Option[String]]("name")
+  def localName = column[String]("local_name")
 
   def isDeleted = column[Boolean]("is_deleted", O.Default(false))
 

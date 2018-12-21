@@ -1,10 +1,10 @@
 package ir.sndu.server.model.contact
 
 @SerialVersionUID(1L)
-case class UnregisteredContact(ownerUserId: Int, name: Option[String])
+case class UnregisteredContact(ownerUserId: Int, localName: String)
 
 @SerialVersionUID(1L)
-case class UnregisteredPhoneContact(phoneNumber: Long, ownerUserId: Int, name: Option[String])
+case class UnregisteredPhoneContact(phoneNumber: Long, ownerUserId: Int, localName: String)
 
 @SerialVersionUID(1L)
-case class UnregisteredEmailContact(email: String, ownerUserId: Int, name: Option[String])
+case class UnregisteredEmailContact(email: String, ownerUserId: Int, localName: String)

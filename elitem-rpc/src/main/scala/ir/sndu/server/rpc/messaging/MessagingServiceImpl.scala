@@ -21,9 +21,8 @@ import slick.jdbc.PostgresProfile
 import scala.concurrent.{ ExecutionContext, Future }
 
 final class MessagingServiceImpl(implicit system: ActorSystem) extends MessagingService
-
   with AuthTokenHelper
-  with MessagingHelper {
+  with MessagingServiceHelper {
 
   override implicit val ec: ExecutionContext = system.dispatcher
 

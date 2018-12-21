@@ -16,7 +16,7 @@ final class UnregisteredEmailContactTable(tag: Tag) extends UnregisteredContactB
 
   def pk = primaryKey("unregistered_email_contacts_pkey", (email, ownerUserId))
 
-  def * = (email, ownerUserId, name) <> (UnregisteredEmailContact.tupled, UnregisteredEmailContact.unapply)
+  def * = (email, ownerUserId, localName) <> (UnregisteredEmailContact.tupled, UnregisteredEmailContact.unapply)
 
 }
 
@@ -24,11 +24,11 @@ object UnregisteredEmailContactRepo {
 
   private val emailContacts = TableQuery[UnregisteredEmailContactTable]
 
-  def create(email: String, ownerUserId: Int, name: Option[String]): FixedSqlAction[Int, NoStream, Effect.Write] =
-    emailContacts += UnregisteredEmailContact(email, ownerUserId, name)
+  def create(email: String, ownerUserId: Int, localName: String): FixedSqlAction[Int, NoStream, Effect.Write] =
+    emailContacts += UnregisteredEmailContact(email, ownerUserId, localName)
 
-  def createIfNotExists(email: String, ownerUserId: Int, name: Option[String]): DBIOAction[Try[Int], NoStream, Effect.Write] = {
-    create(email, ownerUserId, name).asTry
+  def createIfNotExists(email: String, ownerUserId: Int, localName: String): DBIOAction[Try[Int], NoStream, Effect.Write] = {
+    create(email, ownerUserId, localName).asTry
   }
 
   def find(email: String): FixedSqlStreamingAction[Seq[UnregisteredEmailContact], UnregisteredEmailContact, Effect.Read] =

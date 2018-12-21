@@ -16,7 +16,7 @@ final class UnregisteredPhoneContactTable(tag: Tag) extends UnregisteredContactB
 
   def pk = primaryKey("unregistered_phone_contacts_pkey", (phoneNumber, ownerUserId))
 
-  def * = (phoneNumber, ownerUserId, name) <> (UnregisteredPhoneContact.tupled, UnregisteredPhoneContact.unapply)
+  def * = (phoneNumber, ownerUserId, localName) <> (UnregisteredPhoneContact.tupled, UnregisteredPhoneContact.unapply)
 
 }
 
@@ -24,11 +24,11 @@ object UnregisteredPhoneContactRepo {
 
   private val phoneContacts = TableQuery[UnregisteredPhoneContactTable]
 
-  def create(phoneNumber: Long, ownerUserId: Int, name: Option[String]): FixedSqlAction[Int, NoStream, Effect.Write] =
-    phoneContacts += UnregisteredPhoneContact(phoneNumber, ownerUserId, name)
+  def create(phoneNumber: Long, ownerUserId: Int, localName: String): FixedSqlAction[Int, NoStream, Effect.Write] =
+    phoneContacts += UnregisteredPhoneContact(phoneNumber, ownerUserId, localName)
 
-  def createIfNotExists(phoneNumber: Long, ownerUserId: Int, name: Option[String]): DBIOAction[Try[Int], NoStream, Effect.Write] = {
-    create(phoneNumber, ownerUserId, name).asTry
+  def createIfNotExists(phoneNumber: Long, ownerUserId: Int, localName: String): DBIOAction[Try[Int], NoStream, Effect.Write] = {
+    create(phoneNumber, ownerUserId, localName).asTry
   }
 
   def find(phoneNumber: Long): FixedSqlStreamingAction[Seq[UnregisteredPhoneContact], UnregisteredPhoneContact, Effect.Read] =

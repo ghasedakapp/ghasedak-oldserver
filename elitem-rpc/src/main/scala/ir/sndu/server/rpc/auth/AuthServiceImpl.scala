@@ -42,7 +42,7 @@ final class AuthServiceImpl(implicit system: ActorSystem) extends AuthService
     val action: Result[ResponseStartPhoneAuth] = for {
       _ ← fromBoolean(AuthRpcErrors.InvalidApiKey)(AuthSession.isValidApiKey(request.apiKey))
       normalizedPhone ← fromOption(AuthRpcErrors.InvalidPhoneNumber)(normalizeLong(request.phoneNumber).headOption)
-      optUserPhone ← fromDBIO(UserPhoneRepo.findByPhoneNumber(normalizedPhone).headOption)
+      optUserPhone ← fromDBIO(UserPhoneRepo.findByPhoneNumber(normalizedPhone))
       // todo: fix this (delete account)
       _ ← optUserPhone map (p ⇒ forbidDeletedUser(p.userId)) getOrElse point(())
       optAuthTransaction ← fromDBIO(AuthPhoneTransactionRepo.findByPhoneAndDeviceHash(normalizedPhone, request.deviceHash))
@@ -76,7 +76,7 @@ final class AuthServiceImpl(implicit system: ActorSystem) extends AuthService
         case apt: AuthPhoneTransaction ⇒
           for {
             // todo: fix this (delete account)
-            optUserPhone ← fromDBIO(UserPhoneRepo.findByPhoneNumber(apt.phoneNumber).headOption)
+            optUserPhone ← fromDBIO(UserPhoneRepo.findByPhoneNumber(apt.phoneNumber))
             optApiAuth ← getOptApiAuth(apt, optUserPhone)
           } yield optApiAuth
       }

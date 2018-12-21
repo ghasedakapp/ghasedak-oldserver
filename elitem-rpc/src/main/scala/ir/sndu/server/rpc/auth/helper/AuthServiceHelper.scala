@@ -10,6 +10,7 @@ import ir.sndu.persist.repo.user.{ UserPhoneRepo, UserRepo }
 import ir.sndu.server.model.auth.{ AuthPhoneTransaction, AuthSession, AuthTransactionBase }
 import ir.sndu.server.model.user.{ User, UserPhone }
 import ir.sndu.server.rpc.auth.{ AuthRpcErrors, AuthServiceImpl }
+import ir.sndu.server.rpc.common.CommonRpcError
 import ir.sndu.server.user.UserUtils
 import ir.sndu.server.utils.IdUtils._
 import ir.sndu.server.utils.StringUtils._
@@ -85,7 +86,7 @@ trait AuthServiceHelper {
     for {
       phoneAndCode ← fromOption(AuthRpcErrors.InvalidPhoneNumber)(normalizeWithCountry(phone).headOption)
       (_, countryCode) = phoneAndCode
-      validName ← fromOption(AuthRpcErrors.InvalidName)(validName(name))
+      validName ← fromOption(CommonRpcError.InvalidName)(validName(name))
       user = User(
         id = nextIntId(),
         name = validName,

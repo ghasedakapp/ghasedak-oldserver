@@ -7,6 +7,6 @@ abstract class UnregisteredContactBaseTable[T](tag: Tag, tname: String) extends 
 
   def ownerUserId = column[Int]("owner_user_id", O.PrimaryKey)
 
-  def name = column[Option[String]]("name")
+  def localName = column[String]("local_name")
 
 }

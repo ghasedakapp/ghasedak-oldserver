@@ -25,24 +25,23 @@ service ContactService {
 }
 
 message RequestGetContacts {
-    string hash = 1;
 }
 
 message ResponseGetContacts {
-    repeated int32 contacts = 1;
+    repeated int32 contacts_user_id = 1;
 }
 
 message RequestAddContact {
-    google.protobuf.StringValue name = 1;
+    string local_name = 1;
     im.ghasedak.api.ApiContactRecord contact_record = 2;
 }
 
 message ResponseAddContact {
-    int32 user_id = 1;
+    int32 contact_user_id = 1;
 }
 
 message RequestRemoveContact {
-    int32 user_id = 1;
+    int32 contact_user_id = 1;
 }
 
 message RequestSearchContacts {
@@ -50,5 +49,5 @@ message RequestSearchContacts {
 }
 
 message ResponseSearchContacts {
-    int32 user_id = 1;
+    int32 contact_user_id = 1;
 }
