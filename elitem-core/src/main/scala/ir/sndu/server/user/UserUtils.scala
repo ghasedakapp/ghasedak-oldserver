@@ -1,6 +1,6 @@
 package ir.sndu.server.user
 
-import im.ghasedak.api.contact.{ ApiContactInfo, ApiContactType }
+import im.ghasedak.api.contact.ApiContactRecord
 import ir.sndu.persist.repo.user.{ UserEmailRepo, UserPhoneRepo }
 import slick.dbio.{ DBIOAction, Effect, NoStream }
 
@@ -9,21 +9,19 @@ import scala.concurrent.ExecutionContext
 
 object UserUtils {
 
-  def getUserContactInfo(userId: Int)(implicit ec: ExecutionContext): DBIOAction[Seq[ApiContactInfo], NoStream, Effect.Read with Effect.Read] = {
+  def getUserContactsRecord(userId: Int)(implicit ec: ExecutionContext): DBIOAction[Seq[ApiContactRecord], NoStream, Effect.Read with Effect.Read] = {
     for {
       phoneNumber ← UserPhoneRepo.findNumber(userId)
       email ← UserEmailRepo.findEmail(userId)
     } yield {
-      var contactsInfo = ArrayBuffer.empty[ApiContactInfo]
+      var contactsRecord = ArrayBuffer.empty[ApiContactRecord]
       if (phoneNumber.isDefined)
-        contactsInfo += ApiContactInfo(
-          contactType = ApiContactType.PHONE,
-          phoneNumber = phoneNumber)
+        contactsRecord += ApiContactRecord()
+          .withPhoneNumber(phoneNumber.get)
       if (email.isDefined)
-        contactsInfo += ApiContactInfo(
-          contactType = ApiContactType.EMAIL,
-          email = email)
-      contactsInfo
+        contactsRecord += ApiContactRecord()
+          .withEmail(email.get)
+      contactsRecord
     }
   }
 

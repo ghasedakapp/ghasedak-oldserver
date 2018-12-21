@@ -11,7 +11,6 @@ option (scalapb.options) = {
 import "scalapb/scalapb.proto";
 import "google/protobuf/wrappers.proto";
 import "api/contact.proto";
-import "api/user.proto";
 import "rpc/misc.proto";
 
 service ContactService {
@@ -26,22 +25,20 @@ service ContactService {
 }
 
 message RequestGetContacts {
-    int32 from = 1;
-    int32 limit = 2;
+    string hash = 1;
 }
 
 message ResponseGetContacts {
-    bool need_more = 1;
-    repeated im.ghasedak.api.ApiUser users = 2;
+    repeated int32 contacts = 1;
 }
 
 message RequestAddContact {
     google.protobuf.StringValue name = 1;
-    im.ghasedak.api.ApiContactInfo contact_info = 2;
+    im.ghasedak.api.ApiContactRecord contact_record = 2;
 }
 
 message ResponseAddContact {
-    im.ghasedak.api.ApiUser user = 1;
+    int32 user_id = 1;
 }
 
 message RequestRemoveContact {
@@ -53,5 +50,5 @@ message RequestSearchContacts {
 }
 
 message ResponseSearchContacts {
-    repeated im.ghasedak.api.ApiUser users = 2;
+    int32 user_id = 1;
 }
