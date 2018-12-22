@@ -4,11 +4,12 @@ import java.net.ServerSocket
 
 import akka.actor.ActorSystem
 import com.typesafe.config.{ Config, ConfigFactory }
-import io.grpc.{ ManagedChannel, ManagedChannelBuilder }
-import ir.sndu.persist.db.DbExtension
 import im.ghasedak.rpc.auth.AuthServiceGrpc
+import im.ghasedak.rpc.contact.ContactServiceGrpc
 import im.ghasedak.rpc.messaging.MessagingServiceGrpc
 import im.ghasedak.rpc.test.TestServiceGrpc
+import io.grpc.{ ManagedChannel, ManagedChannelBuilder }
+import ir.sndu.persist.db.DbExtension
 import ir.sndu.server.config.{ AppType, ElitemConfigFactory }
 import ir.sndu.server.utils.UserTestUtils
 import org.scalatest.concurrent.ScalaFutures
@@ -71,6 +72,9 @@ abstract class GrpcBaseSuit extends FlatSpec
 
   protected val messagingStub: MessagingServiceGrpc.MessagingServiceBlockingStub =
     MessagingServiceGrpc.blockingStub(channel)
+
+  protected val contactStub: ContactServiceGrpc.ContactServiceBlockingStub =
+    ContactServiceGrpc.blockingStub(channel)
 
   override def afterAll(): Unit = {
     super.afterAll()
