@@ -11,4 +11,6 @@ object ContactRpcError {
 
   val ContactAlreadyExists = RpcError(Status.INTERNAL, "CONTACT_ALREADY_EXISTS")
 
+  val ContactNotFound = RpcError(Status.NOT_FOUND, "CONTACT_NOT_FOUND")
+
 }

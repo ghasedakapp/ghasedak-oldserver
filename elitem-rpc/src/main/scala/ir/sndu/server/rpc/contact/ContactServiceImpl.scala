@@ -57,7 +57,17 @@ class ContactServiceImpl(implicit system: ActorSystem) extends ContactService
     }
   }
 
-  override def removeContact(request: RequestRemoveContact): Future[ResponseVoid] = ???
+  override def removeContact(request: RequestRemoveContact): Future[ResponseVoid] = {
+    authorize { clientData ⇒
+      val action: Result[ResponseVoid] = for {
+        exists ← fromDBIO(UserContactRepo.exists(clientData.userId, request.contactUserId))
+        _ ← fromBoolean(ContactRpcError.ContactNotFound)(exists)
+        _ ← fromDBIO(UserContactRepo.delete(clientData.userId, request.contactUserId))
+      } yield ResponseVoid()
+      val result = db.run(action.value)
+      result
+    }
+  }
 
   override def searchContacts(request: RequestSearchContacts): Future[ResponseSearchContacts] = ???
 

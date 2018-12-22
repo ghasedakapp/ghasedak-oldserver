@@ -28,4 +28,8 @@ object UserContactRepo {
   def insertOrUpdate(contact: UserContact): FixedSqlAction[Int, NoStream, Effect.Write] =
     contacts.insertOrUpdate(contact)
 
+  def delete(ownerUserId: Int, contactUserId: Int): FixedSqlAction[Int, NoStream, Effect.Write] =
+    contacts.filter(c ⇒ c.ownerUserId === ownerUserId && c.contactUserId === contactUserId && c.isDeleted === false)
+      .map(_.isDeleted).update(true)
+
 }
