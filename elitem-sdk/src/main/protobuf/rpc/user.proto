@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package im.ghasedak.rpc;
+
+option java_package = "im.ghasedak.rpc.user";
+option java_multiple_files = true;
+option (scalapb.options) = {
+  flat_package: true
+};
+
+import "scalapb/scalapb.proto";
+import "google/protobuf/wrappers.proto";
+import "api/user.proto";
+
+service UserService {
+    rpc LoadUsers (RequestLoadUsers) returns (ResponseLoadUsers) {
+    }
+}
+
+message RequestLoadUsers {
+    repeated int32 user_ids = 1;
+}
+
+message ResponseLoadUsers {
+    repeated im.ghasedak.api.ApiUser users = 1;
+}

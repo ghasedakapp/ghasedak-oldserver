@@ -22,6 +22,9 @@ object UserContactRepo {
   def findContactIdsActive(ownerUserId: Int): FixedSqlStreamingAction[Seq[Int], Int, Effect.Read] =
     active.filter(_.ownerUserId === ownerUserId).map(_.contactUserId).distinct.result
 
+  def find(ownerUserId: Int): FixedSqlStreamingAction[Seq[UserContact], UserContact, Effect.Read] =
+    active.filter(_.ownerUserId === ownerUserId).result
+
   def exists(ownerUserId: Int, contactUserId: Int): FixedSqlAction[Boolean, ExPostgresProfile.api.NoStream, Effect.Read] =
     active.filter(c ⇒ c.ownerUserId === ownerUserId && c.contactUserId === contactUserId).exists.result
 
