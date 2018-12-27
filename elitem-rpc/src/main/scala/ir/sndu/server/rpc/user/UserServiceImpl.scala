@@ -2,11 +2,9 @@ package ir.sndu.server.rpc.user
 
 import akka.actor.ActorSystem
 import akka.event.{ Logging, LoggingAdapter }
-import im.ghasedak.api.user.ApiUser
 import im.ghasedak.rpc.user.UserServiceGrpc.UserService
 import im.ghasedak.rpc.user.{ RequestLoadUsers, ResponseLoadUsers }
 import ir.sndu.persist.db.DbExtension
-import ir.sndu.persist.repo.user.UserRepo
 import ir.sndu.server.rpc.RpcError
 import ir.sndu.server.rpc.auth.helper.AuthTokenHelper
 import ir.sndu.server.rpc.common.CommonRpcError
@@ -30,22 +28,10 @@ final class UserServiceImpl(implicit system: ActorSystem) extends UserService
 
   override def loadUsers(request: RequestLoadUsers): Future[ResponseLoadUsers] =
     authorize { clientData ⇒
-      val action =
-        UserRepo.findUserContact(clientData.userId, request.userIds) map (_.map {
-          case (user, contact) ⇒
-            ApiUser(
-              id = user.id,
-              name = user.name,
-              localName = contact.localName,
-              Seq.empty,
-              nickname = user.nickname,
-              about = user.about)
-        })
-
       //TODO: config
       if (request.userIds.size > 100)
         Future.failed(CommonRpcError.CollectionSizeLimit)
       else
-        db.run(action) map (ResponseLoadUsers(_))
+        userExt.find(clientData.userId, request.userIds) map (ResponseLoadUsers(_))
     }
 }

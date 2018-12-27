@@ -6,7 +6,9 @@ import akka.actor.{ ActorSystem, ExtendedActorSystem, Extension, ExtensionId, Ex
 import akka.util.Timeout
 import im.ghasedak.api.messaging.ApiMessage
 import im.ghasedak.api.peer.{ ApiPeer, ApiPeerType }
+import im.ghasedak.api.user.ApiUser
 import ir.sndu.persist.db.DbExtension
+import ir.sndu.persist.repo.user.UserRepo
 import slick.jdbc.PostgresProfile
 
 import scala.concurrent.duration._
@@ -41,6 +43,21 @@ class UserExtensionImpl(system: ExtendedActorSystem) extends Extension {
       _ ← createOrUpdateDialog(userId, peer, seq, msgLocalDate)
       _ ← createOrUpdateDialog(peer.id, selfPeer, seq, msgLocalDate)
     } yield ()
+    db.run(action)
+  }
+
+  def find(clientUserId: Int, userIds: Seq[Int]): Future[Seq[ApiUser]] = {
+    val action =
+      UserRepo.findUserContact(clientUserId, userIds) map (_.map {
+        case (user, contact) ⇒
+          ApiUser(
+            id = user.id,
+            name = user.name,
+            localName = contact.localName,
+            contactsRecord = Seq.empty,
+            nickname = user.nickname,
+            about = user.about)
+      })
     db.run(action)
   }
 

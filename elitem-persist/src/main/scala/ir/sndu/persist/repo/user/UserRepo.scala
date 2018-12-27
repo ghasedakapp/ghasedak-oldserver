@@ -6,7 +6,7 @@ import com.github.tminglei.slickpg.ExPostgresProfile.api._
 import ir.sndu.persist.repo.TypeMapper._
 import ir.sndu.persist.repo.contact.UserContactRepo
 import ir.sndu.server.model.contact.UserContact
-import ir.sndu.server.model.user.User
+import ir.sndu.server.model.user.{ User, UserEmail, UserPhone }
 import slick.dbio.Effect
 import slick.lifted.Tag
 import slick.sql.{ FixedSqlAction, FixedSqlStreamingAction, SqlAction }
