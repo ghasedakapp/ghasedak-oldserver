@@ -9,6 +9,7 @@ import ir.sndu.persist.db.DbExtension
 import ir.sndu.persist.repo.user.UserRepo
 import ir.sndu.server.rpc.RpcError
 import ir.sndu.server.rpc.auth.helper.AuthTokenHelper
+import ir.sndu.server.rpc.common.CommonRpcError
 import ir.sndu.server.user.UserExtension
 import ir.sndu.server.utils.concurrent.DBIOResult
 import slick.jdbc.PostgresProfile
@@ -41,8 +42,9 @@ final class UserServiceImpl(implicit system: ActorSystem) extends UserService
               about = user.about)
         })
 
+      //TODO: config
       if (request.userIds.size > 100)
-        Future.failed(UserRpcErrors.LoadUserLimit)
+        Future.failed(CommonRpcError.CollectionSizeLimit)
       else
         db.run(action) map (ResponseLoadUsers(_))
     }

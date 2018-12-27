@@ -4,6 +4,5 @@ import io.grpc.Status
 import ir.sndu.server.rpc.RpcError
 
 object UserRpcErrors {
-  val LoadUserLimit = RpcError(Status.NOT_FOUND, "LOUD_USER_LIMIT")
-
+  val UserNotFound = RpcError(Status.NOT_FOUND, "USER_NOT_FOUND")
 }
