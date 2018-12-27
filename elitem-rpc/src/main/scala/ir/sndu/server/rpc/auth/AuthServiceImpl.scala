@@ -13,7 +13,7 @@ import ir.sndu.persist.repo.user.UserPhoneRepo
 import ir.sndu.server.model.auth.AuthPhoneTransaction
 import ir.sndu.server.rpc.RpcError
 import ir.sndu.server.rpc.auth.helper.{ AuthServiceHelper, AuthTokenHelper }
-import ir.sndu.server.rpc.common.CommonRpcError
+import ir.sndu.server.rpc.common.CommonRpcErrors
 import ir.sndu.server.utils.concurrent.DBIOResult
 import ir.sndu.server.utils.number.PhoneNumberUtils._
 import slick.jdbc.PostgresProfile
@@ -35,7 +35,7 @@ final class AuthServiceImpl(implicit system: ActorSystem) extends AuthService
     case rpcError: RpcError ⇒ rpcError
     case ex ⇒
       log.error(ex, "Internal error")
-      CommonRpcError.InternalError
+      CommonRpcErrors.InternalError
   }
 
   override def startPhoneAuth(request: RequestStartPhoneAuth): Future[ResponseStartPhoneAuth] = {

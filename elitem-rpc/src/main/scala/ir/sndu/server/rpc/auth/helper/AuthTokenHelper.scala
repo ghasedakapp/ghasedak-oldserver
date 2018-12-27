@@ -12,7 +12,7 @@ import ir.sndu.persist.repo.auth.AuthTokenRepo
 import ir.sndu.server.model.auth.AuthToken
 import ir.sndu.server.rpc.Constant
 import ir.sndu.server.rpc.auth.AuthRpcErrors
-import ir.sndu.server.rpc.common.CommonRpcError._
+import ir.sndu.server.rpc.common.CommonRpcErrors._
 import slick.jdbc.PostgresProfile
 
 import scala.concurrent.{ ExecutionContext, Future }

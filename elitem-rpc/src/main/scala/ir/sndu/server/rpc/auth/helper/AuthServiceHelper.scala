@@ -12,7 +12,7 @@ import ir.sndu.server.model.auth.{ AuthPhoneTransaction, AuthSession, AuthTransa
 import ir.sndu.server.model.org.ApiKey
 import ir.sndu.server.model.user.{ User, UserInfo, UserPhone }
 import ir.sndu.server.rpc.auth.{ AuthRpcErrors, AuthServiceImpl }
-import ir.sndu.server.rpc.common.CommonRpcError
+import ir.sndu.server.rpc.common.CommonRpcErrors
 import ir.sndu.server.user.UserUtils
 import ir.sndu.server.utils.CodeGen.genPhoneCode
 import ir.sndu.server.utils.StringUtils._
@@ -96,7 +96,7 @@ trait AuthServiceHelper {
     for {
       phoneAndCode ← fromOption(AuthRpcErrors.InvalidPhoneNumber)(normalizeWithCountry(phone).headOption)
       (_, countryCode) = phoneAndCode
-      validName ← fromOption(CommonRpcError.InvalidName)(validName(name))
+      validName ← fromOption(CommonRpcErrors.InvalidName)(validName(name))
       user = User(
         id = nextIntId(),
         orgId = transaction.orgId,
