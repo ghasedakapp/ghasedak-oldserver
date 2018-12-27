@@ -10,6 +10,7 @@ import io.grpc.Status.Code
 import io.grpc.StatusRuntimeException
 import ir.sndu.persist.repo.auth.{ AuthTransactionRepo, GateAuthCodeRepo }
 import ir.sndu.server.GrpcBaseSuit
+import ir.sndu.server.rpc.Constant
 
 import scala.util.{ Failure, Random, Try }
 
@@ -73,7 +74,7 @@ class AuthServiceSpec extends GrpcBaseSuit {
     Try(authStub.startPhoneAuth(request)) match {
       case Failure(ex: StatusRuntimeException) ⇒
         ex.getStatus.getCode shouldEqual Code.INTERNAL
-        ex.getStatus.getDescription shouldEqual "INVALID_PHONE_NUMBER"
+        ex.getTrailers.get(Constant.TAG_METADATA_KEY) shouldEqual "INVALID_PHONE_NUMBER"
     }
   }
 
@@ -82,7 +83,7 @@ class AuthServiceSpec extends GrpcBaseSuit {
     Try(authStub.validateCode(request)) match {
       case Failure(ex: StatusRuntimeException) ⇒
         ex.getStatus.getCode shouldEqual Code.INTERNAL
-        ex.getStatus.getDescription shouldEqual "AUTH_CODE_EXPIRED"
+        ex.getTrailers.get(Constant.TAG_METADATA_KEY) shouldEqual "AUTH_CODE_EXPIRED"
     }
   }
 
@@ -103,7 +104,7 @@ class AuthServiceSpec extends GrpcBaseSuit {
     Try(authStub.validateCode(request2)) match {
       case Failure(ex: StatusRuntimeException) ⇒
         ex.getStatus.getCode shouldEqual Code.INTERNAL
-        ex.getStatus.getDescription shouldEqual "INVALID_AUTH_CODE"
+        ex.getTrailers.get(Constant.TAG_METADATA_KEY) shouldEqual "INVALID_AUTH_CODE"
     }
   }
 
@@ -119,7 +120,7 @@ class AuthServiceSpec extends GrpcBaseSuit {
     Try(authStub.validateCode(request2)) match {
       case Failure(ex: StatusRuntimeException) ⇒
         ex.getStatus.getCode shouldEqual Code.INTERNAL
-        ex.getStatus.getDescription shouldEqual "AUTH_CODE_EXPIRED"
+        ex.getTrailers.get(Constant.TAG_METADATA_KEY) shouldEqual "AUTH_CODE_EXPIRED"
     }
   }
 
@@ -177,7 +178,7 @@ class AuthServiceSpec extends GrpcBaseSuit {
     Try(stub.testAuth(RequestTestAuth(true))) match {
       case Failure(ex: StatusRuntimeException) ⇒
         ex.getStatus.getCode shouldEqual Code.INTERNAL
-        ex.getStatus.getDescription shouldEqual "AUTH_TEST_ERROR"
+        ex.getTrailers.get(Constant.TAG_METADATA_KEY) shouldEqual "AUTH_TEST_ERROR"
     }
   }
 

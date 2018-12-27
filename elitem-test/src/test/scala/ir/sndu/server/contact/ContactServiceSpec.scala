@@ -5,6 +5,7 @@ import im.ghasedak.rpc.contact.{ RequestAddContact, RequestGetContacts, RequestR
 import io.grpc.Status.Code
 import io.grpc.StatusRuntimeException
 import ir.sndu.server.GrpcBaseSuit
+import ir.sndu.server.rpc.Constant
 
 import scala.util.{ Failure, Random, Try }
 
@@ -44,13 +45,13 @@ class ContactServiceSpec extends GrpcBaseSuit {
     Try(stub.addContact(request1)) match {
       case Failure(ex: StatusRuntimeException) ⇒
         ex.getStatus.getCode shouldEqual Code.INTERNAL
-        ex.getStatus.getDescription shouldEqual "INVALID_CONTACT_RECORD"
+        ex.getTrailers.get(Constant.TAG_METADATA_KEY) shouldEqual "INVALID_CONTACT_RECORD"
     }
     val request2 = RequestAddContact(Random.alphanumeric.take(20).mkString, Some(ApiContactRecord()))
     Try(stub.addContact(request2)) match {
       case Failure(ex: StatusRuntimeException) ⇒
         ex.getStatus.getCode shouldEqual Code.INTERNAL
-        ex.getStatus.getDescription shouldEqual "INVALID_CONTACT_RECORD"
+        ex.getTrailers.get(Constant.TAG_METADATA_KEY) shouldEqual "INVALID_CONTACT_RECORD"
     }
   }
 
@@ -63,7 +64,7 @@ class ContactServiceSpec extends GrpcBaseSuit {
     Try(stub.addContact(request)) match {
       case Failure(ex: StatusRuntimeException) ⇒
         ex.getStatus.getCode shouldEqual Code.INTERNAL
-        ex.getStatus.getDescription shouldEqual "CANT_ADD_SELF"
+        ex.getTrailers.get(Constant.TAG_METADATA_KEY) shouldEqual "CANT_ADD_SELF"
     }
   }
 
@@ -78,7 +79,7 @@ class ContactServiceSpec extends GrpcBaseSuit {
     Try(stub.addContact(request)) match {
       case Failure(ex: StatusRuntimeException) ⇒
         ex.getStatus.getCode shouldEqual Code.INTERNAL
-        ex.getStatus.getDescription shouldEqual "CONTACT_ALREADY_EXISTS"
+        ex.getTrailers.get(Constant.TAG_METADATA_KEY) shouldEqual "CONTACT_ALREADY_EXISTS"
     }
   }
 
@@ -91,7 +92,7 @@ class ContactServiceSpec extends GrpcBaseSuit {
     Try(stub.addContact(request)) match {
       case Failure(ex: StatusRuntimeException) ⇒
         ex.getStatus.getCode shouldEqual Code.NOT_FOUND
-        ex.getStatus.getDescription shouldEqual "USER_NOT_FOUND"
+        ex.getTrailers.get(Constant.TAG_METADATA_KEY) shouldEqual "USER_NOT_FOUND"
     }
   }
 
