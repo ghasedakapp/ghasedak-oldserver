@@ -4,7 +4,7 @@ import im.ghasedak.api.contact.ApiContactRecord
 import ir.sndu.persist.repo.contact.{ UserContactRepo, UserEmailContactRepo, UserPhoneContactRepo }
 import ir.sndu.persist.repo.user.{ UserEmailRepo, UserPhoneRepo, UserRepo }
 import ir.sndu.server.model.contact.{ UserContact, UserEmailContact, UserPhoneContact }
-import ir.sndu.server.rpc.common.CommonRpcError
+import ir.sndu.server.rpc.user.UserRpcErrors
 
 trait ContactServiceHelper {
   this: ContactServiceImpl ⇒
@@ -16,10 +16,10 @@ trait ContactServiceHelper {
         fromDBIO(UserPhoneRepo.findIdByPhoneNumber(contactRecord.getPhoneNumber))
       else
         fromDBIO(UserEmailRepo.findIdByEmail(contactRecord.getEmail))
-      userId ← fromOption(CommonRpcError.UserNotFound)(optUserId)
+      userId ← fromOption(UserRpcErrors.UserNotFound)(optUserId)
       optOrgId ← fromDBIO(UserRepo.findOrgId(userId))
-      orgId ← fromOption(CommonRpcError.UserNotFound)(optOrgId)
-      _ ← fromBoolean(CommonRpcError.UserNotFound)(clientOrgId == orgId)
+      orgId ← fromOption(UserRpcErrors.UserNotFound)(optOrgId)
+      _ ← fromBoolean(UserRpcErrors.UserNotFound)(clientOrgId == orgId)
     } yield userId
   }
 

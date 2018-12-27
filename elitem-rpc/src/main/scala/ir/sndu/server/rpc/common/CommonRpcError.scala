@@ -7,7 +7,7 @@ object CommonRpcError {
 
   val InternalError = RpcError(Status.INTERNAL, "INTERNAL_ERROR")
 
-  val UserNotFound = RpcError(Status.NOT_FOUND, "USER_NOT_FOUND")
+  val CollectionSizeLimit = RpcError(Status.PERMISSION_DENIED, "COLLECTION_SIZE_LIMIT", "Collection size is more than limit")
 
   val InvalidName = RpcError(Status.INTERNAL, "INVALID_NAME")
 

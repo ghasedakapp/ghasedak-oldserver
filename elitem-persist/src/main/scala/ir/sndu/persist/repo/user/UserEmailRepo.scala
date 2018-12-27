@@ -18,7 +18,7 @@ final class UserEmailTable(tag: Tag) extends Table[UserEmail](tag, "user_emails"
 
 object UserEmailRepo {
 
-  private val emails = TableQuery[UserEmailTable]
+  val emails = TableQuery[UserEmailTable]
 
   def findEmail(userId: Int): SqlAction[Option[String], NoStream, Effect.Read] =
     emails.filter(_.userId === userId).map(_.email).result.headOption

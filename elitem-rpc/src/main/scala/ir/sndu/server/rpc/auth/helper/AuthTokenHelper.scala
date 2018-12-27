@@ -10,6 +10,7 @@ import com.auth0.jwt.interfaces.DecodedJWT
 import io.grpc.{ Context, Metadata, StatusRuntimeException }
 import ir.sndu.persist.repo.auth.AuthTokenRepo
 import ir.sndu.server.model.auth.AuthToken
+import ir.sndu.server.rpc.Constant
 import ir.sndu.server.rpc.auth.AuthRpcErrors
 import ir.sndu.server.rpc.common.CommonRpcError._
 import slick.jdbc.PostgresProfile
@@ -17,10 +18,6 @@ import slick.jdbc.PostgresProfile
 import scala.concurrent.{ ExecutionContext, Future }
 
 object AuthTokenHelper {
-
-  val TOKEN_CONTEXT_KEY: Context.Key[String] = Context.key[String]("token")
-
-  val TOKEN_METADATA_KEY: Metadata.Key[String] = Metadata.Key.of("token", Metadata.ASCII_STRING_MARSHALLER);
 
   case class ClientData(userId: Int, orgId: Int, tokenId: String, tokenKey: String, token: String)
 
@@ -78,7 +75,7 @@ trait AuthTokenHelper {
   }
 
   def authorize[T](f: ClientData ⇒ Future[T]): Future[T] =
-    authorize(Option(TOKEN_CONTEXT_KEY.get()))(f)
+    authorize(Option(Constant.TOKEN_CONTEXT_KEY.get()))(f)
 
   def generateToken(userId: Int, orgId: Int): Future[(String, String)] = {
     val tokenKey = UUID.randomUUID().toString

@@ -18,7 +18,7 @@ final class UserPhoneTable(tag: Tag) extends Table[UserPhone](tag, "user_phones"
 
 object UserPhoneRepo {
 
-  private val phones = TableQuery[UserPhoneTable]
+  val phones = TableQuery[UserPhoneTable]
 
   def create(userPhone: UserPhone): FixedSqlAction[Int, NoStream, Effect.Write] =
     phones += userPhone
