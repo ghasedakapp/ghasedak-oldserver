@@ -17,7 +17,6 @@ object DialogUtils {
         DialogRepo.updateLastMessageDate(userId, peer, lastMessageSeq, lastMessageDate)
       else
         DialogRepo.create(userId, peer, lastMessageSeq, lastMessageDate)
-
     } yield ()
   }
 

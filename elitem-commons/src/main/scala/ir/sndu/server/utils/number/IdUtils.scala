@@ -1,4 +1,6 @@
-package ir.sndu.server.utils
+package ir.sndu.server.utils.number
+
+import ir.sndu.server.utils.ThreadLocalSecureRandom
 
 object IdUtils {
   def nextIntId(): Int = nextIntId(ThreadLocalSecureRandom.current())

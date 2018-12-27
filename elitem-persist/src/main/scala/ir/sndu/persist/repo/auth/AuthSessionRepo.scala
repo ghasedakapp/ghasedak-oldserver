@@ -11,31 +11,25 @@ import slick.sql.FixedSqlAction
 
 class AuthSessionTable(tag: Tag) extends Table[AuthSession](tag, "auth_sessions") {
 
+  def orgId = column[Int]("org_id", O.PrimaryKey)
+
+  def apiKey = column[String]("api_key")
+
   def userId = column[Int]("user_id", O.PrimaryKey)
 
   def tokenId = column[String]("token_id", O.PrimaryKey)
 
-  def appId = column[Int]("app_id")
-
-  def apiKey = column[String]("api_key")
-
-  def deviceHash = column[String]("device_hash")
-
-  def deviceInfo = column[String]("device_info")
-
-  def sessionTime = column[LocalDateTime]("session_time")
+  def createdAt = column[LocalDateTime]("created_at")
 
   def deletedAt = column[Option[LocalDateTime]]("deleted_at")
 
-  override def * = (userId, tokenId, appId, apiKey, deviceHash, deviceInfo,
-    sessionTime, deletedAt) <> ((AuthSession.apply _).tupled, AuthSession.unapply)
+  override def * = (orgId, apiKey, userId, tokenId, createdAt, deletedAt) <> ((AuthSession.apply _).tupled, AuthSession.unapply)
+
 }
 
 object AuthSessionRepo {
 
-  private val sessions = TableQuery[AuthSessionTable]
-
-  private val activeSessions = sessions.filter(_.deletedAt.isEmpty)
+  val sessions = TableQuery[AuthSessionTable]
 
   def create(authSession: AuthSession): FixedSqlAction[Int, NoStream, Effect.Write] =
     sessions += authSession

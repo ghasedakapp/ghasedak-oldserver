@@ -18,22 +18,22 @@ message ApiMessage {
 }
 
 message ApiTextMessage {
-    string text = 1; // the text @note Contains sensitive data!!!
-    repeated int32 mentions = 2; // User mentions in message
+    string text = 1;
+    repeated int32 mentions = 2;
 }
 
 message ApiMessageContainer {
-    int32 sender_user_id = 1; // Sender of message
-    int32 sequence_nr = 2; // Sequence Number of message
-    int64 date = 3; // Date of message
-    ApiMessage message = 4; // Content of message
+    int32 sender_user_id = 1;
+    int32 sequence_nr = 2;
+    int64 date = 3;
+    ApiMessage message = 4;
 }
 
 message ApiDialog {
-    im.ghasedak.api.ApiPeer peer = 1; // Peer of conversation
-    int32 unread_count = 2; // Plain messages unread messages count
-    int64 sort_date = 3; // Date of conversation for sorting
-    ApiMessageContainer message = 4; // Top message of conversation
+    ApiPeer peer = 1;
+    int32 unread_count = 2;
+    int64 sort_date = 3;
+    ApiMessageContainer message = 4;
 }
 
 enum ApiListLoadMode {

@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+package im.ghasedak;
+
+message SerializedMessage {
+    int32 id = 1;
+    bytes bytes = 2;
+}

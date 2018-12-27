@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import im.ghasedak.api.peer.{ ApiPeer, ApiPeerType }
 import ir.sndu.persist.repo.TypeMapper._
 import ir.sndu.server.model.dialog.{ Dialog, DialogCommon, UserDialog }
+import slick.jdbc.PostgresProfile
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.Tag
 
@@ -94,7 +95,8 @@ final class UserDialogTable(tag: Tag) extends Table[UserDialog](tag, "user_dialo
 }
 
 object DialogRepo extends UserDialogOperations with DialogCommonOperations {
-  private val dialogs = for {
+
+  val dialogs = for {
     c ← DialogCommonRepo.dialogCommon
     u ← UserDialogRepo.userDialogs if c.dialogId === repDialogId(u.userId, u.peerId, u.peerType)
   } yield (c, u)
@@ -103,12 +105,12 @@ object DialogRepo extends UserDialogOperations with DialogCommonOperations {
     userId:          Int,
     peer:            ApiPeer,
     lastMessageSeq:  Int,
-    lastMessageDate: LocalDateTime) = {
+    lastMessageDate: LocalDateTime): DBIOAction[Int, PostgresProfile.api.NoStream, Effect.Write with Effect.Write] = {
     createUserDialog(userId, peer, 0, 0) andThen
       createCommon(DialogCommon(getDialogId(Some(userId), peer), lastMessageDate, lastMessageSeq, 0, 0))
   }
 
-  def find(userId: Int, limit: Int)(implicit ec: ExecutionContext) = {
+  def find(userId: Int, limit: Int)(implicit ec: ExecutionContext): DBIOAction[Seq[Dialog], NoStream, Effect.Read] = {
     dialogs.filter(r ⇒ r._2.userId === userId)
       .sortBy {
         case (common, _) ⇒ common.lastMessageDate.desc
@@ -116,4 +118,5 @@ object DialogRepo extends UserDialogOperations with DialogCommonOperations {
         case (c, u) ⇒ Dialog.from(c, u)
       })
   }
+
 }

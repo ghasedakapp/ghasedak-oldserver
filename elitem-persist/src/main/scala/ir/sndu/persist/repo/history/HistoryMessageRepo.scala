@@ -11,6 +11,7 @@ import slick.lifted.Tag
 import slick.sql.{ FixedSqlAction, FixedSqlStreamingAction, SqlAction }
 
 final class HistoryMessageTable(tag: Tag) extends Table[HistoryMessage](tag, "history_messages") {
+
   def userId = column[Int]("user_id", O.PrimaryKey)
 
   def peerType = column[Int]("peer_type", O.PrimaryKey)
@@ -51,10 +52,12 @@ final class HistoryMessageTable(tag: Tag) extends Table[HistoryMessage](tag, "hi
         (userId, peer.`type`.value, peer.id, date, senderUserId, sequenceNr, messageContentHeader, messageContentData, deletedAt)
     }
   }
+
 }
 
 object HistoryMessageRepo {
-  private val SharedUserId = 0
+
+  val SharedUserId = 0
 
   val messages = TableQuery[HistoryMessageTable]
   val messagesC = Compiled(messages)
@@ -63,7 +66,7 @@ object HistoryMessageRepo {
 
   val withoutServiceMessages = notDeletedMessages.filter(_.messageContentHeader =!= 2)
 
-  def byUserIdPeer(userId: Rep[Int], peerType: Rep[Int], peerId: Rep[Int]) =
+  def byUserIdPeer(userId: Rep[Int], peerType: Rep[Int], peerId: Rep[Int]): Query[HistoryMessageTable, HistoryMessage, Seq] =
     notDeletedMessages
       .filter(m ⇒ m.userId === userId && m.peerType === peerType && m.peerId === peerId)
 
@@ -97,7 +100,7 @@ object HistoryMessageRepo {
       .take(limit)
   }
 
-  def findAfter(userId: Int, peer: ApiPeer, date: LocalDateTime, limit: Long) =
+  def findAfter(userId: Int, peer: ApiPeer, date: LocalDateTime, limit: Long): FixedSqlStreamingAction[Seq[HistoryMessage], HistoryMessage, Read] =
     afterC((userId, peer.`type`.value, peer.id, date, limit)).result
 
   private val metaAfterC = Compiled { (userId: Rep[Int], peerType: Rep[Int], peerId: Rep[Int], date: Rep[LocalDateTime], limit: ConstColumn[Long]) ⇒
@@ -108,7 +111,7 @@ object HistoryMessageRepo {
       .map(hm ⇒ (hm.sequenceNr, hm.date, hm.senderUserId, hm.messageContentHeader))
   }
 
-  def findMetaAfter(userId: Int, peer: ApiPeer, date: LocalDateTime, limit: Long) =
+  def findMetaAfter(userId: Int, peer: ApiPeer, date: LocalDateTime, limit: Long): FixedSqlStreamingAction[Seq[(Int, LocalDateTime, Int, Int)], (Int, LocalDateTime, Int, Int), Read] =
     metaAfterC((userId, peer.`type`.value, peer.id, date, limit)).result
 
   private val beforeC = Compiled { (userId: Rep[Int], peerId: Rep[Int], peerType: Rep[Int], seq: Rep[Int], limit: ConstColumn[Long]) ⇒
@@ -129,10 +132,10 @@ object HistoryMessageRepo {
     byUserIdPeer(userId, peerType, peerId).filter(_.sequenceNr === sequenceNr)
   }
 
-  def findBefore(userId: Int, peer: ApiPeer, seq: Int, limit: Long) =
+  def findBefore(userId: Int, peer: ApiPeer, seq: Int, limit: Long): FixedSqlStreamingAction[Seq[HistoryMessage], HistoryMessage, Read] =
     beforeC((userId, peer.id, peer.`type`.value, seq, limit)).result
 
-  def findBidi(userId: Int, peer: ApiPeer, date: LocalDateTime, limit: Long) =
+  def findBydi(userId: Int, peer: ApiPeer, date: LocalDateTime, limit: Long): FixedSqlStreamingAction[Seq[HistoryMessage], HistoryMessage, Read] =
     (beforeExclC.applied((userId, peer.`type`.value, peer.id, date, limit)) ++
       afterC.applied((userId, peer.`type`.value, peer.id, date, limit))).result
 
@@ -185,7 +188,7 @@ object HistoryMessageRepo {
       .update(Some(LocalDateTime.now(ZoneId.systemDefault())))
   }
 
-  def delete(userId: Int, peer: ApiPeer, sequenceNumbers: Set[Int]) =
+  def delete(userId: Int, peer: ApiPeer, sequenceNumbers: Set[Int]): FixedSqlAction[Int, NoStream, Write] =
     notDeletedMessages
       .filter(m ⇒ m.userId === userId && m.peerType === peer.`type`.value && m.peerId === peer.id)
       .filter(_.sequenceNr inSet sequenceNumbers)

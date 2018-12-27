@@ -21,6 +21,4 @@ object AuthRpcErrors {
 
   val InvalidAuthCode = RpcError(Status.INTERNAL, "INVALID_AUTH_CODE")
 
-  val InvalidName = RpcError(Status.INTERNAL, "INVALID_NAME")
-
 }

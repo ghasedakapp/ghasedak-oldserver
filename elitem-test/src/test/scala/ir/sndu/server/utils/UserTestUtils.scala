@@ -1,17 +1,17 @@
 package ir.sndu.server.utils
 
+import im.ghasedak.rpc.auth.{ RequestSignUp, RequestStartPhoneAuth, RequestValidateCode }
 import io.grpc._
 import ir.sndu.persist.repo.auth.GateAuthCodeRepo
-import im.ghasedak.rpc.auth.{ RequestSignUp, RequestStartPhoneAuth, RequestValidateCode }
 import ir.sndu.server.GrpcBaseSuit
-import ir.sndu.server.rpc.auth.helper.AuthTokenHelper
-import ir.sndu.server.utils.UserTestUtils.TestClientData
+import ir.sndu.server.rpc.Constant
+import ir.sndu.server.utils.UserTestUtils.PhoneNumberTestClientData
 
 import scala.util.Random
 
 object UserTestUtils {
 
-  case class TestClientData(userId: Int, token: String, phone: Long)
+  case class PhoneNumberTestClientData(userId: Int, token: String, phoneNumber: Long)
 
 }
 
@@ -24,7 +24,7 @@ trait UserTestUtils {
         new ClientInterceptors.CheckedForwardingClientCall[ReqT, RespT](next.newCall(method, callOptions)) {
           @throws[StatusException]
           override protected def checkedStart(responseListener: ClientCall.Listener[RespT], headers: Metadata): Unit = {
-            headers.put(AuthTokenHelper.TOKEN_METADATA_KEY, token)
+            headers.put(Constant.TOKEN_METADATA_KEY, token)
             delegate.start(responseListener, headers)
           }
         }
@@ -36,12 +36,9 @@ trait UserTestUtils {
     75550000000L + scala.util.Random.nextInt(999999)
   }
 
-  protected def createUser(): TestClientData = {
+  protected def createPhoneNumberUser(): PhoneNumberTestClientData = {
     val phone = generatePhoneNumber()
-    val request1 = RequestStartPhoneAuth(
-      phone, 1,
-      "4b654ds5b4654sd65b44s6d5b46s5d4b",
-      Random.nextString(10), "device info")
+    val request1 = RequestStartPhoneAuth(phone, officialApiKeys.head.apiKey)
     val response1 = authStub.startPhoneAuth(request1)
     val codeGate = db.run(GateAuthCodeRepo.find(response1.transactionHash)).futureValue
     val request2 = RequestValidateCode(response1.transactionHash, codeGate.get.codeHash)
@@ -50,10 +47,10 @@ trait UserTestUtils {
       response1.transactionHash,
       Random.alphanumeric.take(20).mkString)
     val response3 = authStub.signUp(request3)
-    TestClientData(
+    PhoneNumberTestClientData(
       response3.getApiAuth.getUser.id,
       response3.getApiAuth.token,
-      response3.getApiAuth.getUser.phoneNumber.get)
+      response3.getApiAuth.getUser.contactsRecord.head.getPhoneNumber)
   }
 
 }
