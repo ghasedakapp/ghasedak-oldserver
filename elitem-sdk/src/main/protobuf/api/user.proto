@@ -16,7 +16,6 @@ message ApiUser {
     int32 id = 1;
     string name = 2;
     string local_name = 3;
-    repeated ApiContactRecord contacts_record = 4;
-    google.protobuf.StringValue nickname = 5;
-    google.protobuf.StringValue about = 6;
+    google.protobuf.StringValue about = 4;
+    repeated ApiContactRecord contacts_record = 5;
 }

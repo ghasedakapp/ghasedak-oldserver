@@ -18,7 +18,7 @@ final class UserEmailContactTable(tag: Tag) extends UserContactBaseTable[UserEma
 
 object UserEmailContactRepo {
 
-  private val emailContacts = TableQuery[UserEmailContactTable]
+  val emailContacts = TableQuery[UserEmailContactTable]
 
   def insertOrUpdate(contact: UserEmailContact): FixedSqlAction[Int, NoStream, Effect.Write] =
     emailContacts.insertOrUpdate(contact)

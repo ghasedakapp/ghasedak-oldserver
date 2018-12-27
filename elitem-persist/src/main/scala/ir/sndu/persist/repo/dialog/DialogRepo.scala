@@ -95,7 +95,8 @@ final class UserDialogTable(tag: Tag) extends Table[UserDialog](tag, "user_dialo
 }
 
 object DialogRepo extends UserDialogOperations with DialogCommonOperations {
-  private val dialogs = for {
+
+  val dialogs = for {
     c ← DialogCommonRepo.dialogCommon
     u ← UserDialogRepo.userDialogs if c.dialogId === repDialogId(u.userId, u.peerId, u.peerType)
   } yield (c, u)
@@ -117,4 +118,5 @@ object DialogRepo extends UserDialogOperations with DialogCommonOperations {
         case (c, u) ⇒ Dialog.from(c, u)
       })
   }
+
 }

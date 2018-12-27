@@ -57,7 +57,7 @@ final class HistoryMessageTable(tag: Tag) extends Table[HistoryMessage](tag, "hi
 
 object HistoryMessageRepo {
 
-  private val SharedUserId = 0
+  val SharedUserId = 0
 
   val messages = TableQuery[HistoryMessageTable]
   val messagesC = Compiled(messages)

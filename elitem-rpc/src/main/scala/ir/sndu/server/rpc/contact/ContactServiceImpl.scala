@@ -9,14 +9,14 @@ import ir.sndu.persist.db.DbExtension
 import ir.sndu.persist.repo.contact.UserContactRepo
 import ir.sndu.server.rpc.RpcError
 import ir.sndu.server.rpc.auth.helper.AuthTokenHelper
-import ir.sndu.server.rpc.common.CommonRpcError
+import ir.sndu.server.rpc.common.CommonRpcErrors
 import ir.sndu.server.utils.StringUtils._
 import ir.sndu.server.utils.concurrent.DBIOResult
 import slick.jdbc.PostgresProfile
 
 import scala.concurrent.{ ExecutionContext, Future }
 
-class ContactServiceImpl(implicit system: ActorSystem) extends ContactService
+final class ContactServiceImpl(implicit system: ActorSystem) extends ContactService
   with AuthTokenHelper
   with ContactServiceHelper
   with DBIOResult[RpcError] {
@@ -31,7 +31,7 @@ class ContactServiceImpl(implicit system: ActorSystem) extends ContactService
     case rpcError: RpcError ⇒ rpcError
     case ex ⇒
       log.error(ex, "Internal error")
-      CommonRpcError.InternalError
+      CommonRpcErrors.InternalError
   }
 
   override def getContacts(request: RequestGetContacts): Future[ResponseGetContacts] = {
@@ -44,12 +44,12 @@ class ContactServiceImpl(implicit system: ActorSystem) extends ContactService
   override def addContact(request: RequestAddContact): Future[ResponseAddContact] = {
     authorize { clientData ⇒
       val action: Result[ResponseAddContact] = for {
-        localName ← fromOption(CommonRpcError.InvalidName)(validName(request.localName))
-        contactRecord ← fromOption(ContactRpcError.InvalidContactRecord)(request.contactRecord)
-        contactUserId ← getContactRecordUserId(contactRecord)
-        _ ← fromBoolean(ContactRpcError.CantAddSelf)(clientData.userId != contactUserId)
+        localName ← fromOption(CommonRpcErrors.InvalidName)(validName(request.localName))
+        contactRecord ← fromOption(ContactRpcErrors.InvalidContactRecord)(request.contactRecord)
+        contactUserId ← getContactRecordUserId(contactRecord, clientData.orgId)
+        _ ← fromBoolean(ContactRpcErrors.CantAddSelf)(clientData.userId != contactUserId)
         exists ← fromDBIO(UserContactRepo.exists(ownerUserId = clientData.userId, contactUserId = contactUserId))
-        _ ← fromBoolean(ContactRpcError.ContactAlreadyExists)(!exists)
+        _ ← fromBoolean(ContactRpcErrors.ContactAlreadyExists)(!exists)
         _ ← addUserContact(clientData.userId, contactUserId, localName, contactRecord)
       } yield ResponseAddContact(contactUserId)
       val result = db.run(action.value)
@@ -61,7 +61,7 @@ class ContactServiceImpl(implicit system: ActorSystem) extends ContactService
     authorize { clientData ⇒
       val action: Result[ResponseVoid] = for {
         exists ← fromDBIO(UserContactRepo.exists(clientData.userId, request.contactUserId))
-        _ ← fromBoolean(ContactRpcError.ContactNotFound)(exists)
+        _ ← fromBoolean(ContactRpcErrors.ContactNotFound)(exists)
         _ ← fromDBIO(UserContactRepo.delete(clientData.userId, request.contactUserId))
       } yield ResponseVoid()
       val result = db.run(action.value)

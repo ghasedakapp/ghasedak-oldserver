@@ -12,18 +12,19 @@ import ir.sndu.persist.repo.auth.AuthTokenRepo
 import ir.sndu.server.model.auth.AuthToken
 import ir.sndu.server.rpc.Constant
 import ir.sndu.server.rpc.auth.AuthRpcErrors
-import ir.sndu.server.rpc.common.CommonRpcError._
+import ir.sndu.server.rpc.common.CommonRpcErrors._
 import slick.jdbc.PostgresProfile
 
 import scala.concurrent.{ ExecutionContext, Future }
 
 object AuthTokenHelper {
 
-  case class ClientData(userId: Int, tokenId: String, tokenKey: String, token: String)
+  case class ClientData(userId: Int, orgId: Int, tokenId: String, tokenKey: String, token: String)
 
   def generateClientData(jwt: DecodedJWT, tokenId: String, tokenKey: String, token: String): ClientData = {
     ClientData(
       Integer.parseInt(jwt.getClaim("userId") asString ()),
+      Integer.parseInt(jwt.getClaim("orgId") asString ()),
       tokenId, tokenKey, token)
   }
 
@@ -76,13 +77,14 @@ trait AuthTokenHelper {
   def authorize[T](f: ClientData ⇒ Future[T]): Future[T] =
     authorize(Option(Constant.TOKEN_CONTEXT_KEY.get()))(f)
 
-  def generateToken(userId: Int): Future[(String, String)] = {
+  def generateToken(userId: Int, orgId: Int): Future[(String, String)] = {
     val tokenKey = UUID.randomUUID().toString
     val algorithm = Algorithm.HMAC512(tokenKey)
     val tokenId = UUID.randomUUID().toString + userId
     val tokenStr = JWT.create()
       .withClaim("tokenId", tokenId)
       .withClaim("userId", userId.toString)
+      .withClaim("orgId", orgId.toString)
       .sign(algorithm)
     val token = AuthToken(tokenId, tokenKey, None)
     db.run(AuthTokenRepo.create(token)) map (_ ⇒ (tokenId, tokenStr))

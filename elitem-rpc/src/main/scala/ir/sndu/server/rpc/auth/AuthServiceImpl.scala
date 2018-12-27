@@ -5,15 +5,15 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import akka.event.{ Logging, LoggingAdapter }
-import ir.sndu.persist.db.DbExtension
-import ir.sndu.persist.repo.auth.{ AuthPhoneTransactionRepo, AuthTransactionRepo }
-import ir.sndu.persist.repo.user.UserPhoneRepo
 import im.ghasedak.rpc.auth.AuthServiceGrpc.AuthService
 import im.ghasedak.rpc.auth._
-import ir.sndu.server.model.auth.{ AuthPhoneTransaction, AuthSession }
+import ir.sndu.persist.db.DbExtension
+import ir.sndu.persist.repo.auth.{ AuthPhoneTransactionRepo, AuthTransactionRepo }
+import ir.sndu.persist.repo.user.UserAuthRepo
+import ir.sndu.server.model.auth.AuthPhoneTransaction
 import ir.sndu.server.rpc.RpcError
 import ir.sndu.server.rpc.auth.helper.{ AuthServiceHelper, AuthTokenHelper }
-import ir.sndu.server.rpc.common.CommonRpcError
+import ir.sndu.server.rpc.common.CommonRpcErrors
 import ir.sndu.server.utils.concurrent.DBIOResult
 import ir.sndu.server.utils.number.PhoneNumberUtils._
 import slick.jdbc.PostgresProfile
@@ -35,17 +35,18 @@ final class AuthServiceImpl(implicit system: ActorSystem) extends AuthService
     case rpcError: RpcError ⇒ rpcError
     case ex ⇒
       log.error(ex, "Internal error")
-      CommonRpcError.InternalError
+      CommonRpcErrors.InternalError
   }
 
   override def startPhoneAuth(request: RequestStartPhoneAuth): Future[ResponseStartPhoneAuth] = {
     val action: Result[ResponseStartPhoneAuth] = for {
-      _ ← fromBoolean(AuthRpcErrors.InvalidApiKey)(AuthSession.isValidApiKey(request.apiKey))
+      optApiKey ← getApiKey(request.apiKey)
+      apiKey ← fromOption(AuthRpcErrors.InvalidApiKey)(optApiKey)
       normalizedPhone ← fromOption(AuthRpcErrors.InvalidPhoneNumber)(normalizeLong(request.phoneNumber).headOption)
-      optUserPhone ← fromDBIO(UserPhoneRepo.findByPhoneNumber(normalizedPhone))
+      optUserAuth ← fromDBIO(UserAuthRepo.findByPhoneNumberAndOrgId(normalizedPhone, apiKey.orgId))
       // todo: fix this (delete account)
-      _ ← optUserPhone map (p ⇒ forbidDeletedUser(p.userId)) getOrElse point(())
-      optAuthTransaction ← fromDBIO(AuthPhoneTransactionRepo.findByPhoneAndDeviceHash(normalizedPhone, request.deviceHash))
+      _ ← optUserAuth map (ua ⇒ forbidDeletedUser(ua.userId)) getOrElse point(())
+      optAuthTransaction ← fromDBIO(AuthPhoneTransactionRepo.findByPhoneNumberAndOrgId(normalizedPhone, apiKey.orgId))
       optAuthTransactionWithExpire ← getOptAuthTransactionWithExpire(optAuthTransaction)
       transactionHash ← optAuthTransactionWithExpire match {
         case Some(transaction) ⇒ point(transaction.transactionHash)
@@ -53,10 +54,8 @@ final class AuthServiceImpl(implicit system: ActorSystem) extends AuthService
           val phoneAuthTransaction = AuthPhoneTransaction(
             phoneNumber = normalizedPhone,
             transactionHash = UUID.randomUUID().toString,
-            appId = request.appId,
-            apiKey = request.apiKey,
-            deviceHash = request.deviceHash,
-            deviceInfo = request.deviceInfo,
+            orgId = apiKey.orgId,
+            apiKey = apiKey.apiKey,
             createdAt = LocalDateTime.now(ZoneOffset.UTC))
           for {
             _ ← fromDBIO(AuthPhoneTransactionRepo.create(phoneAuthTransaction))
@@ -76,8 +75,8 @@ final class AuthServiceImpl(implicit system: ActorSystem) extends AuthService
         case apt: AuthPhoneTransaction ⇒
           for {
             // todo: fix this (delete account)
-            optUserPhone ← fromDBIO(UserPhoneRepo.findByPhoneNumber(apt.phoneNumber))
-            optApiAuth ← getOptApiAuth(apt, optUserPhone)
+            optUserAuth ← fromDBIO(UserAuthRepo.findByPhoneNumberAndOrgId(apt.phoneNumber, transaction.orgId))
+            optApiAuth ← getOptApiAuth(apt, optUserAuth)
           } yield optApiAuth
       }
     } yield ResponseAuth(optApiAuth.isDefined, optApiAuth)

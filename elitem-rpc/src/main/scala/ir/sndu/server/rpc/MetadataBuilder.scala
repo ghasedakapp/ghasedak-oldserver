@@ -18,4 +18,5 @@ class MetadataBuilder() {
   }
 
   def build: Metadata = trailer
+
 }

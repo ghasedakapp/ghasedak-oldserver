@@ -15,10 +15,8 @@ final class AuthTransactionTable(tag: Tag) extends AuthTransactionBaseTable[Auth
 
   override def * = (
     transactionHash,
-    appId,
+    orgId,
     apiKey,
-    deviceHash,
-    deviceInfo,
     createdAt,
     isChecked,
     deletedAt) <> (AuthTransaction.tupled, AuthTransaction.unapply)
@@ -29,7 +27,7 @@ object AuthTransactionRepo {
 
   val transactions = TableQuery[AuthTransactionTable]
 
-  private val active = transactions.filter(_.deletedAt.isEmpty)
+  val active = transactions.filter(_.deletedAt.isEmpty)
 
   def find(transactionHash: String): SqlAction[Option[AuthTransaction], NoStream, Effect.Read] =
     active.filter(_.transactionHash === transactionHash).result.headOption

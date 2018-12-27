@@ -20,9 +20,9 @@ final class GateAuthCodeTable(tag: Tag) extends Table[GateAuthCode](tag, "gate_a
 
 object GateAuthCodeRepo {
 
-  private val codes = TableQuery[GateAuthCodeTable]
+  val codes = TableQuery[GateAuthCodeTable]
 
-  private val active = codes.filter(_.isDeleted === false)
+  val active = codes.filter(_.isDeleted === false)
 
   def createOrUpdate(transactionHash: String, codeHash: String): FixedSqlAction[Int, NoStream, Effect.Write] =
     codes.insertOrUpdate(GateAuthCode(transactionHash, codeHash))

@@ -15,5 +15,6 @@ message ApiContactRecord {
     oneof contact {
         int64 phone_number = 1;
         string email = 2;
+        string nickname = 3;
     }
 }

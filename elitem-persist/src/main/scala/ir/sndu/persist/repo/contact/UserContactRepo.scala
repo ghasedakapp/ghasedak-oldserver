@@ -17,7 +17,7 @@ object UserContactRepo {
 
   val contacts = TableQuery[UserContactTable]
 
-  private val active = contacts.filter(_.isDeleted === false)
+  val active = contacts.filter(_.isDeleted === false)
 
   def findContactIdsActive(ownerUserId: Int): FixedSqlStreamingAction[Seq[Int], Int, Effect.Read] =
     active.filter(_.ownerUserId === ownerUserId).map(_.contactUserId).distinct.result

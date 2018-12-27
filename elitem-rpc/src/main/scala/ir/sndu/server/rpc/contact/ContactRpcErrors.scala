@@ -3,7 +3,7 @@ package ir.sndu.server.rpc.contact
 import io.grpc.Status
 import ir.sndu.server.rpc.RpcError
 
-object ContactRpcError {
+object ContactRpcErrors {
 
   val InvalidContactRecord = RpcError(Status.INTERNAL, "INVALID_CONTACT_RECORD")
 
