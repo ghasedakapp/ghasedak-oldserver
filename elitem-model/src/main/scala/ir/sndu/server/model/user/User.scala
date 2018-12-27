@@ -7,4 +7,5 @@ final case class User(
   orgId:     Int,
   name:      String,
   createdAt: LocalDateTime,
+  about:     Option[String]        = None,
   deletedAt: Option[LocalDateTime] = None)

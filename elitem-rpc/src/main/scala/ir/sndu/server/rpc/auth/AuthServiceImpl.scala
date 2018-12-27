@@ -9,7 +9,7 @@ import im.ghasedak.rpc.auth.AuthServiceGrpc.AuthService
 import im.ghasedak.rpc.auth._
 import ir.sndu.persist.db.DbExtension
 import ir.sndu.persist.repo.auth.{ AuthPhoneTransactionRepo, AuthTransactionRepo }
-import ir.sndu.persist.repo.user.UserPhoneRepo
+import ir.sndu.persist.repo.user.UserAuthRepo
 import ir.sndu.server.model.auth.AuthPhoneTransaction
 import ir.sndu.server.rpc.RpcError
 import ir.sndu.server.rpc.auth.helper.{ AuthServiceHelper, AuthTokenHelper }
@@ -43,9 +43,9 @@ final class AuthServiceImpl(implicit system: ActorSystem) extends AuthService
       optApiKey ← getApiKey(request.apiKey)
       apiKey ← fromOption(AuthRpcErrors.InvalidApiKey)(optApiKey)
       normalizedPhone ← fromOption(AuthRpcErrors.InvalidPhoneNumber)(normalizeLong(request.phoneNumber).headOption)
-      optUserPhone ← fromDBIO(UserPhoneRepo.findByPhoneNumberAndOrgId(normalizedPhone, apiKey.orgId))
+      optUserAuth ← fromDBIO(UserAuthRepo.findByPhoneNumberAndOrgId(normalizedPhone, apiKey.orgId))
       // todo: fix this (delete account)
-      _ ← optUserPhone map (p ⇒ forbidDeletedUser(p.userId)) getOrElse point(())
+      _ ← optUserAuth map (ua ⇒ forbidDeletedUser(ua.userId)) getOrElse point(())
       optAuthTransaction ← fromDBIO(AuthPhoneTransactionRepo.findByPhoneNumberAndOrgId(normalizedPhone, apiKey.orgId))
       optAuthTransactionWithExpire ← getOptAuthTransactionWithExpire(optAuthTransaction)
       transactionHash ← optAuthTransactionWithExpire match {
@@ -75,8 +75,8 @@ final class AuthServiceImpl(implicit system: ActorSystem) extends AuthService
         case apt: AuthPhoneTransaction ⇒
           for {
             // todo: fix this (delete account)
-            optUserPhone ← fromDBIO(UserPhoneRepo.findByPhoneNumberAndOrgId(apt.phoneNumber, transaction.orgId))
-            optApiAuth ← getOptApiAuth(apt, optUserPhone)
+            optUserAuth ← fromDBIO(UserAuthRepo.findByPhoneNumberAndOrgId(apt.phoneNumber, transaction.orgId))
+            optApiAuth ← getOptApiAuth(apt, optUserAuth)
           } yield optApiAuth
       }
     } yield ResponseAuth(optApiAuth.isDefined, optApiAuth)

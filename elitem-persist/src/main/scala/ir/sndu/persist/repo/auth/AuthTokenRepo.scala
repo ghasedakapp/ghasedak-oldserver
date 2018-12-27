@@ -25,12 +25,12 @@ object AuthTokenRepo {
 
   val tokens = TableQuery[AuthTokenTable]
 
-  val activeTokens = tokens.filter(_.deletedAt.isEmpty)
+  val active = tokens.filter(_.deletedAt.isEmpty)
 
   def create(token: AuthToken): FixedSqlAction[Int, NoStream, Effect.Write] =
     tokens += token
 
   def find(tokenId: String): SqlAction[Option[String], NoStream, Effect.Read] =
-    activeTokens.filter(_.tokenId === tokenId).map(_.tokenKey).result.headOption
+    active.filter(_.tokenId === tokenId).map(_.tokenKey).result.headOption
 
 }

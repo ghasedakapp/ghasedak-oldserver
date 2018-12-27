@@ -14,10 +14,10 @@ CREATE TABLE auth_phone_transactions (
 ) inherits(auth_transactions);
 
 CREATE TABLE gate_auth_codes (
-    transaction_hash VARCHAR (255) NOT NULL ,
-    code_hash VARCHAR (255) NOT NULL ,
-    is_deleted BOOLEAN NOT NULL ,
-    primary key(transaction_hash)
+  transaction_hash VARCHAR (255) NOT NULL ,
+  code_hash        VARCHAR (255) NOT NULL ,
+  is_deleted       BOOLEAN NOT NULL ,
+  primary key(transaction_hash)
 );
 
 CREATE TABLE auth_tokens (

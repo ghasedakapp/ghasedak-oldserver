@@ -49,14 +49,13 @@ class UserExtensionImpl(system: ExtendedActorSystem) extends Extension {
   def find(clientOrgId: Int, clientUserId: Int, userIds: Seq[Int]): Future[Seq[ApiUser]] = {
     val action =
       UserRepo.findUserContact(clientOrgId, clientUserId, userIds) map (_.map {
-        case ((user, userInfo), contact) ⇒
+        case ((user, userAuth), contact) ⇒
           ApiUser(
             id = user.id,
             name = user.name,
             localName = contact.localName,
-            contactsRecord = Seq.empty,
-            nickname = userInfo.nickname,
-            about = userInfo.about)
+            about = user.about,
+            contactsRecord = Seq.empty)
       })
     db.run(action)
   }

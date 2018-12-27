@@ -2,7 +2,7 @@ package ir.sndu.server.rpc.contact
 
 import im.ghasedak.api.contact.ApiContactRecord
 import ir.sndu.persist.repo.contact.{ UserContactRepo, UserEmailContactRepo, UserPhoneContactRepo }
-import ir.sndu.persist.repo.user.{ UserEmailRepo, UserPhoneRepo }
+import ir.sndu.persist.repo.user.UserAuthRepo
 import ir.sndu.server.model.contact.{ UserContact, UserEmailContact, UserPhoneContact }
 import ir.sndu.server.rpc.user.UserRpcErrors
 
@@ -13,9 +13,10 @@ trait ContactServiceHelper {
     for {
       _ ← fromBoolean(ContactRpcErrors.InvalidContactRecord)(contactRecord.contact.isDefined)
       optUserId ← if (contactRecord.contact.isPhoneNumber)
-        fromDBIO(UserPhoneRepo.findUserIdByPhoneNumberAndOrgId(contactRecord.getPhoneNumber, orgId))
-      else
-        fromDBIO(UserEmailRepo.findUserIdByEmailAndOrgId(contactRecord.getEmail, orgId))
+        fromDBIO(UserAuthRepo.findUserIdByPhoneNumberAndOrgId(contactRecord.getPhoneNumber, orgId))
+      else if (contactRecord.contact.isEmail)
+        fromDBIO(UserAuthRepo.findUserIdByEmailAndOrgId(contactRecord.getEmail, orgId))
+      else throw ContactRpcErrors.InvalidContactRecord
       userId ← fromOption(UserRpcErrors.UserNotFound)(optUserId)
     } yield userId
   }
