@@ -5,7 +5,6 @@ import sbt._
 object Dependencies {
 
   object V {
-
     val akka = "2.5.14"
     val slick = "3.2.1"
     val slickPg = "0.16.0"
@@ -13,11 +12,9 @@ object Dependencies {
     val flyway = "5.0.7"
     val config = "1.3.2"
     val persistCassandra = "0.87"
-
   }
 
   object Compile {
-
     val actor = "com.typesafe.akka" %% "akka-actor" % V.akka
     val cluster = "com.typesafe.akka" %% "akka-cluster" % V.akka
     val sharding = "com.typesafe.akka" %% "akka-cluster-sharding" % V.akka
