@@ -4,7 +4,7 @@ import im.ghasedak.rpc.auth.{ RequestSignUp, RequestStartPhoneAuth, RequestValid
 import io.grpc._
 import ir.sndu.persist.repo.auth.GateAuthCodeRepo
 import ir.sndu.server.GrpcBaseSuit
-import ir.sndu.server.rpc.auth.helper.AuthTokenHelper
+import ir.sndu.server.rpc.Constant
 import ir.sndu.server.utils.UserTestUtils.PhoneNumberTestClientData
 
 import scala.util.Random
@@ -24,7 +24,7 @@ trait UserTestUtils {
         new ClientInterceptors.CheckedForwardingClientCall[ReqT, RespT](next.newCall(method, callOptions)) {
           @throws[StatusException]
           override protected def checkedStart(responseListener: ClientCall.Listener[RespT], headers: Metadata): Unit = {
-            headers.put(AuthTokenHelper.TOKEN_METADATA_KEY, token)
+            headers.put(Constant.TOKEN_METADATA_KEY, token)
             delegate.start(responseListener, headers)
           }
         }
@@ -50,7 +50,7 @@ trait UserTestUtils {
     PhoneNumberTestClientData(
       response3.getApiAuth.getUser.id,
       response3.getApiAuth.token,
-      response3.getApiAuth.getUser.contactsRecoed.head.getPhoneNumber)
+      response3.getApiAuth.getUser.contactsRecord.head.getPhoneNumber)
   }
 
 }

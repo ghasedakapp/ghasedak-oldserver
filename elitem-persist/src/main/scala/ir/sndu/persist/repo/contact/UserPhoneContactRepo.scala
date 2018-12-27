@@ -18,7 +18,7 @@ final class UserPhoneContactTable(tag: Tag) extends UserContactBaseTable[UserPho
 
 object UserPhoneContactRepo {
 
-  private val phoneContacts = TableQuery[UserPhoneContactTable]
+  val phoneContacts = TableQuery[UserPhoneContactTable]
 
   def insertOrUpdate(contact: UserPhoneContact): FixedSqlAction[Int, NoStream, Effect.Write] =
     phoneContacts.insertOrUpdate(contact)

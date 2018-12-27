@@ -22,7 +22,7 @@ final class UserInfoTable(tag: Tag) extends Table[UserInfo](tag, "users_info") {
 
 object UserInfoRepo {
 
-  private val usersInfo = TableQuery[UserInfoTable]
+  val usersInfo = TableQuery[UserInfoTable]
 
   def create(userInfo: UserInfo): FixedSqlAction[Int, NoStream, Effect.Write] =
     usersInfo += userInfo

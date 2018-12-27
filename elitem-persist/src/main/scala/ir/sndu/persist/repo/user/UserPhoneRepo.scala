@@ -8,11 +8,13 @@ import slick.sql.{ FixedSqlAction, SqlAction }
 
 final class UserPhoneTable(tag: Tag) extends Table[UserPhone](tag, "user_phones") {
 
+  def orgId = column[Int]("org_id", O.PrimaryKey)
+
   def userId = column[Int]("user_id", O.PrimaryKey)
 
   def phoneNumber = column[Long]("phone_number")
 
-  def * = (userId, phoneNumber) <> (UserPhone.tupled, UserPhone.unapply)
+  def * = (orgId, userId, phoneNumber) <> (UserPhone.tupled, UserPhone.unapply)
 
 }
 
@@ -23,13 +25,13 @@ object UserPhoneRepo {
   def create(userPhone: UserPhone): FixedSqlAction[Int, NoStream, Effect.Write] =
     phones += userPhone
 
-  def findByPhoneNumber(phoneNumber: Long): SqlAction[Option[UserPhone], NoStream, Effect.Read] =
-    phones.filter(_.phoneNumber === phoneNumber).result.headOption
+  def findByPhoneNumberAndOrgId(phoneNumber: Long, orgId: Int): SqlAction[Option[UserPhone], NoStream, Effect.Read] =
+    phones.filter(_.orgId === orgId).filter(_.phoneNumber === phoneNumber).result.headOption
 
-  def findIdByPhoneNumber(phoneNumber: Long): SqlAction[Option[Int], NoStream, Effect.Read] =
-    phones.filter(_.phoneNumber === phoneNumber).map(_.userId).result.headOption
+  def findUserIdByPhoneNumberAndOrgId(phoneNumber: Long, orgId: Int): SqlAction[Option[Int], NoStream, Effect.Read] =
+    phones.filter(_.orgId === orgId).filter(_.phoneNumber === phoneNumber).map(_.userId).result.headOption
 
-  def findPhoneNumber(userId: Int): SqlAction[Option[Long], NoStream, Effect.Read] =
+  def findPhoneNumberByUserId(userId: Int): SqlAction[Option[Long], NoStream, Effect.Read] =
     phones.filter(_.userId === userId).map(_.phoneNumber).result.headOption
 
 }

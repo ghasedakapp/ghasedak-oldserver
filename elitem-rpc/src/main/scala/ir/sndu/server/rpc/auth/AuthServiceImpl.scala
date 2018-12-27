@@ -43,7 +43,7 @@ final class AuthServiceImpl(implicit system: ActorSystem) extends AuthService
       optApiKey ← getApiKey(request.apiKey)
       apiKey ← fromOption(AuthRpcErrors.InvalidApiKey)(optApiKey)
       normalizedPhone ← fromOption(AuthRpcErrors.InvalidPhoneNumber)(normalizeLong(request.phoneNumber).headOption)
-      optUserPhone ← fromDBIO(UserPhoneRepo.findByPhoneNumber(normalizedPhone))
+      optUserPhone ← fromDBIO(UserPhoneRepo.findByPhoneNumberAndOrgId(normalizedPhone, apiKey.orgId))
       // todo: fix this (delete account)
       _ ← optUserPhone map (p ⇒ forbidDeletedUser(p.userId)) getOrElse point(())
       optAuthTransaction ← fromDBIO(AuthPhoneTransactionRepo.findByPhoneNumberAndOrgId(normalizedPhone, apiKey.orgId))
@@ -75,7 +75,7 @@ final class AuthServiceImpl(implicit system: ActorSystem) extends AuthService
         case apt: AuthPhoneTransaction ⇒
           for {
             // todo: fix this (delete account)
-            optUserPhone ← fromDBIO(UserPhoneRepo.findByPhoneNumber(apt.phoneNumber))
+            optUserPhone ← fromDBIO(UserPhoneRepo.findByPhoneNumberAndOrgId(apt.phoneNumber, transaction.orgId))
             optApiAuth ← getOptApiAuth(apt, optUserPhone)
           } yield optApiAuth
       }

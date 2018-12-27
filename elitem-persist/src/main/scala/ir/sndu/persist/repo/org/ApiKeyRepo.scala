@@ -23,9 +23,9 @@ final class ApiKeyTable(tag: Tag) extends Table[ApiKey](tag, "api_keys") {
 
 object ApiKeyRepo {
 
-  private val apiKeys = TableQuery[ApiKeyTable]
+  val apiKeys = TableQuery[ApiKeyTable]
 
-  private val active = apiKeys.filter(_.deletedAt.isEmpty)
+  val active = apiKeys.filter(_.deletedAt.isEmpty)
 
   def find(apiKey: String): SqlAction[Option[ApiKey], NoStream, Effect.Read] =
     active.filter(_.apiKey === apiKey).result.headOption

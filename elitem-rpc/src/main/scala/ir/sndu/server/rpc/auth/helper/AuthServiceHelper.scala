@@ -107,7 +107,7 @@ trait AuthServiceHelper {
         userId = user.id,
         countryCode = Some(countryCode))
       _ ← fromDBIO(UserInfoRepo.create(userInfo))
-      userPhone = UserPhone(user.id, phone)
+      userPhone = UserPhone(transaction.orgId, user.id, phone)
       _ ← fromDBIO(UserPhoneRepo.create(userPhone))
       optApiAuth ← getOptApiAuth(transaction, Some(userPhone))
     } yield optApiAuth

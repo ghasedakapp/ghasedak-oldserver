@@ -30,8 +30,9 @@ final class UserServiceImpl(implicit system: ActorSystem) extends UserService
     authorize { clientData ⇒
       //TODO: config
       if (request.userIds.size > 100)
-        Future.failed(CommonRpcError.CollectionSizeLimit)
+        Future.failed(CommonRpcError.CollectionSizeLimitExceed)
       else
-        userExt.find(clientData.userId, request.userIds) map (ResponseLoadUsers(_))
+        userExt.find(clientData.orgId, clientData.userId, request.userIds) map (ResponseLoadUsers(_))
     }
+
 }

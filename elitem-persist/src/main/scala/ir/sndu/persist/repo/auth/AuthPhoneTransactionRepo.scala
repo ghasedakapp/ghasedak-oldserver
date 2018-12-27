@@ -26,9 +26,9 @@ final class AuthPhoneTransactionTable(tag: Tag) extends AuthTransactionBaseTable
 
 object AuthPhoneTransactionRepo {
 
-  private val phoneTransactions = TableQuery[AuthPhoneTransactionTable]
+  val phoneTransactions = TableQuery[AuthPhoneTransactionTable]
 
-  private val active = phoneTransactions.filter(_.deletedAt.isEmpty)
+  val active = phoneTransactions.filter(_.deletedAt.isEmpty)
 
   def create(transaction: AuthPhoneTransaction): FixedSqlAction[Int, NoStream, Effect.Write] =
     phoneTransactions += transaction

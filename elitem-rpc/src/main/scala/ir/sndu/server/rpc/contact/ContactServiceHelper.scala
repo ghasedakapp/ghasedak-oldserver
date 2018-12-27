@@ -2,24 +2,21 @@ package ir.sndu.server.rpc.contact
 
 import im.ghasedak.api.contact.ApiContactRecord
 import ir.sndu.persist.repo.contact.{ UserContactRepo, UserEmailContactRepo, UserPhoneContactRepo }
-import ir.sndu.persist.repo.user.{ UserEmailRepo, UserPhoneRepo, UserRepo }
+import ir.sndu.persist.repo.user.{ UserEmailRepo, UserPhoneRepo }
 import ir.sndu.server.model.contact.{ UserContact, UserEmailContact, UserPhoneContact }
-import ir.sndu.server.rpc.user.UserRpcErrors
+import ir.sndu.server.rpc.user.UserRpcError
 
 trait ContactServiceHelper {
   this: ContactServiceImpl ⇒
 
-  def getContactRecordUserId(contactRecord: ApiContactRecord, clientOrgId: Int): Result[Int] = {
+  def getContactRecordUserId(contactRecord: ApiContactRecord, orgId: Int): Result[Int] = {
     for {
       _ ← fromBoolean(ContactRpcError.InvalidContactRecord)(contactRecord.contact.isDefined)
       optUserId ← if (contactRecord.contact.isPhoneNumber)
-        fromDBIO(UserPhoneRepo.findIdByPhoneNumber(contactRecord.getPhoneNumber))
+        fromDBIO(UserPhoneRepo.findUserIdByPhoneNumberAndOrgId(contactRecord.getPhoneNumber, orgId))
       else
-        fromDBIO(UserEmailRepo.findIdByEmail(contactRecord.getEmail))
-      userId ← fromOption(UserRpcErrors.UserNotFound)(optUserId)
-      optOrgId ← fromDBIO(UserRepo.findOrgId(userId))
-      orgId ← fromOption(UserRpcErrors.UserNotFound)(optOrgId)
-      _ ← fromBoolean(UserRpcErrors.UserNotFound)(clientOrgId == orgId)
+        fromDBIO(UserEmailRepo.findUserIdByEmailAndOrgId(contactRecord.getEmail, orgId))
+      userId ← fromOption(UserRpcError.UserNotFound)(optUserId)
     } yield userId
   }
 

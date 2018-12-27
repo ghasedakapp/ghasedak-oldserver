@@ -16,13 +16,15 @@ CREATE TABLE users_info (
 );
 
 CREATE TABLE user_phones (
+  org_id       INT          NOT NULL,
   user_id           INT          NOT NULL,
   phone_number      BIGINT       NOT NULL,
-  PRIMARY KEY (user_id)
+  PRIMARY KEY (org_id, user_id)
 );
 
 CREATE TABLE user_emails (
+  org_id       INT          NOT NULL,
   user_id     INT                NOT NULL,
   email       VARCHAR (255)      NOT NULL,
-  PRIMARY KEY (user_id)
+  PRIMARY KEY (org_id, user_id)
 );

@@ -11,8 +11,8 @@ object UserUtils {
 
   def getUserContactsRecord(userId: Int)(implicit ec: ExecutionContext): DBIOAction[Seq[ApiContactRecord], NoStream, Effect.Read with Effect.Read] = {
     for {
-      phoneNumber ← UserPhoneRepo.findPhoneNumber(userId)
-      email ← UserEmailRepo.findEmail(userId)
+      phoneNumber ← UserPhoneRepo.findPhoneNumberByUserId(userId)
+      email ← UserEmailRepo.findEmailByUserId(userId)
     } yield {
       var contactsRecord = ArrayBuffer.empty[ApiContactRecord]
       if (phoneNumber.isDefined)

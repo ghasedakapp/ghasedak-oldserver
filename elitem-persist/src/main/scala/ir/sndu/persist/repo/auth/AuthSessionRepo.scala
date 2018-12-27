@@ -29,7 +29,7 @@ class AuthSessionTable(tag: Tag) extends Table[AuthSession](tag, "auth_sessions"
 
 object AuthSessionRepo {
 
-  private val sessions = TableQuery[AuthSessionTable]
+  val sessions = TableQuery[AuthSessionTable]
 
   def create(authSession: AuthSession): FixedSqlAction[Int, NoStream, Effect.Write] =
     sessions += authSession

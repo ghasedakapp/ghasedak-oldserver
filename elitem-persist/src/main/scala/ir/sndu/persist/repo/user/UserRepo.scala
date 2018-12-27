@@ -6,10 +6,10 @@ import com.github.tminglei.slickpg.ExPostgresProfile.api._
 import ir.sndu.persist.repo.TypeMapper._
 import ir.sndu.persist.repo.contact.UserContactRepo
 import ir.sndu.server.model.contact.UserContact
-import ir.sndu.server.model.user.{ User, UserEmail, UserPhone }
+import ir.sndu.server.model.user.{ User, UserInfo }
 import slick.dbio.Effect
 import slick.lifted.Tag
-import slick.sql.{ FixedSqlAction, SqlAction }
+import slick.sql.{ FixedSqlAction, FixedSqlStreamingAction, SqlAction }
 
 final class UserTable(tag: Tag) extends Table[User](tag, "users") {
 
@@ -42,12 +42,15 @@ object UserRepo {
   def find(ids: Set[Int]): FixedSqlStreamingAction[Seq[User], User, Effect.Read] =
     activeUsers.filter(_.id inSet ids).result
 
-  def findUserContact(ownerId: Int, userIds: Seq[Int]): FixedSqlStreamingAction[Seq[(User, UserContact)], (User, UserContact), Effect.Read] = {
-    UserRepo.users
+  def findUserContact(orgId: Int, ownerUserId: Int, userIds: Seq[Int]): FixedSqlStreamingAction[Seq[((User, UserInfo), UserContact)], ((User, UserInfo), UserContact), Effect.Read] = {
+    UserRepo.activeUsers
+      .filter(_.orgId === orgId)
       .filter(_.id inSet userIds)
+      .join(UserInfoRepo.usersInfo)
+      .on(_.id === _.userId)
       .join(UserContactRepo.contacts)
-      .on(_.id === _.contactUserId)
-      .filter(_._2.ownerUserId === ownerId)
+      .on(_._1.id === _.contactUserId)
+      .filter(_._2.ownerUserId === ownerUserId)
       .result
   }
 
