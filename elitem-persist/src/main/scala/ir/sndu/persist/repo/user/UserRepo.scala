@@ -7,25 +7,21 @@ import ir.sndu.persist.repo.TypeMapper._
 import ir.sndu.server.model.user.User
 import slick.dbio.Effect
 import slick.lifted.Tag
-import slick.sql.{ FixedSqlAction, FixedSqlStreamingAction, SqlAction }
+import slick.sql.{ FixedSqlAction, SqlAction }
 
 final class UserTable(tag: Tag) extends Table[User](tag, "users") {
 
   def id = column[Int]("id", O.PrimaryKey)
 
-  def name = column[String]("name")
+  def orgId = column[Int]("org_id")
 
-  def countryCode = column[String]("country_code")
+  def name = column[String]("name")
 
   def createdAt = column[LocalDateTime]("created_at")
 
-  def nickname = column[Option[String]]("nickname")
-
-  def about = column[Option[String]]("about")
-
   def deletedAt = column[Option[LocalDateTime]]("deleted_at")
 
-  def * = (id, name, countryCode, createdAt, nickname, about, deletedAt) <> (User.tupled, User.unapply)
+  def * = (id, orgId, name, createdAt, deletedAt) <> (User.tupled, User.unapply)
 
 }
 
@@ -43,6 +39,9 @@ object UserRepo {
 
   def isDeleted(userId: Int): DBIO[Boolean] =
     users.filter(_.id === userId).filter(_.deletedAt.nonEmpty).exists.result
+
+  def findOrgId(userId: Int): SqlAction[Option[Int], NoStream, Effect.Read] =
+    activeUsers.filter(_.id === userId).map(_.orgId).result.headOption
 
 }
 

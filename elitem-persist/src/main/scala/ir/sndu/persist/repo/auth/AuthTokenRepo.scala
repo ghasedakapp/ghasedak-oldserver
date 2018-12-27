@@ -13,11 +13,11 @@ class AuthTokenTable(tag: Tag) extends Table[AuthToken](tag, "auth_tokens") {
 
   def tokenId = column[String]("token_id", O.PrimaryKey)
 
-  def tokenKy = column[String]("token_key")
+  def tokenKey = column[String]("token_key")
 
   def deletedAt = column[Option[LocalDateTime]]("deleted_at")
 
-  override def * = (tokenId, tokenKy, deletedAt) <> (AuthToken.tupled, AuthToken.unapply)
+  override def * = (tokenId, tokenKey, deletedAt) <> (AuthToken.tupled, AuthToken.unapply)
 
 }
 
@@ -31,6 +31,6 @@ object AuthTokenRepo {
     tokens += token
 
   def find(tokenId: String): SqlAction[Option[String], NoStream, Effect.Read] =
-    activeTokens.filter(_.tokenId === tokenId).map(_.tokenKy).result.headOption
+    activeTokens.filter(_.tokenId === tokenId).map(_.tokenKey).result.headOption
 
 }

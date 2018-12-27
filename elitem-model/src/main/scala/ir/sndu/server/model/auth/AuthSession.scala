@@ -2,31 +2,32 @@ package ir.sndu.server.model.auth
 
 import java.time.LocalDateTime
 
+import com.typesafe.config.{ Config, ConfigFactory }
+import ir.sndu.server.model.org.ApiKey
+
+import scala.collection.JavaConverters._
+
 object AuthSession {
 
-  private val apiKeys = Seq(
-    "4b654ds5b4654sd65b44s6d5b46s5d4b" // Test api Key
-  )
+  val config: Config = ConfigFactory.load()
 
-  def isValidApiKey(apiKey: String): Boolean = apiKeys.contains(apiKey)
+  private val officialApiKeys: Seq[ApiKey] =
+    config.getConfigList("module.auth.official-api-keys")
+      .asScala.map { conf ⇒
+        ApiKey(
+          conf.getInt("org-id"),
+          conf.getString("api-key"))
+      }
 
-  def getAppTitle(appId: Int): String = appId match {
-    case 1  ⇒ "Android"
-    case 2  ⇒ "IOS"
-    case 3  ⇒ "Web"
-    case 42 ⇒ "Test"
-    case _  ⇒ "Unknown"
-  }
+  def isOfficialApiKey(apiKey: String): Option[ApiKey] =
+    officialApiKeys.find(_.apiKey == apiKey)
 
 }
 
-@SerialVersionUID(1L)
 final case class AuthSession(
-  userId:      Int,
-  tokenId:     String,
-  appId:       Int,
-  apiKey:      String,
-  deviceHash:  String,
-  deviceInfo:  String,
-  sessionTime: LocalDateTime,
-  deletedAt:   Option[LocalDateTime] = None)
+  orgId:     Int,
+  apiKey:    String,
+  userId:    Int,
+  tokenId:   String,
+  createdAt: LocalDateTime,
+  deletedAt: Option[LocalDateTime] = None)

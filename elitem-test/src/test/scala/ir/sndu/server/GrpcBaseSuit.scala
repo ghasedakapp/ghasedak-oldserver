@@ -11,10 +11,12 @@ import im.ghasedak.rpc.test.TestServiceGrpc
 import io.grpc.{ ManagedChannel, ManagedChannelBuilder }
 import ir.sndu.persist.db.DbExtension
 import ir.sndu.server.config.{ AppType, ElitemConfigFactory }
+import ir.sndu.server.model.org.ApiKey
 import ir.sndu.server.utils.UserTestUtils
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{ BeforeAndAfterAll, FlatSpec, Inside, Matchers }
 
+import scala.collection.JavaConverters._
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
@@ -56,6 +58,14 @@ abstract class GrpcBaseSuit extends FlatSpec
   protected val randomGrpcPort: Int = randomPort
 
   protected val config: Config = createConfig
+
+  protected val officialApiKeys: Seq[ApiKey] =
+    config.getConfigList("module.auth.official-api-keys")
+      .asScala.map { conf ⇒
+        ApiKey(
+          conf.getInt("org-id"),
+          conf.getString("api-key"))
+      }
 
   protected val system: ActorSystem = ElitemServerBuilder.start(config)
 

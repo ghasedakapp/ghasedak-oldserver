@@ -38,10 +38,7 @@ trait UserTestUtils {
 
   protected def createPhoneNumberUser(): PhoneNumberTestClientData = {
     val phone = generatePhoneNumber()
-    val request1 = RequestStartPhoneAuth(
-      phone, 1,
-      "4b654ds5b4654sd65b44s6d5b46s5d4b",
-      Random.nextString(10), "device info")
+    val request1 = RequestStartPhoneAuth(phone, officialApiKeys.head.apiKey)
     val response1 = authStub.startPhoneAuth(request1)
     val codeGate = db.run(GateAuthCodeRepo.find(response1.transactionHash)).futureValue
     val request2 = RequestValidateCode(response1.transactionHash, codeGate.get.codeHash)

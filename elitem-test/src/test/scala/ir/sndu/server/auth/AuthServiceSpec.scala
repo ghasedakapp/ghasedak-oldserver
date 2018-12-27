@@ -4,11 +4,11 @@ import java.time.temporal.ChronoUnit
 import java.time.{ LocalDateTime, ZoneOffset }
 import java.util.UUID
 
+import im.ghasedak.rpc.auth.{ RequestSignUp, RequestStartPhoneAuth, RequestValidateCode }
+import im.ghasedak.rpc.test.RequestTestAuth
 import io.grpc.Status.Code
 import io.grpc.StatusRuntimeException
 import ir.sndu.persist.repo.auth.{ AuthTransactionRepo, GateAuthCodeRepo }
-import im.ghasedak.rpc.auth.{ RequestSignUp, RequestStartPhoneAuth, RequestValidateCode }
-import im.ghasedak.rpc.test.RequestTestAuth
 import ir.sndu.server.GrpcBaseSuit
 
 import scala.util.{ Failure, Random, Try }
@@ -44,31 +44,21 @@ class AuthServiceSpec extends GrpcBaseSuit {
   it should "return different transaction hash after validate" in differentThAfterValidate
 
   def startPhoneAuth(): Unit = {
-    val request = RequestStartPhoneAuth(
-      generatePhoneNumber(), 1,
-      "4b654ds5b4654sd65b44s6d5b46s5d4b",
-      "device hash", "device info")
+    val request = RequestStartPhoneAuth(generatePhoneNumber(), officialApiKeys.head.apiKey)
     val response = authStub.startPhoneAuth(request)
     response.transactionHash should not be empty
-    db.run(GateAuthCodeRepo.find(response.transactionHash))
-      .futureValue should not be None
+    db.run(GateAuthCodeRepo.find(response.transactionHash)).futureValue should not be None
   }
 
   def sameTransactionHash(): Unit = {
-    val request = RequestStartPhoneAuth(
-      generatePhoneNumber(), 1,
-      "4b654ds5b4654sd65b44s6d5b46s5d4b",
-      "device hash", "device info")
+    val request = RequestStartPhoneAuth(generatePhoneNumber(), officialApiKeys.head.apiKey)
     val response1 = authStub.startPhoneAuth(request)
     val response2 = authStub.startPhoneAuth(request)
     response1.transactionHash shouldEqual response2.transactionHash
   }
 
   def expireTransactionHash(): Unit = {
-    val request = RequestStartPhoneAuth(
-      generatePhoneNumber(), 1,
-      "4b654ds5b4654sd65b44s6d5b46s5d4b",
-      "device hash", "device info")
+    val request = RequestStartPhoneAuth(generatePhoneNumber(), officialApiKeys.head.apiKey)
     val response1 = authStub.startPhoneAuth(request)
     val now = LocalDateTime.now(ZoneOffset.UTC)
     val oldDate = now.minusMinutes(20)
@@ -79,9 +69,7 @@ class AuthServiceSpec extends GrpcBaseSuit {
   }
 
   def invalidPhoneNumber(): Unit = {
-    val request = RequestStartPhoneAuth(
-      2, 1, "4b654ds5b4654sd65b44s6d5b46s5d4b",
-      "device hash", "device info")
+    val request = RequestStartPhoneAuth(2, officialApiKeys.head.apiKey)
     Try(authStub.startPhoneAuth(request)) match {
       case Failure(ex: StatusRuntimeException) ⇒
         ex.getStatus.getCode shouldEqual Code.INTERNAL
@@ -99,10 +87,7 @@ class AuthServiceSpec extends GrpcBaseSuit {
   }
 
   def testValidateCode(): Unit = {
-    val request1 = RequestStartPhoneAuth(
-      generatePhoneNumber(), 1,
-      "4b654ds5b4654sd65b44s6d5b46s5d4b",
-      "device hash", "device info")
+    val request1 = RequestStartPhoneAuth(generatePhoneNumber(), officialApiKeys.head.apiKey)
     val response1 = authStub.startPhoneAuth(request1)
     val codeGate = db.run(GateAuthCodeRepo.find(response1.transactionHash)).futureValue
     val request2 = RequestValidateCode(response1.transactionHash, codeGate.get.codeHash)
@@ -112,10 +97,7 @@ class AuthServiceSpec extends GrpcBaseSuit {
   }
 
   def invalidAuthCode(): Unit = {
-    val request1 = RequestStartPhoneAuth(
-      generatePhoneNumber(), 1,
-      "4b654ds5b4654sd65b44s6d5b46s5d4b",
-      "device hash", "device info")
+    val request1 = RequestStartPhoneAuth(generatePhoneNumber(), officialApiKeys.head.apiKey)
     val response1 = authStub.startPhoneAuth(request1)
     val request2 = RequestValidateCode(response1.transactionHash, "12345")
     Try(authStub.validateCode(request2)) match {
@@ -126,10 +108,7 @@ class AuthServiceSpec extends GrpcBaseSuit {
   }
 
   def authCodeExpired(): Unit = {
-    val request1 = RequestStartPhoneAuth(
-      generatePhoneNumber(), 1,
-      "4b654ds5b4654sd65b44s6d5b46s5d4b",
-      "device hash", "device info")
+    val request1 = RequestStartPhoneAuth(generatePhoneNumber(), officialApiKeys.head.apiKey)
     val response1 = authStub.startPhoneAuth(request1)
     val now = LocalDateTime.now(ZoneOffset.UTC)
     val oldDate = now.minusMinutes(20)
@@ -145,10 +124,7 @@ class AuthServiceSpec extends GrpcBaseSuit {
   }
 
   def signUp(): Unit = {
-    val request1 = RequestStartPhoneAuth(
-      generatePhoneNumber(), 1,
-      "4b654ds5b4654sd65b44s6d5b46s5d4b",
-      "device hash", "device info")
+    val request1 = RequestStartPhoneAuth(generatePhoneNumber(), officialApiKeys.head.apiKey)
     val response1 = authStub.startPhoneAuth(request1)
     val codeGate = db.run(GateAuthCodeRepo.find(response1.transactionHash)).futureValue
     val request2 = RequestValidateCode(response1.transactionHash, codeGate.get.codeHash)
@@ -164,10 +140,7 @@ class AuthServiceSpec extends GrpcBaseSuit {
   }
 
   def signUpAndSignIn(): Unit = {
-    val request1 = RequestStartPhoneAuth(
-      generatePhoneNumber(), 1,
-      "4b654ds5b4654sd65b44s6d5b46s5d4b",
-      "device hash", "device info")
+    val request1 = RequestStartPhoneAuth(generatePhoneNumber(), officialApiKeys.head.apiKey)
     val response1 = authStub.startPhoneAuth(request1)
     val codeGate1 = db.run(GateAuthCodeRepo.find(response1.transactionHash)).futureValue
     val request2 = RequestValidateCode(response1.transactionHash, codeGate1.get.codeHash)
@@ -209,10 +182,7 @@ class AuthServiceSpec extends GrpcBaseSuit {
   }
 
   def differentThAfterValidate(): Unit = {
-    val request1 = RequestStartPhoneAuth(
-      generatePhoneNumber(), 1,
-      "4b654ds5b4654sd65b44s6d5b46s5d4b",
-      "device hash", "device info")
+    val request1 = RequestStartPhoneAuth(generatePhoneNumber(), officialApiKeys.head.apiKey)
     val response1 = authStub.startPhoneAuth(request1)
     val codeGate = db.run(GateAuthCodeRepo.find(response1.transactionHash)).futureValue
     val request2 = RequestValidateCode(response1.transactionHash, codeGate.get.codeHash)

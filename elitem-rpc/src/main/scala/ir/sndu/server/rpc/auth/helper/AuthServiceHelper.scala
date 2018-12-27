@@ -6,21 +6,30 @@ import java.time.{ LocalDateTime, ZoneOffset }
 import im.ghasedak.api.auth.ApiAuth
 import im.ghasedak.api.user.ApiUser
 import ir.sndu.persist.repo.auth.{ AuthSessionRepo, AuthTransactionRepo, GateAuthCodeRepo }
-import ir.sndu.persist.repo.user.{ UserPhoneRepo, UserRepo }
+import ir.sndu.persist.repo.org.ApiKeyRepo
+import ir.sndu.persist.repo.user.{ UserInfoRepo, UserPhoneRepo, UserRepo }
 import ir.sndu.server.model.auth.{ AuthPhoneTransaction, AuthSession, AuthTransactionBase }
-import ir.sndu.server.model.user.{ User, UserPhone }
+import ir.sndu.server.model.org.ApiKey
+import ir.sndu.server.model.user.{ User, UserInfo, UserPhone }
 import ir.sndu.server.rpc.auth.{ AuthRpcErrors, AuthServiceImpl }
 import ir.sndu.server.rpc.common.CommonRpcError
 import ir.sndu.server.user.UserUtils
-import ir.sndu.server.utils.IdUtils._
+import ir.sndu.server.utils.CodeGen.genPhoneCode
 import ir.sndu.server.utils.StringUtils._
-import ir.sndu.server.utils.number.PhoneCodeGen.genPhoneCode
+import ir.sndu.server.utils.number.IdUtils._
 import ir.sndu.server.utils.number.PhoneNumberUtils._
 
 trait AuthServiceHelper {
   this: AuthServiceImpl ⇒
 
   private val maximumValidCodeMinutes = 15 // for 15 minutes phone code is valid
+
+  protected def getApiKey(apiKey: String): Result[Option[ApiKey]] = {
+    AuthSession.isOfficialApiKey(apiKey) match {
+      case Some(ak) ⇒ point(Some(ak))
+      case None     ⇒ fromDBIO(ApiKeyRepo.find(apiKey))
+    }
+  }
 
   protected def forbidDeletedUser(userId: Int): Result[Unit] =
     fromDBIOBoolean(AuthRpcErrors.UserIsDeleted)(UserRepo.isDeleted(userId).map(!_))
@@ -68,15 +77,16 @@ trait AuthServiceHelper {
           userOpt ← fromDBIO(UserRepo.find(userPhone.userId))
           // todo: fix this (delete account)
           user = userOpt.get
-          generatedToken ← fromFuture(generateToken(user.id))
+          generatedToken ← fromFuture(generateToken(user.id, transaction.orgId))
           (tokenId, token) = generatedToken
           authSession = AuthSession(
-            user.id, tokenId, transaction.appId, transaction.apiKey,
-            transaction.deviceHash, transaction.deviceInfo, LocalDateTime.now(ZoneOffset.UTC))
+            transaction.orgId, transaction.apiKey, user.id,
+            tokenId, LocalDateTime.now(ZoneOffset.UTC))
           _ ← fromDBIO(AuthSessionRepo.create(authSession))
           _ ← fromDBIO(AuthTransactionRepo.delete(transaction.transactionHash))
           contactsRecord ← fromDBIO(UserUtils.getUserContactsRecord(user.id))
-          apiUser = ApiUser(user.id, user.name, user.name, contactsRecord, user.nickname, user.about)
+          userInfo ← fromDBIO(UserInfoRepo.find(user.id)).map(_.getOrElse(UserInfo(user.id)))
+          apiUser = ApiUser(user.id, user.name, user.name, contactsRecord, userInfo.nickname, userInfo.about)
         } yield Some(ApiAuth(token, Some(apiUser)))
     }
   }
@@ -89,10 +99,14 @@ trait AuthServiceHelper {
       validName ← fromOption(CommonRpcError.InvalidName)(validName(name))
       user = User(
         id = nextIntId(),
+        orgId = transaction.orgId,
         name = validName,
-        countryCode = countryCode,
         createdAt = LocalDateTime.now(ZoneOffset.UTC))
       _ ← fromDBIO(UserRepo.create(user))
+      userInfo = UserInfo(
+        userId = user.id,
+        countryCode = Some(countryCode))
+      _ ← fromDBIO(UserInfoRepo.create(userInfo))
       userPhone = UserPhone(user.id, phone)
       _ ← fromDBIO(UserPhoneRepo.create(userPhone))
       optApiAuth ← getOptApiAuth(transaction, Some(userPhone))

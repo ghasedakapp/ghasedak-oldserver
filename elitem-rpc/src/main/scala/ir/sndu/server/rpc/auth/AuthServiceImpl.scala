@@ -5,12 +5,12 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import akka.event.{ Logging, LoggingAdapter }
+import im.ghasedak.rpc.auth.AuthServiceGrpc.AuthService
+import im.ghasedak.rpc.auth._
 import ir.sndu.persist.db.DbExtension
 import ir.sndu.persist.repo.auth.{ AuthPhoneTransactionRepo, AuthTransactionRepo }
 import ir.sndu.persist.repo.user.UserPhoneRepo
-import im.ghasedak.rpc.auth.AuthServiceGrpc.AuthService
-import im.ghasedak.rpc.auth._
-import ir.sndu.server.model.auth.{ AuthPhoneTransaction, AuthSession }
+import ir.sndu.server.model.auth.AuthPhoneTransaction
 import ir.sndu.server.rpc.RpcError
 import ir.sndu.server.rpc.auth.helper.{ AuthServiceHelper, AuthTokenHelper }
 import ir.sndu.server.rpc.common.CommonRpcError
@@ -40,12 +40,13 @@ final class AuthServiceImpl(implicit system: ActorSystem) extends AuthService
 
   override def startPhoneAuth(request: RequestStartPhoneAuth): Future[ResponseStartPhoneAuth] = {
     val action: Result[ResponseStartPhoneAuth] = for {
-      _ ← fromBoolean(AuthRpcErrors.InvalidApiKey)(AuthSession.isValidApiKey(request.apiKey))
+      optApiKey ← getApiKey(request.apiKey)
+      apiKey ← fromOption(AuthRpcErrors.InvalidApiKey)(optApiKey)
       normalizedPhone ← fromOption(AuthRpcErrors.InvalidPhoneNumber)(normalizeLong(request.phoneNumber).headOption)
       optUserPhone ← fromDBIO(UserPhoneRepo.findByPhoneNumber(normalizedPhone))
       // todo: fix this (delete account)
       _ ← optUserPhone map (p ⇒ forbidDeletedUser(p.userId)) getOrElse point(())
-      optAuthTransaction ← fromDBIO(AuthPhoneTransactionRepo.findByPhoneAndDeviceHash(normalizedPhone, request.deviceHash))
+      optAuthTransaction ← fromDBIO(AuthPhoneTransactionRepo.findByPhoneNumberAndOrgId(normalizedPhone, apiKey.orgId))
       optAuthTransactionWithExpire ← getOptAuthTransactionWithExpire(optAuthTransaction)
       transactionHash ← optAuthTransactionWithExpire match {
         case Some(transaction) ⇒ point(transaction.transactionHash)
@@ -53,10 +54,8 @@ final class AuthServiceImpl(implicit system: ActorSystem) extends AuthService
           val phoneAuthTransaction = AuthPhoneTransaction(
             phoneNumber = normalizedPhone,
             transactionHash = UUID.randomUUID().toString,
-            appId = request.appId,
-            apiKey = request.apiKey,
-            deviceHash = request.deviceHash,
-            deviceInfo = request.deviceInfo,
+            orgId = apiKey.orgId,
+            apiKey = apiKey.apiKey,
             createdAt = LocalDateTime.now(ZoneOffset.UTC))
           for {
             _ ← fromDBIO(AuthPhoneTransactionRepo.create(phoneAuthTransaction))

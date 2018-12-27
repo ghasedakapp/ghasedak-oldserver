@@ -16,7 +16,7 @@ import slick.jdbc.PostgresProfile
 
 import scala.concurrent.{ ExecutionContext, Future }
 
-class ContactServiceImpl(implicit system: ActorSystem) extends ContactService
+final class ContactServiceImpl(implicit system: ActorSystem) extends ContactService
   with AuthTokenHelper
   with ContactServiceHelper
   with DBIOResult[RpcError] {
@@ -46,7 +46,7 @@ class ContactServiceImpl(implicit system: ActorSystem) extends ContactService
       val action: Result[ResponseAddContact] = for {
         localName ← fromOption(CommonRpcError.InvalidName)(validName(request.localName))
         contactRecord ← fromOption(ContactRpcError.InvalidContactRecord)(request.contactRecord)
-        contactUserId ← getContactRecordUserId(contactRecord)
+        contactUserId ← getContactRecordUserId(contactRecord, clientData.orgId)
         _ ← fromBoolean(ContactRpcError.CantAddSelf)(clientData.userId != contactUserId)
         exists ← fromDBIO(UserContactRepo.exists(ownerUserId = clientData.userId, contactUserId = contactUserId))
         _ ← fromBoolean(ContactRpcError.ContactAlreadyExists)(!exists)

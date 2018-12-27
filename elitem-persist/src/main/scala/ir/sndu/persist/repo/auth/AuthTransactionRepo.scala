@@ -15,10 +15,8 @@ final class AuthTransactionTable(tag: Tag) extends AuthTransactionBaseTable[Auth
 
   override def * = (
     transactionHash,
-    appId,
+    orgId,
     apiKey,
-    deviceHash,
-    deviceInfo,
     createdAt,
     isChecked,
     deletedAt) <> (AuthTransaction.tupled, AuthTransaction.unapply)
