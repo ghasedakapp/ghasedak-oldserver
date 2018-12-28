@@ -6,10 +6,10 @@ import com.github.tminglei.slickpg.ExPostgresProfile.api._
 import ir.sndu.persist.repo.TypeMapper._
 import ir.sndu.persist.repo.contact.UserContactRepo
 import ir.sndu.server.model.contact.UserContact
-import ir.sndu.server.model.user.{User, UserAuth}
+import ir.sndu.server.model.user.{ User, UserAuth }
 import slick.dbio.Effect
 import slick.lifted.Tag
-import slick.sql.{FixedSqlAction, FixedSqlStreamingAction, SqlAction}
+import slick.sql.{ FixedSqlAction, FixedSqlStreamingAction, SqlAction }
 
 final class UserTable(tag: Tag) extends Table[User](tag, "users") {
 
@@ -50,7 +50,7 @@ object UserRepo {
       .filter(_.id inSet userIds)
       .joinLeft(UserAuthRepo.usersAuth)
       .on(_.id === _.userId)
-      .joinLeft(UserContactRepo.contacts filter (_.ownerUserId === ownerUserId))
+      .joinLeft(UserContactRepo.active filter (_.ownerUserId === ownerUserId) distinct)
       .on(_._1.id === _.contactUserId)
       .result
   }

@@ -10,7 +10,7 @@ class UserServiceSpec extends GrpcBaseSuit {
 
   behavior of "UserServiceImpl"
 
-  ignore should "load user" in {
+  it should "load user" in {
     val ali = createUserWithPhone()
     val sara = createUserWithPhone()
 
@@ -27,7 +27,7 @@ class UserServiceSpec extends GrpcBaseSuit {
       'contactsRecord(Seq(ApiContactRecord().withPhoneNumber(sara.phoneNumber.get))))
   }
 
-  ignore should "load more than one user" in {
+  it should "load more than one user" in {
     val users = createUsersWithPhone(5)
 
     val userStubUser1 = userStub.withInterceptors(clientTokenInterceptor(users.head.token))
@@ -45,13 +45,16 @@ class UserServiceSpec extends GrpcBaseSuit {
   }
 
   it should "load user with local name" in {
-    val users = createUsersWithPhone(5)
+    val users = createUsersWithPhone(6)
 
     val contactStubUser1 = contactStub.withInterceptors(clientTokenInterceptor(users.head.token))
+    val contactStubUser2 = contactStub.withInterceptors(clientTokenInterceptor(users(1).token))
     val userStubUser1 = userStub.withInterceptors(clientTokenInterceptor(users.head.token))
 
-    //Adds 3 user to contact of user0
-    val requests = users.slice(1, 4).zipWithIndex.map {
+    val userForContact = users.slice(2, 5)
+
+    //Adds 3 user to contact of user1 and user2
+    val requests = userForContact.zipWithIndex.map {
       case (user, index) ⇒
         RequestAddContact(
           localName = s"user-0$index",
@@ -59,10 +62,21 @@ class UserServiceSpec extends GrpcBaseSuit {
     }
 
     requests foreach contactStubUser1.addContact
+    requests foreach contactStubUser2.addContact
 
-    val rsp = userStubUser1.loadUsers(RequestLoadUsers(users.slice(1, 4).map(_.userId)))
+    val rsp = userStubUser1.loadUsers(RequestLoadUsers(userForContact.map(_.userId)))
 
-    rsp shouldBe 3
+    val userForContactApiUsers = userForContact.zipWithIndex.map {
+      case (user, index) ⇒ ApiUser(
+        user.userId,
+        user.name.get,
+        s"user-0$index",
+        None,
+        Seq(ApiContactRecord().withPhoneNumber(user.phoneNumber.get)))
+    }
+
+    rsp.users should have size userForContact.size
+    rsp.users shouldBe userForContactApiUsers
 
   }
 
