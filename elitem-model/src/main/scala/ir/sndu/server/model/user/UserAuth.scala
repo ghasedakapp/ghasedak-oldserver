@@ -1,5 +1,7 @@
 package ir.sndu.server.model.user
 
+import im.ghasedak.api.contact.ApiContactRecord
+
 final case class UserAuth(
   orgId:       Int,
   userId:      Int,
@@ -7,4 +9,11 @@ final case class UserAuth(
   email:       Option[String] = None,
   nickname:    Option[String] = None,
   countryCode: Option[String] = None,
-  isDeleted:   Boolean        = false)
+  isDeleted:   Boolean        = false) {
+  def toApiContact: Seq[ApiContactRecord] = {
+    Seq(
+      phoneNumber.map(ApiContactRecord().withPhoneNumber),
+      email.map(ApiContactRecord().withEmail),
+      nickname.map(ApiContactRecord().withNickname)).flatten
+  }
+}
