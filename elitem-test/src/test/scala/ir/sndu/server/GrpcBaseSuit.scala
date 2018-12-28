@@ -8,6 +8,7 @@ import im.ghasedak.rpc.auth.AuthServiceGrpc
 import im.ghasedak.rpc.contact.ContactServiceGrpc
 import im.ghasedak.rpc.messaging.MessagingServiceGrpc
 import im.ghasedak.rpc.test.TestServiceGrpc
+import im.ghasedak.rpc.user.UserServiceGrpc
 import io.grpc.{ ManagedChannel, ManagedChannelBuilder }
 import ir.sndu.persist.db.DbExtension
 import ir.sndu.server.config.{ AppType, ElitemConfigFactory }
@@ -85,6 +86,9 @@ abstract class GrpcBaseSuit extends FlatSpec
 
   protected val contactStub: ContactServiceGrpc.ContactServiceBlockingStub =
     ContactServiceGrpc.blockingStub(channel)
+
+  protected val userStub: UserServiceGrpc.UserServiceBlockingStub =
+    UserServiceGrpc.blockingStub(channel)
 
   override def afterAll(): Unit = {
     super.afterAll()

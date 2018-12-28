@@ -28,18 +28,18 @@ class ContactServiceSpec extends GrpcBaseSuit {
   it should "remove his contact" in removeContact
 
   def addContactWithPhoneNumber(): Unit = {
-    val user1 = createPhoneNumberUser()
-    val user2 = createPhoneNumberUser()
+    val user1 = createUserWithPhone()
+    val user2 = createUserWithPhone()
     val stub = contactStub.withInterceptors(clientTokenInterceptor(user1.token))
     val request = RequestAddContact(
       localName = Random.alphanumeric.take(20).mkString,
-      Some(ApiContactRecord().withPhoneNumber(user2.phoneNumber)))
+      Some(ApiContactRecord().withPhoneNumber(user2.phoneNumber.get)))
     val response = stub.addContact(request)
     response.contactUserId shouldEqual user2.userId
   }
 
   def invalidContactError(): Unit = {
-    val user1 = createPhoneNumberUser()
+    val user1 = createUserWithPhone()
     val stub = contactStub.withInterceptors(clientTokenInterceptor(user1.token))
     val request1 = RequestAddContact(Random.alphanumeric.take(20).mkString)
     Try(stub.addContact(request1)) match {
@@ -56,11 +56,11 @@ class ContactServiceSpec extends GrpcBaseSuit {
   }
 
   def cantAddSelfError(): Unit = {
-    val user = createPhoneNumberUser()
+    val user = createUserWithPhone()
     val stub = contactStub.withInterceptors(clientTokenInterceptor(user.token))
     val request = RequestAddContact(
       Random.alphanumeric.take(20).mkString,
-      Some(ApiContactRecord().withPhoneNumber(user.phoneNumber)))
+      Some(ApiContactRecord().withPhoneNumber(user.phoneNumber.get)))
     Try(stub.addContact(request)) match {
       case Failure(ex: StatusRuntimeException) ⇒
         ex.getStatus.getCode shouldEqual Code.INTERNAL
@@ -69,12 +69,12 @@ class ContactServiceSpec extends GrpcBaseSuit {
   }
 
   def contactAlreadyExist(): Unit = {
-    val user1 = createPhoneNumberUser()
-    val user2 = createPhoneNumberUser()
+    val user1 = createUserWithPhone()
+    val user2 = createUserWithPhone()
     val stub = contactStub.withInterceptors(clientTokenInterceptor(user1.token))
     val request = RequestAddContact(
       localName = Random.alphanumeric.take(20).mkString,
-      Some(ApiContactRecord().withPhoneNumber(user2.phoneNumber)))
+      Some(ApiContactRecord().withPhoneNumber(user2.phoneNumber.get)))
     stub.addContact(request)
     Try(stub.addContact(request)) match {
       case Failure(ex: StatusRuntimeException) ⇒
@@ -84,7 +84,7 @@ class ContactServiceSpec extends GrpcBaseSuit {
   }
 
   def userNotFound(): Unit = {
-    val user = createPhoneNumberUser()
+    val user = createUserWithPhone()
     val stub = contactStub.withInterceptors(clientTokenInterceptor(user.token))
     val request = RequestAddContact(
       Random.alphanumeric.take(20).mkString,
@@ -98,13 +98,13 @@ class ContactServiceSpec extends GrpcBaseSuit {
 
   def getAllContacts(): Unit = {
     val n = 10
-    val user = createPhoneNumberUser()
-    val contacts = Seq.fill(n)(createPhoneNumberUser())
+    val user = createUserWithPhone()
+    val contacts = Seq.fill(n)(createUserWithPhone())
     val stub = contactStub.withInterceptors(clientTokenInterceptor(user.token))
     contacts foreach { contact ⇒
       val request = RequestAddContact(
         localName = Random.alphanumeric.take(20).mkString,
-        Some(ApiContactRecord().withPhoneNumber(contact.phoneNumber)))
+        Some(ApiContactRecord().withPhoneNumber(contact.phoneNumber.get)))
       stub.addContact(request)
     }
     val request = RequestGetContacts()
@@ -115,12 +115,12 @@ class ContactServiceSpec extends GrpcBaseSuit {
   }
 
   def removeContact(): Unit = {
-    val user1 = createPhoneNumberUser()
-    val user2 = createPhoneNumberUser()
+    val user1 = createUserWithPhone()
+    val user2 = createUserWithPhone()
     val stub = contactStub.withInterceptors(clientTokenInterceptor(user1.token))
     val request = RequestAddContact(
       localName = Random.alphanumeric.take(20).mkString,
-      Some(ApiContactRecord().withPhoneNumber(user2.phoneNumber)))
+      Some(ApiContactRecord().withPhoneNumber(user2.phoneNumber.get)))
     stub.addContact(request)
     stub.getContacts(RequestGetContacts()).contactsUserId.contains(user2.userId) shouldEqual true
     stub.removeContact(RequestRemoveContact(user2.userId))
