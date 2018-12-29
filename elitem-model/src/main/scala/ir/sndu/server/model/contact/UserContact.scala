@@ -4,18 +4,6 @@ case class UserContact(
   ownerUserId:   Int,
   contactUserId: Int,
   localName:     String,
-  isDeleted:     Boolean)
-
-case class UserPhoneContact(
-  phoneNumber:   Long,
-  ownerUserId:   Int,
-  contactUserId: Int,
-  localName:     String,
-  isDeleted:     Boolean)
-
-case class UserEmailContact(
-  email:         String,
-  ownerUserId:   Int,
-  contactUserId: Int,
-  localName:     String,
-  isDeleted:     Boolean)
+  hasPhone:      Boolean = false,
+  hasEmail:      Boolean = false,
+  isDeleted:     Boolean = false)

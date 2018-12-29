@@ -7,9 +7,21 @@ import slick.dbio.Effect
 import slick.lifted.Tag
 import slick.sql.{ FixedSqlAction, FixedSqlStreamingAction }
 
-final class UserContactTable(tag: Tag) extends UserContactBaseTable[UserContact](tag, "user_contacts") {
+final class UserContactTable(tag: Tag) extends Table[UserContact](tag, "user_contacts") {
 
-  def * = (ownerUserId, contactUserId, localName, isDeleted) <> (UserContact.tupled, UserContact.unapply)
+  def ownerUserId = column[Int]("owner_user_id", O.PrimaryKey)
+
+  def contactUserId = column[Int]("contact_user_id", O.PrimaryKey)
+
+  def localName = column[String]("local_name")
+
+  def hasPhone = column[Boolean]("has_phone", O.Default(false))
+
+  def hasEmail = column[Boolean]("has_email", O.Default(false))
+
+  def isDeleted = column[Boolean]("is_deleted", O.Default(false))
+
+  def * = (ownerUserId, contactUserId, localName, hasPhone, hasEmail, isDeleted) <> (UserContact.tupled, UserContact.unapply)
 
 }
 
