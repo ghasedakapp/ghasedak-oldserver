@@ -12,11 +12,11 @@ class MessagingServiceSpec extends GrpcBaseSuit {
   behavior of "MessagingServiceImpl"
 
   it should "send message, load history, load dialog" in {
-    val aliUser = createPhoneNumberUser()
+    val aliUser = createUserWithPhone()
     val aliPeer = Some(ApiPeer(ApiPeerType.PRIVATE, aliUser.userId))
-    val hosseinUser = createPhoneNumberUser()
+    val hosseinUser = createUserWithPhone()
     val hosseinPeer = Some(ApiPeer(ApiPeerType.PRIVATE, hosseinUser.userId))
-    val salehUser = createPhoneNumberUser()
+    val salehUser = createUserWithPhone()
     val salehPeer = Some(ApiPeer(ApiPeerType.PRIVATE, salehUser.userId))
 
     val stubAli = messagingStub.withInterceptors(clientTokenInterceptor(aliUser.token))

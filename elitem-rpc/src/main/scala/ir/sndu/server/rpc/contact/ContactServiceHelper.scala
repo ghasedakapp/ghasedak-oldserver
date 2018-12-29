@@ -27,8 +27,6 @@ trait ContactServiceHelper {
     localName:     String,
     contactRecord: ApiContactRecord): Result[Unit] = {
     for {
-      _ ← fromDBIO(UserContactRepo.insertOrUpdate(
-        UserContact(ownerUserId, contactUserId, localName, isDeleted = false)))
       _ ← if (contactRecord.contact.isPhoneNumber)
         fromDBIO(UserPhoneContactRepo.insertOrUpdate(
           UserPhoneContact(contactRecord.getPhoneNumber, ownerUserId, contactUserId, localName, isDeleted = false)))

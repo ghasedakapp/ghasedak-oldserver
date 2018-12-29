@@ -44,15 +44,14 @@ object UserRepo {
   def find(ids: Set[Int]): FixedSqlStreamingAction[Seq[User], User, Effect.Read] =
     activeUsers.filter(_.id inSet ids).result
 
-  def findUserContact(orgId: Int, ownerUserId: Int, userIds: Seq[Int]): FixedSqlStreamingAction[Seq[((User, UserAuth), UserContact)], ((User, UserAuth), UserContact), Effect.Read] = {
+  def findUserContact(orgId: Int, ownerUserId: Int, userIds: Seq[Int]): FixedSqlStreamingAction[Seq[((User, Option[UserAuth]), Option[UserContact])], ((User, Option[UserAuth]), Option[UserContact]), Effect.Read] = {
     UserRepo.activeUsers
       .filter(_.orgId === orgId)
       .filter(_.id inSet userIds)
-      .join(UserAuthRepo.usersAuth)
+      .joinLeft(UserAuthRepo.usersAuth)
       .on(_.id === _.userId)
-      .join(UserContactRepo.contacts)
+      .joinLeft(UserContactRepo.active filter (_.ownerUserId === ownerUserId) distinct)
       .on(_._1.id === _.contactUserId)
-      .filter(_._2.ownerUserId === ownerUserId)
       .result
   }
 

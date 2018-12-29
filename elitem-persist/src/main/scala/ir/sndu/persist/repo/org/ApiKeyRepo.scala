@@ -15,9 +15,11 @@ final class ApiKeyTable(tag: Tag) extends Table[ApiKey](tag, "api_keys") {
 
   def apiKey = column[String]("api_key", O.PrimaryKey, O.Unique)
 
+  def title = column[Option[String]]("title")
+
   def deletedAt = column[Option[LocalDateTime]]("deleted_at")
 
-  override def * = (orgId, apiKey, deletedAt) <> (ApiKey.tupled, ApiKey.unapply)
+  override def * = (orgId, apiKey, title, deletedAt) <> (ApiKey.tupled, ApiKey.unapply)
 
 }
 

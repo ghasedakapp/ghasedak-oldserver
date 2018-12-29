@@ -32,7 +32,7 @@ final class UserServiceImpl(implicit system: ActorSystem) extends UserService
       if (request.userIds.size > 100)
         Future.failed(CommonRpcErrors.CollectionSizeLimitExceed)
       else
-        userExt.find(clientData.orgId, clientData.userId, request.userIds) map (ResponseLoadUsers(_))
+        userExt.getUsers(clientData.orgId, clientData.userId, request.userIds) map (ResponseLoadUsers(_))
     }
 
 }

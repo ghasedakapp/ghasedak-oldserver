@@ -5,13 +5,13 @@ import io.grpc._
 import ir.sndu.persist.repo.auth.GateAuthCodeRepo
 import ir.sndu.server.GrpcBaseSuit
 import ir.sndu.server.rpc.Constant
-import ir.sndu.server.utils.UserTestUtils.PhoneNumberTestClientData
+import ir.sndu.server.utils.UserTestUtils.TestClientData
 
 import scala.util.Random
 
 object UserTestUtils {
 
-  case class PhoneNumberTestClientData(userId: Int, token: String, phoneNumber: Long)
+  case class TestClientData(userId: Int, token: String, phoneNumber: Option[Long] = None, name: Option[String] = None)
 
 }
 
@@ -36,21 +36,26 @@ trait UserTestUtils {
     75550000000L + scala.util.Random.nextInt(999999)
   }
 
-  protected def createPhoneNumberUser(): PhoneNumberTestClientData = {
+  protected def createUserWithPhone(): TestClientData = {
     val phone = generatePhoneNumber()
     val request1 = RequestStartPhoneAuth(phone, officialApiKeys.head.apiKey)
     val response1 = authStub.startPhoneAuth(request1)
     val codeGate = db.run(GateAuthCodeRepo.find(response1.transactionHash)).futureValue
     val request2 = RequestValidateCode(response1.transactionHash, codeGate.get.codeHash)
     authStub.validateCode(request2)
+    val name = Random.alphanumeric.take(20).mkString
     val request3 = RequestSignUp(
       response1.transactionHash,
-      Random.alphanumeric.take(20).mkString)
+      name)
     val response3 = authStub.signUp(request3)
-    PhoneNumberTestClientData(
+    TestClientData(
       response3.getApiAuth.getUser.id,
       response3.getApiAuth.token,
-      response3.getApiAuth.getUser.contactsRecord.head.getPhoneNumber)
+      Some(response3.getApiAuth.getUser.contactsRecord.head.getPhoneNumber),
+      Some(name))
   }
+
+  protected def createUsersWithPhone(num: Int): Seq[TestClientData] =
+    1 to num map (_ ⇒ createUserWithPhone())
 
 }
