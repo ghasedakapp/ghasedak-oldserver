@@ -10,6 +10,7 @@ import im.ghasedak.api.peer.{ ApiPeer, ApiPeerType }
 import im.ghasedak.api.user.ApiUser
 import ir.sndu.persist.db.DbExtension
 import ir.sndu.persist.repo.user.UserRepo
+import ir.sndu.server.model.contact.UserContact
 import ir.sndu.server.model.user.UserAuth
 import slick.jdbc.PostgresProfile
 
@@ -57,9 +58,17 @@ class UserExtensionImpl(system: ExtendedActorSystem) extends Extension {
             name = user.name,
             localName = contact.map(_.localName).getOrElse(user.name),
             about = user.about,
-            contactsRecord = userAuth.map(_.toApiContact).getOrElse(Seq.empty))
+            contactsRecord = toApiContact(userAuth, contact))
       })
     db.run(action)
+  }
+
+  def toApiContact(userAuth: Option[UserAuth], contact: Option[UserContact]): Seq[ApiContactRecord] = {
+    Seq(
+      contact.filter(_.hasPhone) flatMap (_ ⇒ userAuth.flatMap(_.phoneNumber.map(ApiContactRecord().withPhoneNumber))),
+      contact.filter(_.hasEmail) flatMap (_ ⇒ userAuth.flatMap(_.email.map(ApiContactRecord().withEmail))),
+      userAuth.flatMap(_.nickname.map(ApiContactRecord().withNickname)))
+      .flatten
   }
 
 }

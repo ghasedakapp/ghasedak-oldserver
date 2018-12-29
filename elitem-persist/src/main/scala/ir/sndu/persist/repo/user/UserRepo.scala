@@ -48,7 +48,7 @@ object UserRepo {
     UserRepo.activeUsers
       .filter(_.orgId === orgId)
       .filter(_.id inSet userIds)
-      .joinLeft(UserAuthRepo.usersAuth)
+      .joinLeft(UserAuthRepo.active)
       .on(_.id === _.userId)
       .joinLeft(UserContactRepo.active filter (_.ownerUserId === ownerUserId) distinct)
       .on(_._1.id === _.contactUserId)
