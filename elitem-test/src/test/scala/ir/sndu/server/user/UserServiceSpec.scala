@@ -10,7 +10,7 @@ class UserServiceSpec extends GrpcBaseSuit {
 
   behavior of "UserServiceImpl"
 
-  it should "load user" in {
+  it should "load user without contact" in {
     val ali = createUserWithPhone()
     val sara = createUserWithPhone()
 
@@ -24,10 +24,10 @@ class UserServiceSpec extends GrpcBaseSuit {
       'name(sara.name.get),
       'localName(sara.name.get),
       'about(None),
-      'contactsRecord(Seq(ApiContactRecord().withPhoneNumber(sara.phoneNumber.get))))
+      'contactsRecord(Seq.empty))
   }
 
-  it should "load more than one user" in {
+  it should "load more than one user without contact" in {
     val users = createUsersWithPhone(5)
 
     val userStubUser1 = userStub.withInterceptors(clientTokenInterceptor(users.head.token))
@@ -40,7 +40,7 @@ class UserServiceSpec extends GrpcBaseSuit {
       name = u.name.get,
       localName = u.name.get,
       about = None,
-      contactsRecord = Seq(ApiContactRecord().withPhoneNumber(u.phoneNumber.get))))
+      contactsRecord = Seq.empty))
 
   }
 
