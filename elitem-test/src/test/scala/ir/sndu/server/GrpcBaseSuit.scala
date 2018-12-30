@@ -21,7 +21,7 @@ import scala.collection.JavaConverters._
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
-// todo: Config this for parallel execution
+// todo: config this for parallel execution
 abstract class GrpcBaseSuit extends FlatSpec
   with Matchers
   with ScalaFutures

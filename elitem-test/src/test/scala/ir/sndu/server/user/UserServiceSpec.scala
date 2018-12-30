@@ -41,7 +41,6 @@ class UserServiceSpec extends GrpcBaseSuit {
       localName = u.name.get,
       about = None,
       contactsRecord = Seq.empty))
-
   }
 
   it should "load user with local name" in {
@@ -77,7 +76,6 @@ class UserServiceSpec extends GrpcBaseSuit {
 
     rsp.users should have size userForContact.size
     rsp.users shouldBe userForContactApiUsers
-
   }
 
 }

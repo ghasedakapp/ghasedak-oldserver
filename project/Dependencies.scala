@@ -11,7 +11,6 @@ object Dependencies {
     val postgres = "42.2.1"
     val flyway = "5.0.7"
     val config = "1.3.2"
-    val persistCassandra = "0.87"
   }
 
   object Compile {

@@ -109,9 +109,7 @@ class ContactServiceSpec extends GrpcBaseSuit {
     }
     val request = RequestGetContacts()
     val response = stub.getContacts(request)
-    contacts foreach { contact ⇒
-      response.contactsUserId.contains(contact.userId) shouldEqual true
-    }
+    response.contactUserIds should contain allElementsOf contacts.map(_.userId)
   }
 
   def removeContact(): Unit = {
@@ -122,9 +120,9 @@ class ContactServiceSpec extends GrpcBaseSuit {
       localName = Random.alphanumeric.take(20).mkString,
       Some(ApiContactRecord().withPhoneNumber(user2.phoneNumber.get)))
     stub.addContact(request)
-    stub.getContacts(RequestGetContacts()).contactsUserId.contains(user2.userId) shouldEqual true
+    stub.getContacts(RequestGetContacts()).contactUserIds.contains(user2.userId) shouldEqual true
     stub.removeContact(RequestRemoveContact(user2.userId))
-    stub.getContacts(RequestGetContacts()).contactsUserId.contains(user2.userId) shouldEqual false
+    stub.getContacts(RequestGetContacts()).contactUserIds.contains(user2.userId) shouldEqual false
   }
 
 }
