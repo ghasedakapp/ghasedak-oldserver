@@ -5,7 +5,7 @@ import com.github.tminglei.slickpg.ExPostgresProfile.api._
 import ir.sndu.server.model.contact.UserContact
 import slick.dbio.Effect
 import slick.lifted.Tag
-import slick.sql.{ FixedSqlAction, FixedSqlStreamingAction }
+import slick.sql.{ FixedSqlAction, FixedSqlStreamingAction, SqlAction }
 
 final class UserContactTable(tag: Tag) extends Table[UserContact](tag, "user_contacts") {
 
@@ -36,6 +36,9 @@ object UserContactRepo {
 
   def find(ownerUserId: Int): FixedSqlStreamingAction[Seq[UserContact], UserContact, Effect.Read] =
     active.filter(_.ownerUserId === ownerUserId).result
+
+  def find(ownerUserId: Int, contactUserId: Int): SqlAction[Option[UserContact], NoStream, Effect.Read] =
+    active.filter(c ⇒ c.ownerUserId === ownerUserId && c.contactUserId === contactUserId).result.headOption
 
   def exists(ownerUserId: Int, contactUserId: Int): FixedSqlAction[Boolean, ExPostgresProfile.api.NoStream, Effect.Read] =
     active.filter(c ⇒ c.ownerUserId === ownerUserId && c.contactUserId === contactUserId).exists.result

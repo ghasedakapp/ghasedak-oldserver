@@ -1,6 +1,6 @@
 package ir.sndu.server.model.auth
 
-case class GateAuthCode(
+final case class GateAuthCode(
   transactionHash: String,
   codeHash:        String,
   isDeleted:       Boolean = false)

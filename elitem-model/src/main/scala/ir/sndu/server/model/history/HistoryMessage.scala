@@ -4,7 +4,7 @@ import java.time.LocalDateTime
 
 import im.ghasedak.api.peer.ApiPeer
 
-case class HistoryMessage(
+final case class HistoryMessage(
   userId:               Int,
   peer:                 ApiPeer,
   date:                 LocalDateTime,
@@ -19,6 +19,8 @@ case class HistoryMessage(
 }
 
 object HistoryMessage {
+
   def empty(userId: Int, peer: ApiPeer, date: LocalDateTime) =
     HistoryMessage(userId, peer, date, 0, 0, 0, Array.emptyByteArray, None)
+
 }

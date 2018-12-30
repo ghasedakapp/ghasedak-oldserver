@@ -1,6 +1,6 @@
 package ir.sndu.server.model.contact
 
-case class UserContact(
+final case class UserContact(
   ownerUserId:   Int,
   contactUserId: Int,
   localName:     String,

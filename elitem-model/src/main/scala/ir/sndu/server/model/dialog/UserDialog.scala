@@ -6,21 +6,21 @@ import im.ghasedak.api.messaging.{ ApiDialog, ApiMessage, ApiMessageContainer }
 import im.ghasedak.api.peer.ApiPeer
 import ir.sndu.server.model.history.HistoryMessage
 
-case class DialogCommon(
+final case class DialogCommon(
   dialogId:        String,
   lastMessageDate: LocalDateTime,
   lastMessageSeq:  Int,
   lastReceivedSeq: Int,
   lastReadSeq:     Int)
 
-case class UserDialog(
+final case class UserDialog(
   userId:               Int,
   peer:                 ApiPeer,
   ownerLastReceivedSeq: Int,
   ownerLastReadSeq:     Int,
   createdAt:            LocalDateTime)
 
-case class Dialog(
+final case class Dialog(
   userId:               Int,
   peer:                 ApiPeer,
   ownerLastReceivedSeq: Int,
@@ -48,6 +48,7 @@ case class Dialog(
 }
 
 object Dialog {
+
   def from(common: DialogCommon, dialog: UserDialog): Dialog =
     Dialog(
       userId = dialog.userId,
@@ -59,4 +60,5 @@ object Dialog {
       lastReceivedSeq = common.lastReceivedSeq,
       lastReadSeq = common.lastReadSeq,
       createdAt = dialog.createdAt)
+
 }

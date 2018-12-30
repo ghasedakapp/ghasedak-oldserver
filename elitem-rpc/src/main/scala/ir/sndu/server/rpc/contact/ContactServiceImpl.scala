@@ -7,6 +7,7 @@ import im.ghasedak.rpc.contact._
 import im.ghasedak.rpc.misc.ResponseVoid
 import ir.sndu.persist.db.DbExtension
 import ir.sndu.persist.repo.contact.UserContactRepo
+import ir.sndu.server.model.contact.UserContact
 import ir.sndu.server.rpc.RpcError
 import ir.sndu.server.rpc.auth.helper.AuthTokenHelper
 import ir.sndu.server.rpc.common.CommonRpcErrors
@@ -48,9 +49,20 @@ final class ContactServiceImpl(implicit system: ActorSystem) extends ContactServ
         contactRecord ← fromOption(ContactRpcErrors.InvalidContactRecord)(request.contactRecord)
         contactUserId ← getContactRecordUserId(contactRecord, clientData.orgId)
         _ ← fromBoolean(ContactRpcErrors.CantAddSelf)(clientData.userId != contactUserId)
-        exists ← fromDBIO(UserContactRepo.exists(ownerUserId = clientData.userId, contactUserId = contactUserId))
-        _ ← fromBoolean(ContactRpcErrors.ContactAlreadyExists)(!exists)
-        _ ← addUserContact(clientData.userId, contactUserId, localName, contactRecord)
+        optExistContact ← fromDBIO(UserContactRepo.find(clientData.userId, contactUserId))
+        _ ← fromBoolean(ContactRpcErrors.ContactAlreadyExists) {
+          val contact = optExistContact.getOrElse(UserContact(clientData.userId, contactUserId, localName))
+          !((contact.hasEmail && contact.hasEmail == contactRecord.contact.isEmail) ||
+            (contact.hasPhone && contact.hasPhone == contactRecord.contact.isPhoneNumber))
+        }
+        // fixme: use UserProcessor actor for concurrency problem
+        _ ← if (contactRecord.contact.isPhoneNumber)
+          fromDBIO(UserContactRepo.insertOrUpdate(
+            UserContact(clientData.userId, contactUserId, localName, hasPhone = true, hasEmail = optExistContact.exists(_.hasEmail))))
+        else if (contactRecord.contact.isEmail)
+          fromDBIO(UserContactRepo.insertOrUpdate(
+            UserContact(clientData.userId, contactUserId, localName, hasEmail = true, hasPhone = optExistContact.exists(_.hasPhone))))
+        else throw ContactRpcErrors.InvalidContactRecord
       } yield ResponseAddContact(contactUserId)
       val result = db.run(action.value)
       result

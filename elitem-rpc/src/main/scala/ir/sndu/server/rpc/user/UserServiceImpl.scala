@@ -28,7 +28,7 @@ final class UserServiceImpl(implicit system: ActorSystem) extends UserService
 
   override def loadUsers(request: RequestLoadUsers): Future[ResponseLoadUsers] =
     authorize { clientData ⇒
-      //TODO: config
+      // todo: config
       if (request.userIds.size > 100)
         Future.failed(CommonRpcErrors.CollectionSizeLimitExceed)
       else

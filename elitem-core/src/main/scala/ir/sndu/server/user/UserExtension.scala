@@ -28,7 +28,7 @@ class UserExtensionImpl(system: ExtendedActorSystem) extends Extension {
   import HistoryUtils._
 
   private def calculateDate: Instant = {
-    //TODO Avoids duplicate date
+    // todo: avoids duplicate date
     Instant.now()
   }
 

@@ -33,19 +33,19 @@ object UserRepo {
 
   val users = TableQuery[UserTable]
 
-  val activeUsers = users.filter(_.deletedAt.isEmpty)
+  val active = users.filter(_.deletedAt.isEmpty)
 
   def create(user: User): FixedSqlAction[Int, NoStream, Effect.Write] =
     users += user
 
   def find(id: Int): SqlAction[Option[User], NoStream, Effect.Read] =
-    activeUsers.filter(_.id === id).result.headOption
+    active.filter(_.id === id).result.headOption
 
   def find(ids: Set[Int]): FixedSqlStreamingAction[Seq[User], User, Effect.Read] =
-    activeUsers.filter(_.id inSet ids).result
+    active.filter(_.id inSet ids).result
 
   def findUserContact(orgId: Int, ownerUserId: Int, userIds: Seq[Int]): FixedSqlStreamingAction[Seq[((User, Option[UserAuth]), Option[UserContact])], ((User, Option[UserAuth]), Option[UserContact]), Effect.Read] = {
-    UserRepo.activeUsers
+    UserRepo.active
       .filter(_.orgId === orgId)
       .filter(_.id inSet userIds)
       .joinLeft(UserAuthRepo.active)
@@ -59,7 +59,7 @@ object UserRepo {
     users.filter(_.id === userId).filter(_.deletedAt.nonEmpty).exists.result
 
   def findOrgId(userId: Int): SqlAction[Option[Int], NoStream, Effect.Read] =
-    activeUsers.filter(_.id === userId).map(_.orgId).result.headOption
+    active.filter(_.id === userId).map(_.orgId).result.headOption
 
 }
 

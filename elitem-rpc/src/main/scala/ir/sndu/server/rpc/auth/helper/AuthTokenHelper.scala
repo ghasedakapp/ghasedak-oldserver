@@ -47,7 +47,7 @@ trait AuthTokenHelper {
       case Some(token) ⇒
         try {
           val tokenId = JWT.decode(token).getClaim("tokenId").asString()
-          // todo: Use cache
+          // todo: use cache
           db.run(AuthTokenRepo.find(tokenId)) flatMap {
             case None ⇒ Future.failed(InvalidToken)
             case Some(tokenKey) ⇒
