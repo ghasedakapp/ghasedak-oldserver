@@ -7,8 +7,9 @@ import akka.actor.ActorSystem
 import akka.event.{ Logging, LoggingAdapter }
 import im.ghasedak.rpc.auth.AuthServiceGrpc.AuthService
 import im.ghasedak.rpc.auth._
+import im.ghasedak.rpc.misc.ResponseVoid
 import ir.sndu.persist.db.DbExtension
-import ir.sndu.persist.repo.auth.{ AuthPhoneTransactionRepo, AuthTransactionRepo }
+import ir.sndu.persist.repo.auth.{ AuthPhoneTransactionRepo, AuthSessionRepo, AuthTokenRepo, AuthTransactionRepo }
 import ir.sndu.persist.repo.user.UserAuthRepo
 import ir.sndu.server.model.auth.AuthPhoneTransaction
 import ir.sndu.server.rpc.RpcError
@@ -94,6 +95,17 @@ final class AuthServiceImpl(implicit system: ActorSystem) extends AuthService
     } yield ResponseAuth(optApiAuth.isDefined, optApiAuth)
     val result = db.run(action.value)
     result
+  }
+
+  override def signOut(request: RequestSignOut): Future[ResponseVoid] = {
+    authorize { clientData ⇒
+      val action: Result[ResponseVoid] = for {
+        _ ← fromDBIO(AuthTokenRepo.delete(clientData.tokenId))
+        _ ← fromDBIO(AuthSessionRepo.delete(clientData.tokenId))
+      } yield ResponseVoid()
+      val result = db.run(action.value)
+      result
+    }
   }
 
 }

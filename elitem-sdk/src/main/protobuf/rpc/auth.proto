@@ -4,25 +4,26 @@ package im.ghasedak.rpc;
 
 option java_package = "im.ghasedak.rpc.auth";
 option java_multiple_files = true;
+
 option (scalapb.options) = {
   flat_package: true
 };
 
 import "scalapb/scalapb.proto";
+
 import "api/auth.proto";
+import "rpc/misc.proto";
 
 service AuthService {
-    rpc StartPhoneAuth (RequestStartPhoneAuth) returns (ResponseStartPhoneAuth) {
-    }
-    rpc ValidateCode (RequestValidateCode) returns (ResponseAuth) {
-    }
-    rpc SignUp (RequestSignUp) returns (ResponseAuth) {
-    }
+    rpc StartPhoneAuth (RequestStartPhoneAuth) returns (ResponseStartPhoneAuth);
+    rpc ValidateCode (RequestValidateCode) returns (ResponseAuth);
+    rpc SignUp (RequestSignUp) returns (ResponseAuth);
+    rpc SignOut (RequestSignOut) returns (ResponseVoid);
 }
 
 message RequestStartPhoneAuth {
     int64 phone_number = 1;
-    string api_key = 3;
+    string api_key = 2;
 }
 
 message ResponseStartPhoneAuth {
@@ -42,4 +43,7 @@ message RequestSignUp {
 message ResponseAuth {
     bool is_registered = 1;
     im.ghasedak.api.ApiAuth api_auth = 2;
+}
+
+message RequestSignOut {
 }

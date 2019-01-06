@@ -4,6 +4,7 @@ package im.ghasedak.rpc;
 
 option java_package = "im.ghasedak.rpc.test";
 option java_multiple_files = true;
+
 option (scalapb.options) = {
   flat_package: true
 };
@@ -11,8 +12,7 @@ option (scalapb.options) = {
 import "scalapb/scalapb.proto";
 
 service TestService {
-    rpc TestAuth (RequestTestAuth) returns (ResponseTestAuth) {
-    }
+    rpc TestAuth (RequestTestAuth) returns (ResponseTestAuth);
 }
 
 message RequestTestAuth {

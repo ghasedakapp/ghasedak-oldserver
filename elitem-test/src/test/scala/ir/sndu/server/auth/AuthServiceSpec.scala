@@ -4,7 +4,7 @@ import java.time.temporal.ChronoUnit
 import java.time.{ LocalDateTime, ZoneOffset }
 import java.util.UUID
 
-import im.ghasedak.rpc.auth.{ RequestSignUp, RequestStartPhoneAuth, RequestValidateCode }
+import im.ghasedak.rpc.auth.{ RequestSignOut, RequestSignUp, RequestStartPhoneAuth, RequestValidateCode }
 import im.ghasedak.rpc.test.RequestTestAuth
 import io.grpc.Status.Code
 import io.grpc.StatusRuntimeException
@@ -42,7 +42,9 @@ class AuthServiceSpec extends GrpcBaseSuit {
 
   it should "return right error in authorize method" in rightAuthorizeError
 
-  it should "return different transaction hash after validate" in differentThAfterValidate
+  it should "return different transaction hash after validate" in differentTransactionHashAfterValidate
+
+  it should "sign out and cant send request again" in signOut
 
   def startPhoneAuth(): Unit = {
     val request = RequestStartPhoneAuth(generatePhoneNumber(), officialApiKeys.head.apiKey)
@@ -182,7 +184,7 @@ class AuthServiceSpec extends GrpcBaseSuit {
     }
   }
 
-  def differentThAfterValidate(): Unit = {
+  def differentTransactionHashAfterValidate(): Unit = {
     val request1 = RequestStartPhoneAuth(generatePhoneNumber(), officialApiKeys.head.apiKey)
     val response1 = authStub.startPhoneAuth(request1)
     val codeGate = db.run(GateAuthCodeRepo.find(response1.transactionHash)).futureValue
@@ -190,6 +192,18 @@ class AuthServiceSpec extends GrpcBaseSuit {
     val response2 = authStub.validateCode(request2)
     val response3 = authStub.startPhoneAuth(request1)
     response3.transactionHash should not equal response1.transactionHash
+  }
+
+  def signOut(): Unit = {
+    val user = createUserWithPhone()
+    val stub1 = authStub.withInterceptors(clientTokenInterceptor(user.token))
+    stub1.signOut(RequestSignOut())
+    val stub2 = testStub.withInterceptors(clientTokenInterceptor(user.token))
+    Try(stub2.testAuth(RequestTestAuth())) match {
+      case Failure(ex: StatusRuntimeException) ⇒
+        ex.getStatus.getCode shouldEqual Code.UNAUTHENTICATED
+        ex.getTrailers.get(Constant.TAG_METADATA_KEY) shouldEqual "INVALID_TOKEN"
+    }
   }
 
 }
