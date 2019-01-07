@@ -2,11 +2,17 @@ package ir.sndu.server.utils.number
 
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber
+import com.typesafe.config.ConfigFactory
 
 import scala.annotation.tailrec
 import scala.util.Try
 
 object PhoneNumberUtils {
+
+  private val config = ConfigFactory.load()
+
+  private val testPhoneNumberPrefix = config.getString("module.auth.test-phone-number.prefix")
+
   def parse(number: String, defaultCountry: String = ""): Seq[PhoneNumber] = {
     val phoneUtil = PhoneNumberUtil.getInstance()
 
@@ -33,7 +39,7 @@ object PhoneNumberUtils {
     }
   }
 
-  def isTestPhone(number: Long): Boolean = number.toString.startsWith("11")
+  def isTestPhone(number: Long): Boolean = number.toString.startsWith(testPhoneNumberPrefix)
 
   def isValid(number: String, defaultCountry: String = ""): Boolean = normalizeStr(number, defaultCountry).nonEmpty
 
