@@ -36,6 +36,13 @@ trait UserTestUtils {
     75550000000L + scala.util.Random.nextInt(999999)
   }
 
+  protected def generateTestPhoneNumber(): (Long, String) = {
+    val prefix = config.getString("module.auth.test-phone-number.prefix")
+    val strPhone = ((prefix + "0000000").toLong + scala.util.Random.nextInt(999999)).toString
+    val code = "0" + strPhone(4).toString * 2 + strPhone(5).toString * 2
+    (strPhone.toLong, code)
+  }
+
   protected def createUserWithPhone(): TestClientData = {
     val phone = generatePhoneNumber()
     val request1 = RequestStartPhoneAuth(phone, officialApiKeys.head.apiKey)

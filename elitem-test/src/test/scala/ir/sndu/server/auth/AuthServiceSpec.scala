@@ -46,6 +46,8 @@ class AuthServiceSpec extends GrpcBaseSuit {
 
   it should "sign out and cant send request again" in signOut
 
+  it should "successfully login with test phone number" in testPhoneNumber
+
   def startPhoneAuth(): Unit = {
     val request = RequestStartPhoneAuth(generatePhoneNumber(), officialApiKeys.head.apiKey)
     val response = authStub.startPhoneAuth(request)
@@ -204,6 +206,22 @@ class AuthServiceSpec extends GrpcBaseSuit {
         ex.getStatus.getCode shouldEqual Code.UNAUTHENTICATED
         ex.getTrailers.get(Constant.TAG_METADATA_KEY) shouldEqual "INVALID_TOKEN"
     }
+  }
+
+  def testPhoneNumber(): Unit = {
+    val (phoneNumber, code) = generateTestPhoneNumber()
+    val request1 = RequestStartPhoneAuth(phoneNumber, officialApiKeys.head.apiKey)
+    val response1 = authStub.startPhoneAuth(request1)
+    val request2 = RequestValidateCode(response1.transactionHash, code)
+    val response2 = authStub.validateCode(request2)
+    response2.isRegistered shouldEqual false
+    response2.apiAuth shouldEqual None
+    val request3 = RequestSignUp(
+      response1.transactionHash,
+      Random.alphanumeric.take(20).mkString)
+    val response3 = authStub.signUp(request3)
+    response3.isRegistered shouldEqual true
+    response3.apiAuth should not be None
   }
 
 }
