@@ -17,6 +17,8 @@ import slick.jdbc.PostgresProfile
 import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
 
+case class SendMessageAck(seq: Int, date: Long)
+
 class UserExtensionImpl(system: ExtendedActorSystem) extends Extension {
 
   implicit private val _system: ActorSystem = system
@@ -32,7 +34,7 @@ class UserExtensionImpl(system: ExtendedActorSystem) extends Extension {
     Instant.now()
   }
 
-  def sendMessage(userId: Int, peer: ApiPeer, randomId: Long, message: ApiMessage): Future[Unit] = {
+  def sendMessage(userId: Int, peer: ApiPeer, randomId: Long, message: ApiMessage): Future[SendMessageAck] = {
     val msgDate = calculateDate
     val msgLocalDate = LocalDateTime.ofInstant(msgDate, ZoneOffset.UTC)
     val selfPeer = ApiPeer(ApiPeerType.PRIVATE, userId)
@@ -45,7 +47,7 @@ class UserExtensionImpl(system: ExtendedActorSystem) extends Extension {
         message)
       _ ← createOrUpdateDialog(userId, peer, seq, msgLocalDate)
       _ ← createOrUpdateDialog(peer.id, selfPeer, seq, msgLocalDate)
-    } yield ()
+    } yield SendMessageAck(seq, msgDate.toEpochMilli)
     db.run(action)
   }
 
