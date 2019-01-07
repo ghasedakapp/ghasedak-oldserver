@@ -1,6 +1,6 @@
 package ir.sndu.persist.repo.auth
 
-import java.time.LocalDateTime
+import java.time.{ LocalDateTime, ZoneOffset }
 
 import com.github.tminglei.slickpg.ExPostgresProfile.api._
 import ir.sndu.persist.repo.TypeMapper._
@@ -32,5 +32,9 @@ object AuthTokenRepo {
 
   def find(tokenId: String): SqlAction[Option[String], NoStream, Effect.Read] =
     active.filter(_.tokenId === tokenId).map(_.tokenKey).result.headOption
+
+  def delete(tokenId: String): FixedSqlAction[Int, NoStream, Effect.Write] =
+    tokens.filter(_.tokenId === tokenId).map(_.deletedAt)
+      .update(Some(LocalDateTime.now(ZoneOffset.UTC)))
 
 }

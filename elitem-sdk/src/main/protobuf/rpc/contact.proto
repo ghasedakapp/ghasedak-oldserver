@@ -4,24 +4,22 @@ package im.ghasedak.rpc;
 
 option java_package = "im.ghasedak.rpc.contact";
 option java_multiple_files = true;
+
 option (scalapb.options) = {
   flat_package: true
 };
 
 import "scalapb/scalapb.proto";
+
 import "google/protobuf/wrappers.proto";
 import "api/contact.proto";
 import "rpc/misc.proto";
 
 service ContactService {
-    rpc GetContacts (RequestGetContacts) returns (ResponseGetContacts){
-    }
-    rpc AddContact (RequestAddContact) returns (ResponseAddContact){
-    }
-    rpc RemoveContact (RequestRemoveContact) returns (ResponseVoid){
-    }
-    rpc SearchContacts (RequestSearchContacts) returns (ResponseSearchContacts){
-    }
+    rpc GetContacts (RequestGetContacts) returns (ResponseGetContacts);
+    rpc AddContact (RequestAddContact) returns (ResponseAddContact);
+    rpc RemoveContact (RequestRemoveContact) returns (ResponseVoid);
+    rpc SearchContacts (RequestSearchContacts) returns (ResponseSearchContacts);
 }
 
 message RequestGetContacts {
