@@ -16,7 +16,7 @@ import "api/peer.proto";
 import "rpc/misc.proto";
 
 service MessagingService {
-    rpc SendMessage (RequestSendMessage) returns (ResponseVoid);
+    rpc SendMessage (RequestSendMessage) returns (ResponseSendMessage);
     rpc LoadDialogs (RequestLoadDialogs) returns (ResponseLoadDialogs);
     rpc LoadHistory (RequestLoadHistory) returns (ResponseLoadHistory);
     rpc MessageReceived (RequestMessageReceived) returns (ResponseVoid);
@@ -27,6 +27,11 @@ message RequestSendMessage {
     im.ghasedak.api.ApiPeer peer = 1;
     int64 random_id = 2;
     im.ghasedak.api.ApiMessage message = 3;
+}
+
+message ResponseSendMessage {
+    int32 sequence_nr = 1;
+    int64 date = 2;
 }
 
 message RequestLoadDialogs {

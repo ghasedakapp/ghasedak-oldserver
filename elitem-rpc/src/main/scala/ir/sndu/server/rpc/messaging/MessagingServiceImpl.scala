@@ -32,7 +32,7 @@ final class MessagingServiceImpl(implicit system: ActorSystem) extends Messaging
 
   protected val userExt = UserExtension(system)
 
-  override def sendMessage(request: RequestSendMessage): Future[ResponseVoid] =
+  override def sendMessage(request: RequestSendMessage): Future[ResponseSendMessage] =
     authorize { clientData ⇒
       val (peer, randomId, message) = RequestSendMessage.unapply(request).get
       withValidPeer(peer, clientData.userId) {
@@ -40,7 +40,7 @@ final class MessagingServiceImpl(implicit system: ActorSystem) extends Messaging
           clientData.userId,
           peer.get,
           randomId,
-          message.get).map(_ ⇒ ResponseVoid())
+          message.get).map(r ⇒ ResponseSendMessage(r.seq, r.date))
       }
     }
 
