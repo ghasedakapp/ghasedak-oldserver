@@ -40,7 +40,7 @@ final class MessagingServiceImpl(implicit system: ActorSystem) extends Messaging
           clientData.userId,
           peer.get,
           randomId,
-          message.get).map(r ⇒ ResponseSendMessage(r.seq, r.date))
+          message.get)
       }
     }
 
@@ -71,14 +71,14 @@ final class MessagingServiceImpl(implicit system: ActorSystem) extends Messaging
     }
 
   override def messageReceived(request: RequestMessageReceived): Future[ResponseVoid] =
-    authorize { _ ⇒
+    authorize { clientData ⇒
       val (peer, seq) = RequestMessageReceived.unapply(request).get
-      Future.successful(ResponseVoid())
+      userExt.messageReceived(clientData.userId, peer.getOrElse(throw MessagingRpcErrors.InvalidPeer), seq)
     }
 
   override def messageRead(request: RequestMessageRead): Future[ResponseVoid] =
     authorize { clientData ⇒
       val (peer, seq) = RequestMessageRead.unapply(request).get
-      Future.successful(ResponseVoid())
+      userExt.messageRead(clientData.userId, peer.getOrElse(throw MessagingRpcErrors.InvalidPeer), seq)
     }
 }
