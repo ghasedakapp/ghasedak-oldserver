@@ -43,7 +43,20 @@ trait DialogCommonOperations extends DialogId {
       case ApiPeerType.UNKNOWN | ApiPeerType.Unrecognized(_) ⇒ throw new RuntimeException("Unknown peer type")
       case ApiPeerType.PRIVATE                               ⇒ updateLastMessageDatePrivate(userId: Int, peer: ApiPeer, lastMessageSeq, lastMessageDate: LocalDateTime)
       case ApiPeerType.GROUP                                 ⇒ updateLastMessageDateGroup(peer, lastMessageSeq, lastMessageDate)
+    }
 
+  def updateLastReceivedSeq(userId: Int, peer: ApiPeer, lastReceivedSeq: Int)(implicit ec: ExecutionContext): FixedSqlAction[Int, NoStream, Effect.Write] =
+    peer.`type` match {
+      case ApiPeerType.UNKNOWN | ApiPeerType.Unrecognized(_) ⇒ throw new RuntimeException("Unknown peer type")
+      case ApiPeerType.PRIVATE                               ⇒ updateLastReceivedSeqPrivate(userId: Int, peer: ApiPeer, lastReceivedSeq)
+      case ApiPeerType.GROUP                                 ⇒ updateLastReceivedSeqGroup(peer, lastReceivedSeq)
+    }
+
+  def updateLastReadSeq(userId: Int, peer: ApiPeer, lastReadSeq: Int)(implicit ec: ExecutionContext): FixedSqlAction[Int, NoStream, Effect.Write] =
+    peer.`type` match {
+      case ApiPeerType.UNKNOWN | ApiPeerType.Unrecognized(_) ⇒ throw new RuntimeException("Unknown peer type")
+      case ApiPeerType.PRIVATE                               ⇒ updateLastReadSeqPrivate(userId: Int, peer: ApiPeer, lastReadSeq)
+      case ApiPeerType.GROUP                                 ⇒ updateLastReadSeqGroup(peer, lastReadSeq)
     }
 
   def updateLastMessageDatePrivate(userId: Int, peer: ApiPeer, lastMessageSeq: Int, lastMessageDate: LocalDateTime)(implicit ec: ExecutionContext): FixedSqlAction[Int, NoStream, Effect.Write] = {
@@ -58,7 +71,7 @@ trait DialogCommonOperations extends DialogId {
       .update(lastMessageDate)
   }
 
-  def updateLastReceivedAtPrivate(userId: Int, peer: ApiPeer, lastReceivedSeq: Int)(implicit ec: ExecutionContext): FixedSqlAction[Int, NoStream, Effect.Write] = {
+  def updateLastReceivedSeqPrivate(userId: Int, peer: ApiPeer, lastReceivedSeq: Int)(implicit ec: ExecutionContext): FixedSqlAction[Int, NoStream, Effect.Write] = {
     requirePrivate(peer)
     byPKC.applied(getDialogId(Some(userId), peer)).map(_.lastReceivedSeq).update(lastReceivedSeq)
   }

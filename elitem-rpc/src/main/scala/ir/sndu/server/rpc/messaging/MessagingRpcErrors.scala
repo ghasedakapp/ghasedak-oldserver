@@ -7,4 +7,6 @@ object MessagingRpcErrors {
 
   val MessageToSelf = RpcError(Status.PERMISSION_DENIED, "MESSAGE_TO_SELF")
 
+  val InvalidPeer = RpcError(Status.INTERNAL, "INVALID_PEER")
+
 }
