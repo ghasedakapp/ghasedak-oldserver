@@ -56,7 +56,7 @@ class UserServiceSpec extends GrpcBaseSuit {
     val requests = userForContact.zipWithIndex.map {
       case (user, index) ⇒
         RequestAddContact(
-          localName = s"user-0$index",
+          localName = Some(s"user-0$index"),
           contactRecord = Some(ApiContactRecord().withPhoneNumber(user.phoneNumber.get)))
     }
 

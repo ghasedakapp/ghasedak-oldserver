@@ -7,6 +7,7 @@ import im.ghasedak.rpc.contact._
 import im.ghasedak.rpc.misc.ResponseVoid
 import ir.sndu.persist.db.DbExtension
 import ir.sndu.persist.repo.contact.UserContactRepo
+import ir.sndu.persist.repo.user.UserRepo
 import ir.sndu.server.model.contact.UserContact
 import ir.sndu.server.rpc.RpcError
 import ir.sndu.server.rpc.auth.helper.AuthTokenHelper
@@ -45,9 +46,10 @@ final class ContactServiceImpl(implicit system: ActorSystem) extends ContactServ
   override def addContact(request: RequestAddContact): Future[ResponseAddContact] = {
     authorize { clientData ⇒
       val action: Result[ResponseAddContact] = for {
-        localName ← fromOption(CommonRpcErrors.InvalidName)(validName(request.localName))
         contactRecord ← fromOption(ContactRpcErrors.InvalidContactRecord)(request.contactRecord)
         contactUserId ← getContactRecordUserId(contactRecord, clientData.orgId)
+        name ← fromDBIO(UserRepo.find(contactUserId).map(_.map(_.name)))
+        localName ← fromOption(CommonRpcErrors.InvalidName)(validName(request.localName.getOrElse(name.get)))
         _ ← fromBoolean(ContactRpcErrors.CantAddSelf)(clientData.userId != contactUserId)
         optExistContact ← fromDBIO(UserContactRepo.find(clientData.userId, contactUserId))
         _ ← fromBoolean(ContactRpcErrors.ContactAlreadyExists) {
