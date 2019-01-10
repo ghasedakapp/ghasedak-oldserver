@@ -1,7 +1,5 @@
 syntax = "proto3";
 
-package im.ghasedak.api;
-
 option java_package = "im.ghasedak.api.messaging";
 option java_multiple_files = true;
 

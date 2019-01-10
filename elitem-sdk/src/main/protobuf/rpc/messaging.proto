@@ -1,7 +1,5 @@
 syntax = "proto3";
 
-package im.ghasedak.rpc;
-
 option java_package = "im.ghasedak.rpc.messaging";
 option java_multiple_files = true;
 
@@ -24,9 +22,9 @@ service MessagingService {
 }
 
 message RequestSendMessage {
-    im.ghasedak.api.ApiPeer peer = 1;
+    ApiPeer peer = 1;
     int64 random_id = 2;
-    im.ghasedak.api.ApiMessage message = 3;
+    ApiMessage message = 3;
 }
 
 message ResponseSendMessage {
@@ -40,26 +38,26 @@ message RequestLoadDialogs {
 }
 
 message ResponseLoadDialogs {
-    repeated im.ghasedak.api.ApiDialog dialogs = 1;
+    repeated ApiDialog dialogs = 1;
 }
 
 message RequestLoadHistory {
-    im.ghasedak.api.ApiPeer peer = 1;
+    ApiPeer peer = 1;
     int32 sequence_nr = 2;
-    im.ghasedak.api.ApiListLoadMode load_mode = 3;
+    ApiListLoadMode load_mode = 3;
     int32 limit = 4;
 }
 
 message ResponseLoadHistory {
-    repeated im.ghasedak.api.ApiMessageContainer history = 1;
+    repeated ApiMessageContainer history = 1;
 }
 
 message RequestMessageReceived {
-    im.ghasedak.api.ApiPeer peer = 1;
+    ApiPeer peer = 1;
     int32 sequence_nr = 2;
 }
 
 message RequestMessageRead {
-    im.ghasedak.api.ApiPeer peer = 1;
+    ApiPeer peer = 1;
     int32 sequence_nr = 2;
 }

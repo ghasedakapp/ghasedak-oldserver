@@ -31,8 +31,8 @@ lazy val root = (project in file("."))
     commonSettings,
     Packaging.packagingSettings
   )
-  .dependsOn(model, sdk, struct, core, sequence, rpc, persist, commons, runtime, test)
-  .aggregate(model, sdk, struct, core, sequence, rpc, persist, commons, runtime, test)
+  .dependsOn(model, sdk, core, sequence, rpc, persist, commons, runtime, test)
+  .aggregate(model, sdk, core, sequence, rpc, persist, commons, runtime, test)
 
 // Every protobuf that transfer between client and server
 lazy val sdk = elitemModule("elitem-sdk")
@@ -40,18 +40,11 @@ lazy val sdk = elitemModule("elitem-sdk")
     libraryDependencies ++= Dependencies.sdk
   )
 
-// Every protobuf that transfer between just servers
-lazy val struct = elitemModule("elitem-struct")
-  .settings(
-    libraryDependencies ++= Dependencies.struct
-  )
-  .dependsOn(sdk)
-
 lazy val model = elitemModule("elitem-model")
   .settings(
     libraryDependencies ++= Dependencies.model
   )
-  .dependsOn(sdk, struct)
+  .dependsOn(sdk)
 
 lazy val core = elitemModule("elitem-core")
   .settings(
@@ -62,7 +55,7 @@ lazy val sequence = elitemModule("elitem-sequence")
   .settings(
     libraryDependencies ++= Dependencies.sequence
   )
-  .dependsOn(sdk, struct, model, commons)
+  .dependsOn(sdk, model, commons)
 
 lazy val rpc = elitemModule("elitem-rpc")
   .settings(
@@ -80,7 +73,7 @@ lazy val commons = elitemModule("elitem-commons")
   )
 
 lazy val runtime = elitemModule("elitem-runtime")
-  .dependsOn(model, sdk, struct, core, sequence, rpc, persist, commons)
+  .dependsOn(model, sdk, core, sequence, rpc, persist, commons)
 
 lazy val test = elitemModule("elitem-test")
   .settings(

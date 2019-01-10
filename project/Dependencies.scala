@@ -67,11 +67,9 @@ object Dependencies {
 
   val sdk: Seq[ModuleID] = shared ++ grpc
 
-  val struct: Seq[ModuleID] = shared ++ Seq(
-    actor
+  val model: Seq[ModuleID] = shared ++ Seq(
+    config
   )
-
-  val model: Seq[ModuleID] = shared
 
   val core: Seq[ModuleID] = shared ++ Seq(
     actor,
@@ -90,6 +88,7 @@ object Dependencies {
   ) ++ grpc
 
   val persist: Seq[ModuleID] = shared ++ Seq(
+    actor,
     slick,
     postgres,
     hikariCp,

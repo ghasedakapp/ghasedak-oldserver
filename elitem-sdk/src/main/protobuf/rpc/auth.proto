@@ -1,7 +1,5 @@
 syntax = "proto3";
 
-package im.ghasedak.rpc;
-
 option java_package = "im.ghasedak.rpc.auth";
 option java_multiple_files = true;
 
@@ -42,7 +40,7 @@ message RequestSignUp {
 
 message ResponseAuth {
     bool is_registered = 1;
-    im.ghasedak.api.ApiAuth api_auth = 2;
+    ApiAuth api_auth = 2;
 }
 
 message RequestSignOut {

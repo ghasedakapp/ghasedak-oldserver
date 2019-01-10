@@ -1,7 +1,5 @@
 syntax = "proto3";
 
-package im.ghasedak.rpc;
-
 option java_package = "im.ghasedak.rpc.test";
 option java_multiple_files = true;
 
