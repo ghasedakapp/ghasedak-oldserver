@@ -1,0 +1,6 @@
+* chore: Changes test phone pattern
+* fix: Fixes timezone of message date in dialogs
+* feat: Adds contact without local name
+* feat: Gets seq and date of sent message in response
+* feat: Implements message read and receive
+* feat: Implements logout rpc
