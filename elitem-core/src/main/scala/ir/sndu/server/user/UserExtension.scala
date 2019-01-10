@@ -2,7 +2,7 @@ package ir.sndu.server.user
 
 import java.time.{ Instant, LocalDateTime, ZoneOffset }
 
-import akka.actor.{ ActorSystem, ExtendedActorSystem, Extension, ExtensionId, ExtensionIdProvider }
+import akka.actor._
 import im.ghasedak.api.contact.ApiContactRecord
 import im.ghasedak.api.messaging.ApiMessage
 import im.ghasedak.api.peer.{ ApiPeer, ApiPeerType }
@@ -26,8 +26,8 @@ final class UserExtensionImpl(system: ExtendedActorSystem) extends Extension {
 
   private implicit val db: PostgresProfile.backend.Database = DbExtension(system).db
 
-  import DialogUtils._
-  import HistoryUtils._
+  import ir.sndu.server.dialog.DialogUtils._
+  import ir.sndu.server.history.HistoryUtils._
 
   private def calculateDate: Instant = {
     // todo: avoids duplicate date

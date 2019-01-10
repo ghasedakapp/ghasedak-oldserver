@@ -1,4 +1,4 @@
-package ir.sndu.server.user
+package ir.sndu.server.history
 
 import java.time.LocalDateTime
 
