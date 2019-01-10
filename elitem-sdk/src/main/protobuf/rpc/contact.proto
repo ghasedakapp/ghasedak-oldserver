@@ -30,7 +30,7 @@ message ResponseGetContacts {
 }
 
 message RequestAddContact {
-    string local_name = 1;
+    google.protobuf.StringValue local_name = 1;
     im.ghasedak.api.ApiContactRecord contact_record = 2;
 }
 

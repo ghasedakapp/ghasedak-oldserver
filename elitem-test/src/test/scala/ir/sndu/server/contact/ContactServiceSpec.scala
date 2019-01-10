@@ -2,8 +2,10 @@ package ir.sndu.server.contact
 
 import im.ghasedak.api.contact.ApiContactRecord
 import im.ghasedak.rpc.contact.{ RequestAddContact, RequestGetContacts, RequestRemoveContact }
+import im.ghasedak.rpc.user.RequestLoadUsers
 import io.grpc.Status.Code
 import io.grpc.StatusRuntimeException
+import ir.sndu.persist.repo.user.UserRepo
 import ir.sndu.server.GrpcBaseSuit
 import ir.sndu.server.rpc.Constant
 
@@ -27,12 +29,14 @@ class ContactServiceSpec extends GrpcBaseSuit {
 
   it should "remove his contact" in removeContact
 
+  it should "add contact without local name" in addWithoutLocalName
+
   def addContactWithPhoneNumber(): Unit = {
     val user1 = createUserWithPhone()
     val user2 = createUserWithPhone()
     val stub = contactStub.withInterceptors(clientTokenInterceptor(user1.token))
     val request = RequestAddContact(
-      localName = Random.alphanumeric.take(20).mkString,
+      localName = Some(Random.alphanumeric.take(20).mkString),
       Some(ApiContactRecord().withPhoneNumber(user2.phoneNumber.get)))
     val response = stub.addContact(request)
     response.contactUserId shouldEqual user2.userId
@@ -41,13 +45,13 @@ class ContactServiceSpec extends GrpcBaseSuit {
   def invalidContactError(): Unit = {
     val user1 = createUserWithPhone()
     val stub = contactStub.withInterceptors(clientTokenInterceptor(user1.token))
-    val request1 = RequestAddContact(Random.alphanumeric.take(20).mkString)
+    val request1 = RequestAddContact(Some(Random.alphanumeric.take(20).mkString))
     Try(stub.addContact(request1)) match {
       case Failure(ex: StatusRuntimeException) ⇒
         ex.getStatus.getCode shouldEqual Code.INTERNAL
         ex.getTrailers.get(Constant.TAG_METADATA_KEY) shouldEqual "INVALID_CONTACT_RECORD"
     }
-    val request2 = RequestAddContact(Random.alphanumeric.take(20).mkString, Some(ApiContactRecord()))
+    val request2 = RequestAddContact(Some(Random.alphanumeric.take(20).mkString), Some(ApiContactRecord()))
     Try(stub.addContact(request2)) match {
       case Failure(ex: StatusRuntimeException) ⇒
         ex.getStatus.getCode shouldEqual Code.INTERNAL
@@ -59,7 +63,7 @@ class ContactServiceSpec extends GrpcBaseSuit {
     val user = createUserWithPhone()
     val stub = contactStub.withInterceptors(clientTokenInterceptor(user.token))
     val request = RequestAddContact(
-      Random.alphanumeric.take(20).mkString,
+      Some(Random.alphanumeric.take(20).mkString),
       Some(ApiContactRecord().withPhoneNumber(user.phoneNumber.get)))
     Try(stub.addContact(request)) match {
       case Failure(ex: StatusRuntimeException) ⇒
@@ -73,7 +77,7 @@ class ContactServiceSpec extends GrpcBaseSuit {
     val user2 = createUserWithPhone()
     val stub = contactStub.withInterceptors(clientTokenInterceptor(user1.token))
     val request = RequestAddContact(
-      localName = Random.alphanumeric.take(20).mkString,
+      localName = Some(Random.alphanumeric.take(20).mkString),
       Some(ApiContactRecord().withPhoneNumber(user2.phoneNumber.get)))
     stub.addContact(request)
     Try(stub.addContact(request)) match {
@@ -87,7 +91,7 @@ class ContactServiceSpec extends GrpcBaseSuit {
     val user = createUserWithPhone()
     val stub = contactStub.withInterceptors(clientTokenInterceptor(user.token))
     val request = RequestAddContact(
-      Random.alphanumeric.take(20).mkString,
+      Some(Random.alphanumeric.take(20).mkString),
       Some(ApiContactRecord().withPhoneNumber(generatePhoneNumber())))
     Try(stub.addContact(request)) match {
       case Failure(ex: StatusRuntimeException) ⇒
@@ -103,7 +107,7 @@ class ContactServiceSpec extends GrpcBaseSuit {
     val stub = contactStub.withInterceptors(clientTokenInterceptor(user.token))
     contacts foreach { contact ⇒
       val request = RequestAddContact(
-        localName = Random.alphanumeric.take(20).mkString,
+        localName = Some(Random.alphanumeric.take(20).mkString),
         Some(ApiContactRecord().withPhoneNumber(contact.phoneNumber.get)))
       stub.addContact(request)
     }
@@ -117,12 +121,27 @@ class ContactServiceSpec extends GrpcBaseSuit {
     val user2 = createUserWithPhone()
     val stub = contactStub.withInterceptors(clientTokenInterceptor(user1.token))
     val request = RequestAddContact(
-      localName = Random.alphanumeric.take(20).mkString,
+      localName = Some(Random.alphanumeric.take(20).mkString),
       Some(ApiContactRecord().withPhoneNumber(user2.phoneNumber.get)))
     stub.addContact(request)
     stub.getContacts(RequestGetContacts()).contactUserIds.contains(user2.userId) shouldEqual true
     stub.removeContact(RequestRemoveContact(user2.userId))
     stub.getContacts(RequestGetContacts()).contactUserIds.contains(user2.userId) shouldEqual false
+  }
+
+  def addWithoutLocalName(): Unit = {
+    val user1 = createUserWithPhone()
+    val user2 = createUserWithPhone()
+    val stub = contactStub.withInterceptors(clientTokenInterceptor(user1.token))
+    val uStub = userStub.withInterceptors(clientTokenInterceptor(user1.token))
+    val request = RequestAddContact(
+      localName = None,
+      Some(ApiContactRecord().withPhoneNumber(user2.phoneNumber.get)))
+    val response = stub.addContact(request)
+    response.contactUserId shouldEqual user2.userId
+
+    val name = db.run(UserRepo.find(user2.userId)).futureValue.get.name
+    uStub.loadUsers(RequestLoadUsers(Seq(response.contactUserId))).users.head.localName shouldEqual name
   }
 
 }

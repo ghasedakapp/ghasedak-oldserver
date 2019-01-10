@@ -14,7 +14,7 @@ object CodeGen {
   def genPhoneCode(phone: Long): String =
     if (isTestPhone(phone) && testPhoneNumberEnable) {
       val strPhone = phone.toString
-      Try("0" + strPhone(4).toString * 2 + strPhone(5).toString * 2) getOrElse genCode()
+      Try("1" + strPhone(4).toString * 2 + strPhone(5).toString * 2) getOrElse genCode()
     } else genCode()
 
   def genCode(): String = ThreadLocalSecureRandom.current().nextLong().toString.dropWhile(c ⇒ c == '0' || c == '-').take(5)

@@ -1,6 +1,6 @@
 package ir.sndu.server.model.dialog
 
-import java.time.{ LocalDateTime, ZoneId }
+import java.time.{ LocalDateTime, ZoneId, ZoneOffset }
 
 import im.ghasedak.api.messaging.{ ApiDialog, ApiMessage, ApiMessageContainer }
 import im.ghasedak.api.peer.ApiPeer
@@ -33,7 +33,7 @@ final case class Dialog(
 
   def toApi(msgOpt: Option[HistoryMessage]): ApiDialog = {
     val history = msgOpt.getOrElse(HistoryMessage.empty(userId, peer, lastMessageDate))
-    val msgDate = lastMessageDate.atZone(ZoneId.systemDefault()).toInstant.toEpochMilli
+    val msgDate = lastMessageDate.toInstant(ZoneOffset.UTC).toEpochMilli
     ApiDialog(
       Some(peer),
       lastMessageSeq - ownerLastReadSeq,
