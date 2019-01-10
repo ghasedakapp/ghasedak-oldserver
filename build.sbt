@@ -31,8 +31,8 @@ lazy val root = (project in file("."))
     commonSettings,
     Packaging.packagingSettings
   )
-  .dependsOn(model, sdk, struct, core, rpc, persist, commons, runtime, test, cli)
-  .aggregate(model, sdk, struct, core, rpc, persist, commons, runtime, test, cli)
+  .dependsOn(model, sdk, struct, core, sequence, rpc, persist, commons, runtime, test)
+  .aggregate(model, sdk, struct, core, sequence, rpc, persist, commons, runtime, test)
 
 // Every protobuf that transfer between client and server
 lazy val sdk = elitemModule("elitem-sdk")
@@ -58,6 +58,12 @@ lazy val core = elitemModule("elitem-core")
     libraryDependencies ++= Dependencies.core
   ).dependsOn(persist)
 
+lazy val sequence = elitemModule("elitem-sequence")
+  .settings(
+    libraryDependencies ++= Dependencies.sequence
+  )
+  .dependsOn(sdk, struct, model, commons)
+
 lazy val rpc = elitemModule("elitem-rpc")
   .settings(
     libraryDependencies ++= Dependencies.rpc
@@ -74,21 +80,11 @@ lazy val commons = elitemModule("elitem-commons")
   )
 
 lazy val runtime = elitemModule("elitem-runtime")
-  .dependsOn(model, sdk, struct, core, rpc, persist, commons)
+  .dependsOn(model, sdk, struct, core, sequence, rpc, persist, commons)
 
 lazy val test = elitemModule("elitem-test")
   .settings(
     libraryDependencies ++= Dependencies.test
-  )
-  .dependsOn(runtime)
-
-lazy val cli = elitemModule("elitem-cli")
-  .settings(
-    libraryDependencies ++= Dependencies.cli,
-    PB.protoSources in Compile ++= Seq(
-      file("elitem-concurrent/src/main/protobuf")
-    ),
-    mainClass in Compile := Some("ir.sndu.server.CliMain")
   )
   .dependsOn(runtime)
 
