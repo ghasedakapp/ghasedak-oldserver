@@ -10,9 +10,7 @@ Fast and secure Messenger Platform
 
 * Postgresql
 
-    ```
-    sudo apt install postgresql
-    ```
+* Apache Pulsar
 
 ## Running the tests
 
