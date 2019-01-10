@@ -12,7 +12,11 @@ import "scalapb/scalapb.proto";
 import "api/sequence.proto";
 
 service SequenceService {
-    rpc GetDifference (ApiSeqState) returns (ResponseGetDifference);
+    rpc GetDifference (RequestGetDifference) returns (stream ResponseGetDifference);
+}
+
+message RequestGetDifference {
+    ApiSeqState seq_state = 1;
 }
 
 message ResponseGetDifference {

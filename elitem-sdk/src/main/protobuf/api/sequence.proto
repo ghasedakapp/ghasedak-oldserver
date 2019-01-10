@@ -15,20 +15,22 @@ message ApiSeqState {
 }
 
 message ApiWeakUpdate {
-    oneof update {
+    oneof weak_update {
         TestWeakUpdate test_weak_update = 1;
     }
 }
 
 message ApiStrongUpdate {
-    oneof update {
+    oneof strong_update {
         TestStrongUpdate test_strong_update = 1;
     }
 }
 
 message ApiUpdateContainer {
-    ApiWeakUpdate weak_update = 2;
-    ApiStrongUpdate strong_update = 3;
+    oneof update {
+        ApiWeakUpdate weak_update = 2;
+        ApiStrongUpdate strong_update = 3;
+    }
 }
 
 message TestStrongUpdate {
