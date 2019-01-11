@@ -31,8 +31,8 @@ lazy val root = (project in file("."))
     commonSettings,
     Packaging.packagingSettings
   )
-  .dependsOn(model, sdk, struct, core, rpc, persist, commons, runtime, test, cli)
-  .aggregate(model, sdk, struct, core, rpc, persist, commons, runtime, test, cli)
+  .dependsOn(model, sdk, core, sequence, rpc, persist, commons, runtime, test)
+  .aggregate(model, sdk, core, sequence, rpc, persist, commons, runtime, test)
 
 // Every protobuf that transfer between client and server
 lazy val sdk = elitemModule("elitem-sdk")
@@ -40,23 +40,22 @@ lazy val sdk = elitemModule("elitem-sdk")
     libraryDependencies ++= Dependencies.sdk
   )
 
-// Every protobuf that transfer between just servers
-lazy val struct = elitemModule("elitem-struct")
-  .settings(
-    libraryDependencies ++= Dependencies.struct
-  )
-  .dependsOn(sdk)
-
 lazy val model = elitemModule("elitem-model")
   .settings(
     libraryDependencies ++= Dependencies.model
   )
-  .dependsOn(sdk, struct)
+  .dependsOn(sdk)
 
 lazy val core = elitemModule("elitem-core")
   .settings(
     libraryDependencies ++= Dependencies.core
   ).dependsOn(persist)
+
+lazy val sequence = elitemModule("elitem-sequence")
+  .settings(
+    libraryDependencies ++= Dependencies.sequence
+  )
+  .dependsOn(sdk, model, commons)
 
 lazy val rpc = elitemModule("elitem-rpc")
   .settings(
@@ -74,21 +73,11 @@ lazy val commons = elitemModule("elitem-commons")
   )
 
 lazy val runtime = elitemModule("elitem-runtime")
-  .dependsOn(model, sdk, struct, core, rpc, persist, commons)
+  .dependsOn(model, sdk, core, sequence, rpc, persist, commons)
 
 lazy val test = elitemModule("elitem-test")
   .settings(
     libraryDependencies ++= Dependencies.test
-  )
-  .dependsOn(runtime)
-
-lazy val cli = elitemModule("elitem-cli")
-  .settings(
-    libraryDependencies ++= Dependencies.cli,
-    PB.protoSources in Compile ++= Seq(
-      file("elitem-concurrent/src/main/protobuf")
-    ),
-    mainClass in Compile := Some("ir.sndu.server.CliMain")
   )
   .dependsOn(runtime)
 
