@@ -31,8 +31,8 @@ lazy val root = (project in file("."))
     commonSettings,
     Packaging.packagingSettings
   )
-  .dependsOn(model, sdk, core, sequence, rpc, persist, commons, runtime, test)
-  .aggregate(model, sdk, core, sequence, rpc, persist, commons, runtime, test)
+  .dependsOn(model, sdk, core, update, rpc, persist, commons, runtime, test)
+  .aggregate(model, sdk, core, update, rpc, persist, commons, runtime, test)
 
 // Every protobuf that transfer between client and server
 lazy val sdk = ghasedakModule("ghasedak-sdk")
@@ -51,9 +51,9 @@ lazy val core = ghasedakModule("ghasedak-core")
     libraryDependencies ++= Dependencies.core
   ).dependsOn(persist)
 
-lazy val sequence = ghasedakModule("ghasedak-sequence")
+lazy val update = ghasedakModule("ghasedak-update")
   .settings(
-    libraryDependencies ++= Dependencies.sequence
+    libraryDependencies ++= Dependencies.update
   )
   .dependsOn(sdk, model, commons)
 
@@ -73,7 +73,7 @@ lazy val commons = ghasedakModule("ghasedak-commons")
   )
 
 lazy val runtime = ghasedakModule("ghasedak-runtime")
-  .dependsOn(model, sdk, core, sequence, rpc, persist, commons)
+  .dependsOn(model, sdk, core, update, rpc, persist, commons)
 
 lazy val test = ghasedakModule("ghasedak-test")
   .settings(
