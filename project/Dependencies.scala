@@ -1,4 +1,4 @@
-package ir.sndu
+package im.ghasedak
 
 import sbt._
 

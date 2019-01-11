@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package im.ghasedak.rpc;
+
+option java_package = "im.ghasedak.rpc.update";
+option java_multiple_files = true;
+
+option (scalapb.options) = {
+  flat_package: true
+};
+
+import "scalapb/scalapb.proto";
+
+import "api/update.proto";
+
+service UpdateService {
+    rpc GetState (RequestGetState) returns (ResponseGetState);
+    rpc GetDifference (RequestGetDifference) returns (stream ResponseGetDifference);
+}
+
+message RequestGetState {
+}
+
+message ResponseGetState {
+    im.ghasedak.api.ApiSeqState seq_state = 1;
+}
+
+message RequestGetDifference {
+    im.ghasedak.api.ApiSeqState seq_state = 1;
+}
+
+message ResponseGetDifference {
+    im.ghasedak.api.ApiSeqState seq_state = 1;
+    im.ghasedak.api.ApiUpdateContainer update_container = 2;
+}
