@@ -1,6 +1,6 @@
 # Ghasedak
 
-Fast and secure Messenger Platform
+Fast and secure Messaging Platform
 
 ## Getting Started
 

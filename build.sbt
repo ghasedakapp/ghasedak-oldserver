@@ -1,21 +1,21 @@
-import ir.sndu.Dependencies
+import im.ghasedak.Dependencies
 import scalariform.formatter.preferences._
 
-name := "elitem"
+name := "ghasedak"
 
 scalaSource in ProtocPlugin.ProtobufConfig := sourceManaged.value
 
 enablePlugins(JavaAppPackaging)
 
 lazy val commonSettings = Seq(
-  organization := "ir.elitem",
+  organization := "im.ghasedak",
   scalaVersion := "2.12.8",
-  mainClass in Compile := Some("ir.sndu.server.Main"),
+  mainClass in Compile := Some("im.ghasedak.server.Main"),
   PB.targets in Compile := Seq(
     scalapb.gen() -> (sourceManaged in Compile).value),
   PB.includePaths in Compile ++= Seq(
-    file("elitem-model/src/main/protobuf"),
-    file("elitem-sdk/src/main/protobuf")
+    file("ghasedak-model/src/main/protobuf"),
+    file("ghasedak-sdk/src/main/protobuf")
   ),
   scalaSource in ProtocPlugin.ProtobufConfig := sourceManaged.value,
   scalariformPreferences := scalariformPreferences.value
@@ -31,57 +31,57 @@ lazy val root = (project in file("."))
     commonSettings,
     Packaging.packagingSettings
   )
-  .dependsOn(model, sdk, core, sequence, rpc, persist, commons, runtime, test)
-  .aggregate(model, sdk, core, sequence, rpc, persist, commons, runtime, test)
+  .dependsOn(model, sdk, core, update, rpc, persist, commons, runtime, test)
+  .aggregate(model, sdk, core, update, rpc, persist, commons, runtime, test)
 
 // Every protobuf that transfer between client and server
-lazy val sdk = elitemModule("elitem-sdk")
+lazy val sdk = ghasedakModule("ghasedak-sdk")
   .settings(
     libraryDependencies ++= Dependencies.sdk
   )
 
-lazy val model = elitemModule("elitem-model")
+lazy val model = ghasedakModule("ghasedak-model")
   .settings(
     libraryDependencies ++= Dependencies.model
   )
   .dependsOn(sdk)
 
-lazy val core = elitemModule("elitem-core")
+lazy val core = ghasedakModule("ghasedak-core")
   .settings(
     libraryDependencies ++= Dependencies.core
   ).dependsOn(persist)
 
-lazy val sequence = elitemModule("elitem-sequence")
+lazy val update = ghasedakModule("ghasedak-update")
   .settings(
-    libraryDependencies ++= Dependencies.sequence
+    libraryDependencies ++= Dependencies.update
   )
   .dependsOn(sdk, model, commons)
 
-lazy val rpc = elitemModule("elitem-rpc")
+lazy val rpc = ghasedakModule("ghasedak-rpc")
   .settings(
     libraryDependencies ++= Dependencies.rpc
   ).dependsOn(core, persist)
 
-lazy val persist = elitemModule("elitem-persist")
+lazy val persist = ghasedakModule("ghasedak-persist")
   .settings(
     libraryDependencies ++= Dependencies.persist
   ).dependsOn(model, commons)
 
-lazy val commons = elitemModule("elitem-commons")
+lazy val commons = ghasedakModule("ghasedak-commons")
   .settings(
     libraryDependencies ++= Dependencies.commons
   )
 
-lazy val runtime = elitemModule("elitem-runtime")
-  .dependsOn(model, sdk, core, sequence, rpc, persist, commons)
+lazy val runtime = ghasedakModule("ghasedak-runtime")
+  .dependsOn(model, sdk, core, update, rpc, persist, commons)
 
-lazy val test = elitemModule("elitem-test")
+lazy val test = ghasedakModule("ghasedak-test")
   .settings(
     libraryDependencies ++= Dependencies.test
   )
   .dependsOn(runtime)
 
-def elitemModule(name: String): Project = {
+def ghasedakModule(name: String): Project = {
   Project(id = name, base = file(name))
     .settings(commonSettings)
 }

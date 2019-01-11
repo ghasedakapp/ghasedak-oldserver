@@ -1,4 +1,4 @@
-package ir.sndu
+package im.ghasedak
 
 import sbt._
 
@@ -79,7 +79,7 @@ object Dependencies {
     caffeine
   )
 
-  val sequence: Seq[ModuleID] = shared ++ Seq(
+  val update: Seq[ModuleID] = shared ++ Seq(
     actor
   ) ++ pulsar4s
 
