@@ -10,7 +10,7 @@ option (scalapb.options) = {
 };
 
 import "scalapb/scalapb.proto";
-
+import "google/protobuf/wrappers.proto";
 import "api/peer.proto";
 
 message ApiMessage {
@@ -36,6 +36,7 @@ message ApiDialog {
     int32 unread_count = 2;
     int64 sort_date = 3;
     ApiMessageContainer message = 4;
+    google.protobuf.Int64Value firstUnreadSeq = 5;
 }
 
 enum ApiListLoadMode {
