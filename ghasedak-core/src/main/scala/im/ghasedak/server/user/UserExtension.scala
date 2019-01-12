@@ -46,6 +46,7 @@ final class UserExtensionImpl(system: ExtendedActorSystem) extends Extension {
         msgLocalDate,
         message)
       _ ← createOrUpdateDialog(userId, peer, seq, msgLocalDate)
+      _ ← DialogRepo.updateOwnerLastReadSeq(userId, peer, seq)
       _ ← createOrUpdateDialog(peer.id, selfPeer, seq, msgLocalDate)
     } yield ResponseSendMessage(seq, msgDate.toEpochMilli)
     db.run(action)
