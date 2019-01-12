@@ -18,6 +18,7 @@ final class UserServiceImpl(implicit system: ActorSystem) extends UserService
   with AuthTokenHelper
   with DBIOResult[RpcError] {
 
+  // todo: use separate dispatcher for rpc handlers
   override implicit val ec: ExecutionContext = system.dispatcher
 
   override val db: PostgresProfile.backend.Database = DbExtension(system).db

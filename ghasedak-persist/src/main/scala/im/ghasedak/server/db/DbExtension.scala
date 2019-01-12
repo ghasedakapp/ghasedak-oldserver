@@ -31,7 +31,7 @@ object DbExtension extends ExtensionId[DbExtensionImpl] {
 
 }
 
-class DbExtensionImpl(val db: Database) extends Extension with FlywayInit {
+final class DbExtensionImpl(val db: Database) extends Extension with FlywayInit {
 
   private lazy val flyway: Flyway = {
     val ds: DataSource = db.source match {

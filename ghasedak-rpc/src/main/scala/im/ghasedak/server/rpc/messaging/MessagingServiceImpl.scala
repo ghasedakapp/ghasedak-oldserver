@@ -24,6 +24,7 @@ final class MessagingServiceImpl(implicit system: ActorSystem) extends Messaging
   with AuthTokenHelper
   with MessagingServiceHelper {
 
+  // todo: use separate dispatcher for rpc handlers
   override implicit val ec: ExecutionContext = system.dispatcher
 
   override val db: PostgresProfile.backend.Database = DbExtension(system).db

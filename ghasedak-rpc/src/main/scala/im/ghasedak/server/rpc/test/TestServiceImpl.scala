@@ -13,6 +13,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 final class TestServiceImpl(implicit system: ActorSystem) extends TestService
   with AuthTokenHelper {
 
+  // todo: use separate dispatcher for rpc handlers
   override implicit val ec: ExecutionContext = system.dispatcher
 
   override val db: PostgresProfile.backend.Database = DbExtension(system).db
