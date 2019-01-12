@@ -14,7 +14,7 @@ object DialogUtils {
     for {
       exist ← DialogRepo.usersExists(userId, peer)
       _ ← if (exist)
-        DialogRepo.updateLastMessageDate(userId, peer, lastMessageSeq, lastMessageDate)
+        DialogRepo.updateLastMessageSeqDate(userId, peer, lastMessageSeq, lastMessageDate)
       else
         DialogRepo.create(userId, peer, lastMessageSeq, lastMessageDate)
     } yield ()

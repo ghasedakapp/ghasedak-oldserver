@@ -11,6 +11,7 @@ import im.ghasedak.rpc.messaging.MessagingServiceGrpc.MessagingService
 import im.ghasedak.rpc.messaging._
 import im.ghasedak.rpc.misc.ResponseVoid
 import im.ghasedak.server.db.DbExtension
+import im.ghasedak.server.dialog.DialogExtension
 import im.ghasedak.server.repo.dialog.DialogRepo
 import im.ghasedak.server.repo.history.HistoryMessageRepo
 import im.ghasedak.server.rpc.auth.helper.AuthTokenHelper
@@ -31,6 +32,7 @@ final class MessagingServiceImpl(implicit system: ActorSystem) extends Messaging
   override val log: LoggingAdapter = Logging.getLogger(system, this)
 
   protected val userExt = UserExtension(system)
+  protected val dialogExt = DialogExtension(system)
 
   override def sendMessage(request: RequestSendMessage): Future[ResponseSendMessage] =
     authorize { clientData ⇒
@@ -46,12 +48,7 @@ final class MessagingServiceImpl(implicit system: ActorSystem) extends Messaging
 
   override def loadDialogs(request: RequestLoadDialogs): Future[ResponseLoadDialogs] =
     authorize { clientData ⇒
-      val action = for {
-        dialogs ← DialogRepo.find(clientData.userId, request.limit)
-        fullDialogs ← DBIO.sequence(dialogs.map(d ⇒
-          HistoryMessageRepo.find(d.userId, d.peer, Some(d.lastMessageDate), 1).headOption.map(d.toApi)))
-      } yield ResponseLoadDialogs(fullDialogs)
-      db.run(action)
+      dialogExt.loadDialogs(clientData.userId, request.limit)
     }
 
   override def loadHistory(request: RequestLoadHistory): Future[ResponseLoadHistory] =

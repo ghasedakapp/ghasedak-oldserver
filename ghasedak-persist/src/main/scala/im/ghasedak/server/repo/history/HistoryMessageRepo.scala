@@ -93,15 +93,15 @@ object HistoryMessageRepo {
     query.take(limit).result
   }
 
-  private val afterC = Compiled { (userId: Rep[Int], peerType: Rep[Int], peerId: Rep[Int], date: Rep[LocalDateTime], limit: ConstColumn[Long]) ⇒
+  private val afterC = Compiled { (userId: Rep[Int], peerType: Rep[Int], peerId: Rep[Int], seq: Rep[Int], limit: ConstColumn[Long]) ⇒
     byUserIdPeer(userId, peerType, peerId)
-      .filter(_.date >= date)
-      .sortBy(_.date.asc)
+      .filter(_.sequenceNr >= seq)
+      .sortBy(_.sequenceNr.asc)
       .take(limit)
   }
 
-  def findAfter(userId: Int, peer: ApiPeer, date: LocalDateTime, limit: Long): FixedSqlStreamingAction[Seq[HistoryMessage], HistoryMessage, Read] =
-    afterC((userId, peer.`type`.value, peer.id, date, limit)).result
+  def findAfter(userId: Int, peer: ApiPeer, seq: Int, limit: Long): FixedSqlStreamingAction[Seq[HistoryMessage], HistoryMessage, Read] =
+    afterC((userId, peer.`type`.value, peer.id, seq, limit)).result
 
   private val metaAfterC = Compiled { (userId: Rep[Int], peerType: Rep[Int], peerId: Rep[Int], date: Rep[LocalDateTime], limit: ConstColumn[Long]) ⇒
     byUserIdPeer(userId, peerType, peerId)
@@ -121,9 +121,9 @@ object HistoryMessageRepo {
       .take(limit)
   }
 
-  private val beforeExclC = Compiled { (userId: Rep[Int], peerId: Rep[Int], peerType: Rep[Int], date: Rep[LocalDateTime], limit: ConstColumn[Long]) ⇒
+  private val beforeExclC = Compiled { (userId: Rep[Int], peerId: Rep[Int], peerType: Rep[Int], seq: Rep[Int], limit: ConstColumn[Long]) ⇒
     byUserIdPeer(userId, peerType, peerId)
-      .filter(_.date < date)
+      .filter(_.sequenceNr < seq)
       .sortBy(_.date.asc)
       .take(limit)
   }
@@ -135,9 +135,9 @@ object HistoryMessageRepo {
   def findBefore(userId: Int, peer: ApiPeer, seq: Int, limit: Long): FixedSqlStreamingAction[Seq[HistoryMessage], HistoryMessage, Read] =
     beforeC((userId, peer.id, peer.`type`.value, seq, limit)).result
 
-  def findBydi(userId: Int, peer: ApiPeer, date: LocalDateTime, limit: Long): FixedSqlStreamingAction[Seq[HistoryMessage], HistoryMessage, Read] =
-    (beforeExclC.applied((userId, peer.`type`.value, peer.id, date, limit)) ++
-      afterC.applied((userId, peer.`type`.value, peer.id, date, limit))).result
+  def findBydi(userId: Int, peer: ApiPeer, seq: Int, limit: Long): FixedSqlStreamingAction[Seq[HistoryMessage], HistoryMessage, Read] =
+    (beforeExclC.applied((userId, peer.`type`.value, peer.id, seq, limit)) ++
+      afterC.applied((userId, peer.`type`.value, peer.id, seq, limit))).result
 
   def findBySender(senderUserId: Int, peer: ApiPeer, sequenceNr: Int): FixedSqlStreamingAction[Seq[HistoryMessage], HistoryMessage, Read] =
     notDeletedMessages.filter(m ⇒ m.senderUserId === senderUserId && m.peerType === peer.`type`.value && m.peerId === peer.id && m.sequenceNr === sequenceNr).result
