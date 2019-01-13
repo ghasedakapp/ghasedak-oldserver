@@ -13,7 +13,7 @@ object GrpcFrontend {
 
     services foreach serverBuilder.addService
 
-    serverBuilder.intercept(new TokenServerInterceptor).intercept(new LoggingServerInterceptor)
+    serverBuilder.intercept(new LoggingServerInterceptor).intercept(new TokenServerInterceptor)
 
     server = Some(serverBuilder.build().start)
     logger.info("Server started, listening on " + port)
