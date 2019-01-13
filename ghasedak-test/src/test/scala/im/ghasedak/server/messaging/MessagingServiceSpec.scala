@@ -14,7 +14,7 @@ class MessagingServiceSpec extends GrpcBaseSuit {
   it should "send message, load history, load dialog" in sendMessage
   it should "read message" in readMessage
 
-  def sendMessage: Unit = {
+  def sendMessage(): Unit = {
     val aliUser = createUserWithPhone()
     val aliPeer = Some(ApiPeer(ApiPeerType.PRIVATE, aliUser.userId))
     val hosseinUser = createUserWithPhone()
@@ -62,7 +62,7 @@ class MessagingServiceSpec extends GrpcBaseSuit {
     dialogRspAli.dialogs.map(_.message.get.message.get) shouldBe Seq(msgToSaleh, msgToAli)
   }
 
-  def readMessage: Unit = {
+  def readMessage(): Unit = {
     val aliUser = createUserWithPhone()
     val aliPeer = Some(ApiPeer(ApiPeerType.PRIVATE, aliUser.userId))
     val hosseinUser = createUserWithPhone()

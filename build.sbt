@@ -49,7 +49,7 @@ lazy val model = ghasedakModule("ghasedak-model")
 lazy val core = ghasedakModule("ghasedak-core")
   .settings(
     libraryDependencies ++= Dependencies.core
-  ).dependsOn(persist)
+  ).dependsOn(persist, update)
 
 lazy val update = ghasedakModule("ghasedak-update")
   .settings(

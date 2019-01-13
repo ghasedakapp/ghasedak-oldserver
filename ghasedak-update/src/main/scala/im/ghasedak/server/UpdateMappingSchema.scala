@@ -20,5 +20,6 @@ class UpdateMappingSchema extends Schema[UpdateMapping] {
     new SchemaInfo()
       .setName("UpdateMapping")
       .setType(SchemaType.PROTOBUF)
+      .setSchema(Array[Byte](0))
 
 }

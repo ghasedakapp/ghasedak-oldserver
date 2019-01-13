@@ -1,6 +1,6 @@
 package im.ghasedak.server
 
-import akka.actor.{ ActorSystem, ExtendedActorSystem, Extension, ExtensionId }
+import akka.actor._
 import com.google.protobuf.ByteString
 import com.sksamuel.pulsar4s._
 import com.typesafe.config.Config
@@ -11,14 +11,9 @@ import org.apache.pulsar.client.impl.MessageIdImpl
 
 import scala.concurrent.{ ExecutionContext, Future }
 
-object SeqUpdateExtension extends ExtensionId[SeqUpdateExtensionImpl] {
-
-  override def createExtension(system: ExtendedActorSystem): SeqUpdateExtensionImpl = new SeqUpdateExtensionImpl(system)
-
-}
-
 final class SeqUpdateExtensionImpl(system: ActorSystem) extends Extension
-  with DeliveryOperations {
+  with DeliveryOperations
+  with DifferenceOperation {
 
   protected implicit val _system: ActorSystem = system
 
@@ -38,7 +33,7 @@ final class SeqUpdateExtensionImpl(system: ActorSystem) extends Extension
 
   protected implicit val updateMappingSchema: Schema[UpdateMapping] = UpdateMappingSchema()
 
-  def getUserUpdateTopic(userId: Int): String = s"user_update_$userId"
+  def getUserUpdateTopic(userId: Int): Topic = Topic(s"user_update_$userId")
 
   def getApiSeqState(messageId: MessageId): ApiSeqState = {
     val state = MessageIdImpl.fromByteArray(messageId.bytes).asInstanceOf[MessageIdImpl]
@@ -46,8 +41,13 @@ final class SeqUpdateExtensionImpl(system: ActorSystem) extends Extension
     ApiSeqState(seq.toInt, ByteString.copyFrom(state.toByteArray))
   }
 
+  def getMessageId(seqState: ApiSeqState): MessageId = {
+    MessageId.fromJava(MessageIdImpl.fromByteArray(seqState.state.toByteArray))
+  }
+
+  // todo: find better way for get pulsar state
   def getState(userId: Int): Future[ApiSeqState] = {
-    val topic = Topic(getUserUpdateTopic(userId))
+    val topic = getUserUpdateTopic(userId)
     val readerConfig = ReaderConfig(topic, MessageId.earliest)
     val reader = pulsarClient.reader[UpdateMapping](readerConfig)
 
@@ -65,4 +65,10 @@ final class SeqUpdateExtensionImpl(system: ActorSystem) extends Extension
     }
   }
 
+}
+
+object SeqUpdateExtension extends ExtensionId[SeqUpdateExtensionImpl] with ExtensionIdProvider {
+  override def createExtension(system: ExtendedActorSystem): SeqUpdateExtensionImpl = new SeqUpdateExtensionImpl(system)
+
+  override def lookup(): ExtensionId[_ <: Extension] = SeqUpdateExtension
 }

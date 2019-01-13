@@ -2,9 +2,11 @@ package im.ghasedak.server.rpc.test
 
 import akka.actor.ActorSystem
 import akka.event.{ Logging, LoggingAdapter }
-import im.ghasedak.server.db.DbExtension
+import im.ghasedak.rpc.misc.ResponseVoid
 import im.ghasedak.rpc.test.TestServiceGrpc.TestService
-import im.ghasedak.rpc.test.{ RequestTestAuth, ResponseTestAuth }
+import im.ghasedak.rpc.test._
+import im.ghasedak.server.SeqUpdateExtension
+import im.ghasedak.server.db.DbExtension
 import im.ghasedak.server.rpc.auth.helper.AuthTokenHelper
 import slick.jdbc.PostgresProfile
 
@@ -20,13 +22,17 @@ final class TestServiceImpl(implicit system: ActorSystem) extends TestService
 
   override val log: LoggingAdapter = Logging.getLogger(system, this)
 
-  override def testAuth(request: RequestTestAuth): Future[ResponseTestAuth] = {
+  protected val seqUpdateExt = SeqUpdateExtension(system)
+
+  override def checkAuth(request: RequestCheckAuth): Future[ResponseVoid] = {
     authorize { _ ⇒
-      if (request.exception) {
-        Future.failed(TestRpcErrors.AuthTestError)
-      } else {
-        Future.successful(ResponseTestAuth(true))
-      }
+      Future.successful(ResponseVoid())
+    }
+  }
+
+  override def sendUpdate(request: RequestSendUpdate): Future[ResponseVoid] = {
+    authorize { clientData ⇒
+      seqUpdateExt.deliverUserUpdate(clientData.userId, request.getUpdateContainer) map (_ ⇒ ResponseVoid())
     }
   }
 

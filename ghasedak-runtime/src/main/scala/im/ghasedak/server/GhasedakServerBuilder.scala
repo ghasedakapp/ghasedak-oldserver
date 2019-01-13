@@ -7,14 +7,16 @@ import im.ghasedak.rpc.auth.AuthServiceGrpc
 import im.ghasedak.rpc.contact.ContactServiceGrpc
 import im.ghasedak.rpc.messaging.MessagingServiceGrpc
 import im.ghasedak.rpc.test.TestServiceGrpc
+import im.ghasedak.rpc.update.UpdateServiceGrpc
 import im.ghasedak.rpc.user.UserServiceGrpc
-import io.grpc.ServerServiceDefinition
 import im.ghasedak.server.frontend.Frontend
 import im.ghasedak.server.rpc.auth.AuthServiceImpl
 import im.ghasedak.server.rpc.contact.ContactServiceImpl
 import im.ghasedak.server.rpc.messaging.MessagingServiceImpl
 import im.ghasedak.server.rpc.test.TestServiceImpl
+import im.ghasedak.server.rpc.update.UpdateServiceImpl
 import im.ghasedak.server.rpc.user.UserServiceImpl
+import io.grpc.ServerServiceDefinition
 
 import scala.concurrent.ExecutionContext
 
@@ -45,7 +47,8 @@ object ServiceDescriptors {
       AuthServiceGrpc.bindService(new AuthServiceImpl, ec),
       MessagingServiceGrpc.bindService(new MessagingServiceImpl, ec),
       ContactServiceGrpc.bindService(new ContactServiceImpl(), ec),
-      UserServiceGrpc.bindService(new UserServiceImpl(), ec))
+      UserServiceGrpc.bindService(new UserServiceImpl(), ec),
+      UpdateServiceGrpc.bindService(new UpdateServiceImpl(), ec))
   }
 
 }

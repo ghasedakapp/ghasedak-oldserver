@@ -4,13 +4,14 @@ import java.time.temporal.ChronoUnit
 import java.time.{ LocalDateTime, ZoneOffset }
 import java.util.UUID
 
-import im.ghasedak.rpc.auth.{ RequestSignOut, RequestSignUp, RequestStartPhoneAuth, RequestValidateCode }
-import im.ghasedak.rpc.test.RequestTestAuth
+import im.ghasedak.rpc.auth._
+import im.ghasedak.rpc.misc.ResponseVoid
+import im.ghasedak.rpc.test.RequestCheckAuth
+import im.ghasedak.server.GrpcBaseSuit
+import im.ghasedak.server.repo.auth._
+import im.ghasedak.server.rpc.Constant
 import io.grpc.Status.Code
 import io.grpc.StatusRuntimeException
-import im.ghasedak.server.repo.auth.{ AuthTransactionRepo, GateAuthCodeRepo }
-import im.ghasedak.server.GrpcBaseSuit
-import im.ghasedak.server.rpc.Constant
 
 import scala.util.{ Failure, Random, Try }
 
@@ -39,8 +40,6 @@ class AuthServiceSpec extends GrpcBaseSuit {
   it should "sign up and after that sign in" in signUpAndSignIn
 
   it should "authorized client after sign up" in authorizedAfterSignUp
-
-  it should "return right error in authorize method" in rightAuthorizeError
 
   it should "return different transaction hash after validate" in differentTransactionHashAfterValidate
 
@@ -172,18 +171,8 @@ class AuthServiceSpec extends GrpcBaseSuit {
   def authorizedAfterSignUp(): Unit = {
     val user = createUserWithPhone()
     val stub = testStub.withInterceptors(clientTokenInterceptor(user.token))
-    val response = stub.testAuth(RequestTestAuth())
-    response.auth shouldEqual true
-  }
-
-  def rightAuthorizeError(): Unit = {
-    val user = createUserWithPhone()
-    val stub = testStub.withInterceptors(clientTokenInterceptor(user.token))
-    Try(stub.testAuth(RequestTestAuth(true))) match {
-      case Failure(ex: StatusRuntimeException) ⇒
-        ex.getStatus.getCode shouldEqual Code.INTERNAL
-        ex.getTrailers.get(Constant.TAG_METADATA_KEY) shouldEqual "AUTH_TEST_ERROR"
-    }
+    val response = stub.checkAuth(RequestCheckAuth())
+    response shouldEqual ResponseVoid()
   }
 
   def differentTransactionHashAfterValidate(): Unit = {
@@ -191,9 +180,9 @@ class AuthServiceSpec extends GrpcBaseSuit {
     val response1 = authStub.startPhoneAuth(request1)
     val codeGate = db.run(GateAuthCodeRepo.find(response1.transactionHash)).futureValue
     val request2 = RequestValidateCode(response1.transactionHash, codeGate.get.codeHash)
-    val response2 = authStub.validateCode(request2)
-    val response3 = authStub.startPhoneAuth(request1)
-    response3.transactionHash should not equal response1.transactionHash
+    authStub.validateCode(request2)
+    val response2 = authStub.startPhoneAuth(request1)
+    response2.transactionHash should not equal response1.transactionHash
   }
 
   def signOut(): Unit = {
@@ -201,7 +190,7 @@ class AuthServiceSpec extends GrpcBaseSuit {
     val stub1 = authStub.withInterceptors(clientTokenInterceptor(user.token))
     stub1.signOut(RequestSignOut())
     val stub2 = testStub.withInterceptors(clientTokenInterceptor(user.token))
-    Try(stub2.testAuth(RequestTestAuth())) match {
+    Try(stub2.checkAuth(RequestCheckAuth())) match {
       case Failure(ex: StatusRuntimeException) ⇒
         ex.getStatus.getCode shouldEqual Code.UNAUTHENTICATED
         ex.getTrailers.get(Constant.TAG_METADATA_KEY) shouldEqual "INVALID_TOKEN"

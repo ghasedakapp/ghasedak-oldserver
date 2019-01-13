@@ -10,6 +10,7 @@ option (scalapb.options) = {
 };
 
 import "scalapb/scalapb.proto";
+
 import "google/protobuf/wrappers.proto";
 import "api/peer.proto";
 

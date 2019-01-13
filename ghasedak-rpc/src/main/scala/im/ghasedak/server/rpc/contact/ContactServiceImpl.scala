@@ -6,9 +6,9 @@ import im.ghasedak.rpc.contact.ContactServiceGrpc.ContactService
 import im.ghasedak.rpc.contact._
 import im.ghasedak.rpc.misc.ResponseVoid
 import im.ghasedak.server.db.DbExtension
+import im.ghasedak.server.model.contact.UserContact
 import im.ghasedak.server.repo.contact.UserContactRepo
 import im.ghasedak.server.repo.user.UserRepo
-import im.ghasedak.server.model.contact.UserContact
 import im.ghasedak.server.rpc.RpcError
 import im.ghasedak.server.rpc.auth.helper.AuthTokenHelper
 import im.ghasedak.server.rpc.common.CommonRpcErrors
@@ -39,8 +39,11 @@ final class ContactServiceImpl(implicit system: ActorSystem) extends ContactServ
 
   override def getContacts(request: RequestGetContacts): Future[ResponseGetContacts] = {
     authorize { clientData ⇒
-      db.run(UserContactRepo.findContactIdsActive(clientData.userId)
-        .map(ResponseGetContacts(_)))
+      val action: Result[ResponseGetContacts] = for {
+        contacts ← fromDBIO(UserContactRepo.findContactIdsActive(clientData.userId))
+      } yield ResponseGetContacts(contacts)
+      val result = db.run(action.value)
+      result
     }
   }
 

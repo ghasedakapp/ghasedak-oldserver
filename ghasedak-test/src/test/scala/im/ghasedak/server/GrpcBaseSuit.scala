@@ -8,12 +8,13 @@ import im.ghasedak.rpc.auth.AuthServiceGrpc
 import im.ghasedak.rpc.contact.ContactServiceGrpc
 import im.ghasedak.rpc.messaging.MessagingServiceGrpc
 import im.ghasedak.rpc.test.TestServiceGrpc
+import im.ghasedak.rpc.update.UpdateServiceGrpc
 import im.ghasedak.rpc.user.UserServiceGrpc
-import io.grpc.{ ManagedChannel, ManagedChannelBuilder }
-import im.ghasedak.server.db.DbExtension
 import im.ghasedak.server.config.{ AppType, GhasedakConfigFactory }
+import im.ghasedak.server.db.DbExtension
 import im.ghasedak.server.model.org.ApiKey
-import im.ghasedak.server.utils.UserTestUtils
+import im.ghasedak.server.utils.{ UpdateMatcher, UserTestUtils }
+import io.grpc.{ ManagedChannel, ManagedChannelBuilder }
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{ BeforeAndAfterAll, FlatSpec, Inside, Matchers }
 
@@ -27,6 +28,7 @@ abstract class GrpcBaseSuit extends FlatSpec
   with ScalaFutures
   with Inside
   with UserTestUtils
+  with UpdateMatcher
   with BeforeAndAfterAll {
 
   private def randomPort: Int = {
@@ -53,6 +55,8 @@ abstract class GrpcBaseSuit extends FlatSpec
       """.stripMargin))
       .withFallback(GhasedakConfigFactory.load(AppType.Test))
   }
+
+  protected type TestUser = UserTestUtils.TestClientData
 
   protected val randomAkkaPort: Int = randomPort
 
@@ -89,6 +93,12 @@ abstract class GrpcBaseSuit extends FlatSpec
 
   protected val userStub: UserServiceGrpc.UserServiceBlockingStub =
     UserServiceGrpc.blockingStub(channel)
+
+  protected val updateStub: UpdateServiceGrpc.UpdateServiceBlockingStub =
+    UpdateServiceGrpc.blockingStub(channel)
+
+  protected val asyncUpdateStub: UpdateServiceGrpc.UpdateServiceStub =
+    UpdateServiceGrpc.stub(channel)
 
   override def afterAll(): Unit = {
     super.afterAll()

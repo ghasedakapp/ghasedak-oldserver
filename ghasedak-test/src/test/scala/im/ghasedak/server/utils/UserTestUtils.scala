@@ -1,11 +1,11 @@
 package im.ghasedak.server.utils
 
-import im.ghasedak.rpc.auth.{ RequestSignUp, RequestStartPhoneAuth, RequestValidateCode }
-import io.grpc._
-import im.ghasedak.server.repo.auth.GateAuthCodeRepo
+import im.ghasedak.rpc.auth._
 import im.ghasedak.server.GrpcBaseSuit
+import im.ghasedak.server.repo.auth.GateAuthCodeRepo
 import im.ghasedak.server.rpc.Constant
 import im.ghasedak.server.utils.UserTestUtils.TestClientData
+import io.grpc._
 
 import scala.util.Random
 
@@ -43,7 +43,7 @@ trait UserTestUtils {
     (strPhone.toLong, code)
   }
 
-  protected def createUserWithPhone(): TestClientData = {
+  protected def createUserWithPhone(): TestUser = {
     val phone = generatePhoneNumber()
     val request1 = RequestStartPhoneAuth(phone, officialApiKeys.head.apiKey)
     val response1 = authStub.startPhoneAuth(request1)
@@ -62,7 +62,7 @@ trait UserTestUtils {
       Some(name))
   }
 
-  protected def createUsersWithPhone(num: Int): Seq[TestClientData] =
+  protected def createUsersWithPhone(num: Int): Seq[TestUser] =
     1 to num map (_ ⇒ createUserWithPhone())
 
 }
