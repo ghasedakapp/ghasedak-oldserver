@@ -5,12 +5,6 @@ package im.ghasedak.server.update;
 option java_package = "im.ghasedak.server.update";
 option java_multiple_files = true;
 
-option (scalapb.options) = {
-  flat_package: true
-};
-
-import "scalapb/scalapb.proto";
-
 import "api/update.proto";
 
 message UpdateMapping {
