@@ -2,8 +2,7 @@ package im.ghasedak.server.rpc.user
 
 import akka.actor.ActorSystem
 import akka.event.{ Logging, LoggingAdapter }
-import im.ghasedak.rpc.user.UserServiceGrpc.UserService
-import im.ghasedak.rpc.user.{ RequestLoadUsers, ResponseLoadUsers }
+import im.ghasedak.rpc.user.{ RequestLoadUsers, ResponseLoadUsers, UserService }
 import im.ghasedak.server.db.DbExtension
 import im.ghasedak.server.rpc.RpcError
 import im.ghasedak.server.rpc.auth.helper.AuthTokenHelper

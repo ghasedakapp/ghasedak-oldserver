@@ -7,16 +7,13 @@ import akka.event.{ Logging, LoggingAdapter }
 import com.google.protobuf.CodedInputStream
 import im.ghasedak.api.messaging.{ ApiMessage, ApiMessageContainer }
 import im.ghasedak.api.peer.ApiPeer
-import im.ghasedak.rpc.messaging.MessagingServiceGrpc.MessagingService
 import im.ghasedak.rpc.messaging._
 import im.ghasedak.rpc.misc.ResponseVoid
 import im.ghasedak.server.db.DbExtension
 import im.ghasedak.server.dialog.DialogExtension
-import im.ghasedak.server.repo.dialog.DialogRepo
 import im.ghasedak.server.repo.history.HistoryMessageRepo
 import im.ghasedak.server.rpc.auth.helper.AuthTokenHelper
 import im.ghasedak.server.user.UserExtension
-import slick.dbio.DBIO
 import slick.jdbc.PostgresProfile
 
 import scala.concurrent.{ ExecutionContext, Future }

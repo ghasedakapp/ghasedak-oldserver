@@ -3,8 +3,7 @@ package im.ghasedak.server.rpc.test
 import akka.actor.ActorSystem
 import akka.event.{ Logging, LoggingAdapter }
 import im.ghasedak.server.db.DbExtension
-import im.ghasedak.rpc.test.TestServiceGrpc.TestService
-import im.ghasedak.rpc.test.{ RequestTestAuth, ResponseTestAuth }
+import im.ghasedak.rpc.test.{ RequestTestAuth, ResponseTestAuth, TestService }
 import im.ghasedak.server.rpc.auth.helper.AuthTokenHelper
 import slick.jdbc.PostgresProfile
 
