@@ -35,11 +35,19 @@ case class Endpoint(typ: EndpointTypes.EndpointType, interface: String, port: In
 
 object Frontend {
 
-  def start(services: HttpRequest ⇒ Future[HttpResponse])(implicit system: ActorSystem, mat: Materializer, config: Config): Unit = {
+  def start(services: HttpRequest ⇒ Future[HttpResponse])(
+    implicit
+    system: ActorSystem,
+    mat: Materializer,
+    config: Config): Future[Unit] = {
     config.getConfigList("endpoints").asScala.map(Endpoint.fromConfig) foreach (startEndpoint(_, services))
   }
 
-  private def startEndpoint(endpoint: Endpoint, services: HttpRequest ⇒ Future[HttpResponse])(implicit system: ActorSystem, mat: Materializer): Unit = {
+  private def startEndpoint(endpoint: Endpoint, services: HttpRequest ⇒ Future[HttpResponse])(
+    implicit
+    system: ActorSystem,
+    mat: Materializer
+  ): Future[Unit] = {
     endpoint.typ match {
       case EndpointTypes.Grpc ⇒ GrpcFrontend.start(endpoint.interface, endpoint.port, services)
     }

@@ -57,9 +57,14 @@ object ServiceDescriptors {
       ContactServiceHandler.partial(new ContactServiceImpl)
     val userService: PartialFunction[HttpRequest, Future[HttpResponse]] =
       UserServiceHandler.partial(new UserServiceImpl)
-    val serviceHandlers: HttpRequest ⇒ Future[HttpResponse] =
-      ServiceHandler.concatOrNotFound(testService, authService, messagingService, contactService, userService)
-    serviceHandlers
+
+    ServiceHandler.concatOrNotFound(
+      testService,
+      authService,
+      messagingService,
+      contactService,
+      userService
+    )
   }
 
 }

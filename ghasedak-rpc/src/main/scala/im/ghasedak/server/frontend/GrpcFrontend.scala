@@ -1,14 +1,15 @@
 package im.ghasedak.server.frontend
 
 import akka.actor.ActorSystem
+import akka.http.scaladsl.UseHttp2.Always
+import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
+import akka.http.scaladsl.{Http, HttpConnectionContext}
+import akka.stream.Materializer
 import io.grpc._
 import org.slf4j.LoggerFactory
-import akka.http.scaladsl.UseHttp2.Always
-import akka.http.scaladsl.model.{ HttpRequest, HttpResponse }
-import akka.http.scaladsl.{ Http, HttpConnectionContext }
-import akka.stream.Materializer
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
 
 object GrpcFrontend {
 
@@ -18,27 +19,25 @@ object GrpcFrontend {
   def start(host: String, port: Int, services: HttpRequest ⇒ Future[HttpResponse])(
     implicit
     system: ActorSystem,
-    mat:    Materializer): Future[Http.ServerBinding] = {
+    mat:    Materializer
+  ): Future[Unit] = {
+
     implicit val ec = system.dispatcher
 
     val bound = Http().bindAndHandleAsync(
       services,
       interface = host,
       port = port,
+      // Needed until akka-http 10.1.5 see  https://github.com/akka/akka-http/issues/2168
+      parallelism = 256,
       connectionContext = HttpConnectionContext(http2 = Always))
 
-    //    val serverBuilder = ServerBuilder.forPort(port)
-    //
-    //    services foreach serverBuilder.addService
-    //
     //    serverBuilder.intercept(new LoggingServerInterceptor).intercept(new TokenServerInterceptor)
-    //
-    //    server = Some(serverBuilder.build().start)
-    //    logger.info("Server started, listening on " + port)
     //
     sys.addShutdownHook {
       logger.error("*** shutting down gRPC server since JVM is shutting down")
-      stop()
+      Await.result(bound, 10.seconds)
+        .terminate(hardDeadline = 3.seconds)
       logger.error("*** server shut down")
     }
 
@@ -46,12 +45,8 @@ object GrpcFrontend {
       println(s"gRPC server bound to: ${binding.localAddress}")
     }
 
-    bound
+    bound map (_ => ())
 
-  }
-
-  private def stop(): Unit = {
-    server foreach (_.shutdown)
   }
 
 }
