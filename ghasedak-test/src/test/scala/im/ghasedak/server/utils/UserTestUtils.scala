@@ -46,15 +46,15 @@ trait UserTestUtils {
   protected def createUserWithPhone(): TestClientData = {
     val phone = generatePhoneNumber()
     val request1 = RequestStartPhoneAuth(phone, officialApiKeys.head.apiKey)
-    val response1 = authStub.startPhoneAuth(request1)
+    val response1 = authStub.startPhoneAuth.invoke(request1).futureValue
     val codeGate = db.run(GateAuthCodeRepo.find(response1.transactionHash)).futureValue
     val request2 = RequestValidateCode(response1.transactionHash, codeGate.get.codeHash)
-    authStub.validateCode(request2)
+    authStub.validateCode.invoke(request2).futureValue
     val name = Random.alphanumeric.take(20).mkString
     val request3 = RequestSignUp(
       response1.transactionHash,
       name)
-    val response3 = authStub.signUp(request3)
+    val response3 = authStub.signUp.invoke(request3).futureValue
     TestClientData(
       response3.getApiAuth.getUser.id,
       response3.getApiAuth.token,

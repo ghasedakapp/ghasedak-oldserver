@@ -1,3 +1,4 @@
+import akka.grpc.sbt.AkkaGrpcPlugin.GeneratorOption
 import im.ghasedak.Dependencies
 import scalariform.formatter.preferences._
 
@@ -6,6 +7,8 @@ name := "ghasedak"
 scalaSource in ProtocPlugin.ProtobufConfig := sourceManaged.value
 
 enablePlugins(JavaAppPackaging)
+enablePlugins(AkkaGrpcPlugin)
+akkaGrpcCodeGeneratorSettings += "server_power_apis"
 
 lazy val commonSettings = Seq(
   organization := "im.ghasedak",
@@ -24,7 +27,6 @@ lazy val commonSettings = Seq(
     .setPreference(SpacesAroundMultiImports, true),
   parallelExecution in Test := false
 )
-
 lazy val root = (project in file("."))
   .settings(
     commonSettings,
@@ -36,9 +38,10 @@ lazy val root = (project in file("."))
 // Every protobuf that transfer between client and server
 lazy val sdk = ghasedakModule("ghasedak-sdk")
   .settings(
-    libraryDependencies ++= Dependencies.sdk
+    libraryDependencies ++= Dependencies.sdk,
+  akkaGrpcCodeGeneratorSettings += "server_power_apis",
+    akkaGrpcGeneratedSources := Seq(AkkaGrpc.Server, AkkaGrpc.Client)
   ).enablePlugins(AkkaGrpcPlugin)
-
 
 lazy val model = ghasedakModule("ghasedak-model")
   .settings(

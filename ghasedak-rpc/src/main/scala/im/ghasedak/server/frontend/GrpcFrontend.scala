@@ -2,14 +2,14 @@ package im.ghasedak.server.frontend
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.UseHttp2.Always
-import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
-import akka.http.scaladsl.{Http, HttpConnectionContext}
+import akka.http.scaladsl.model.{ HttpRequest, HttpResponse }
+import akka.http.scaladsl.{ Http, HttpConnectionContext }
 import akka.stream.Materializer
 import io.grpc._
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.duration._
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{ Await, Future }
 
 object GrpcFrontend {
 
@@ -19,8 +19,7 @@ object GrpcFrontend {
   def start(host: String, port: Int, services: HttpRequest ⇒ Future[HttpResponse])(
     implicit
     system: ActorSystem,
-    mat:    Materializer
-  ): Future[Unit] = {
+    mat:    Materializer): Future[Unit] = {
 
     implicit val ec = system.dispatcher
 
@@ -45,7 +44,7 @@ object GrpcFrontend {
       println(s"gRPC server bound to: ${binding.localAddress}")
     }
 
-    bound map (_ => ())
+    bound map (_ ⇒ ())
 
   }
 

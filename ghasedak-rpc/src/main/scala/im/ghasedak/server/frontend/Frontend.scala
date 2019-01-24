@@ -38,16 +38,15 @@ object Frontend {
   def start(services: HttpRequest ⇒ Future[HttpResponse])(
     implicit
     system: ActorSystem,
-    mat: Materializer,
-    config: Config): Future[Unit] = {
-    config.getConfigList("endpoints").asScala.map(Endpoint.fromConfig) foreach (startEndpoint(_, services))
+    mat:    Materializer,
+    config: Config): Unit = {
+    config.getConfigList("endpoints").asScala.map(Endpoint.fromConfig) map (startEndpoint(_, services))
   }
 
   private def startEndpoint(endpoint: Endpoint, services: HttpRequest ⇒ Future[HttpResponse])(
     implicit
     system: ActorSystem,
-    mat: Materializer
-  ): Future[Unit] = {
+    mat:    Materializer): Future[Unit] = {
     endpoint.typ match {
       case EndpointTypes.Grpc ⇒ GrpcFrontend.start(endpoint.interface, endpoint.port, services)
     }

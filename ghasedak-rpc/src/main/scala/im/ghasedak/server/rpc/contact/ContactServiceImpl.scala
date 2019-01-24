@@ -2,6 +2,7 @@ package im.ghasedak.server.rpc.contact
 
 import akka.actor.ActorSystem
 import akka.event.{ Logging, LoggingAdapter }
+import akka.grpc.scaladsl.Metadata
 import im.ghasedak.rpc.contact._
 import im.ghasedak.rpc.misc.ResponseVoid
 import im.ghasedak.server.db.DbExtension
@@ -17,7 +18,7 @@ import slick.jdbc.PostgresProfile
 
 import scala.concurrent.{ ExecutionContext, Future }
 
-final class ContactServiceImpl(implicit system: ActorSystem) extends ContactService
+final class ContactServiceImpl(implicit system: ActorSystem) extends ContactServicePowerApi
   with AuthTokenHelper
   with ContactServiceHelper
   with DBIOResult[RpcError] {
@@ -35,15 +36,15 @@ final class ContactServiceImpl(implicit system: ActorSystem) extends ContactServ
       CommonRpcErrors.InternalError
   }
 
-  override def getContacts(request: RequestGetContacts): Future[ResponseGetContacts] = {
-    authorize { clientData ⇒
+  override def getContacts(request: RequestGetContacts, metadata: Metadata): Future[ResponseGetContacts] = {
+    authorize(metadata) { clientData ⇒
       db.run(UserContactRepo.findContactIdsActive(clientData.userId)
         .map(ResponseGetContacts(_)))
     }
   }
 
-  override def addContact(request: RequestAddContact): Future[ResponseAddContact] = {
-    authorize { clientData ⇒
+  override def addContact(request: RequestAddContact, metadata: Metadata): Future[ResponseAddContact] = {
+    authorize(metadata) { clientData ⇒
       val action: Result[ResponseAddContact] = for {
         contactRecord ← fromOption(ContactRpcErrors.InvalidContactRecord)(request.contactRecord)
         contactUserId ← getContactRecordUserId(contactRecord, clientData.orgId)
@@ -70,8 +71,8 @@ final class ContactServiceImpl(implicit system: ActorSystem) extends ContactServ
     }
   }
 
-  override def removeContact(request: RequestRemoveContact): Future[ResponseVoid] = {
-    authorize { clientData ⇒
+  override def removeContact(request: RequestRemoveContact, metadata: Metadata): Future[ResponseVoid] = {
+    authorize(metadata) { clientData ⇒
       val action: Result[ResponseVoid] = for {
         exists ← fromDBIO(UserContactRepo.exists(clientData.userId, request.contactUserId))
         _ ← fromBoolean(ContactRpcErrors.ContactNotFound)(exists)
@@ -82,6 +83,6 @@ final class ContactServiceImpl(implicit system: ActorSystem) extends ContactServ
     }
   }
 
-  override def searchContacts(request: RequestSearchContacts): Future[ResponseSearchContacts] = ???
+  override def searchContacts(request: RequestSearchContacts, metadata: Metadata): Future[ResponseSearchContacts] = ???
 
 }
