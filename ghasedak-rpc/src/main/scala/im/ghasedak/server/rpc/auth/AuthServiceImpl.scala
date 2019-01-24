@@ -8,12 +8,11 @@ import akka.event.{ Logging, LoggingAdapter }
 import im.ghasedak.rpc.auth._
 import im.ghasedak.rpc.misc.ResponseVoid
 import im.ghasedak.server.db.DbExtension
-import im.ghasedak.server.repo.auth.{ AuthPhoneTransactionRepo, AuthSessionRepo, AuthTokenRepo, AuthTransactionRepo }
-import im.ghasedak.server.repo.user.UserAuthRepo
 import im.ghasedak.server.model.auth.AuthPhoneTransaction
-import im.ghasedak.server.rpc.RpcError
-import im.ghasedak.server.rpc.auth.helper.{ AuthServiceHelper, AuthTokenHelper }
-import im.ghasedak.server.rpc.common.CommonRpcErrors
+import im.ghasedak.server.repo.auth._
+import im.ghasedak.server.repo.user.UserAuthRepo
+import im.ghasedak.server.rpc._
+import im.ghasedak.server.rpc.auth.helper._
 import im.ghasedak.server.utils.concurrent.DBIOResult
 import im.ghasedak.server.utils.number.PhoneNumberUtils._
 import slick.jdbc.PostgresProfile
@@ -23,7 +22,8 @@ import scala.concurrent.{ ExecutionContext, Future }
 final class AuthServiceImpl(implicit system: ActorSystem) extends AuthService
   with AuthServiceHelper
   with AuthTokenHelper
-  with DBIOResult[RpcError] {
+  with DBIOResult[RpcError]
+  with RpcErrorHandler {
 
   // todo: use separate dispatcher for rpc handlers
   override implicit val ec: ExecutionContext = system.dispatcher
@@ -31,13 +31,6 @@ final class AuthServiceImpl(implicit system: ActorSystem) extends AuthService
   override val db: PostgresProfile.backend.Database = DbExtension(system).db
 
   override val log: LoggingAdapter = Logging.getLogger(system, this)
-
-  implicit private def onFailure: PartialFunction[Throwable, RpcError] = {
-    case rpcError: RpcError ⇒ rpcError
-    case ex ⇒
-      log.error(ex, "Internal error")
-      CommonRpcErrors.InternalError
-  }
 
   override def startPhoneAuth(request: RequestStartPhoneAuth): Future[ResponseStartPhoneAuth] = {
     val action: Result[ResponseStartPhoneAuth] = for {

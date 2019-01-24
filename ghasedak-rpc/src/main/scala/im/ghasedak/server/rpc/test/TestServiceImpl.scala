@@ -6,13 +6,15 @@ import im.ghasedak.rpc.misc.ResponseVoid
 import im.ghasedak.rpc.test._
 import im.ghasedak.server.SeqUpdateExtension
 import im.ghasedak.server.db.DbExtension
+import im.ghasedak.server.rpc.RpcErrorHandler
 import im.ghasedak.server.rpc.auth.helper.AuthTokenHelper
 import slick.jdbc.PostgresProfile
 
 import scala.concurrent.{ ExecutionContext, Future }
 
 final class TestServiceImpl(implicit system: ActorSystem) extends TestService
-  with AuthTokenHelper {
+  with AuthTokenHelper
+  with RpcErrorHandler {
 
   // todo: use separate dispatcher for rpc handlers
   override implicit val ec: ExecutionContext = system.dispatcher

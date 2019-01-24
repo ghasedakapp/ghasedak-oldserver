@@ -12,6 +12,7 @@ import im.ghasedak.rpc.misc.ResponseVoid
 import im.ghasedak.server.db.DbExtension
 import im.ghasedak.server.dialog.DialogExtension
 import im.ghasedak.server.repo.history.HistoryMessageRepo
+import im.ghasedak.server.rpc.RpcErrorHandler
 import im.ghasedak.server.rpc.auth.helper.AuthTokenHelper
 import im.ghasedak.server.user.UserExtension
 import slick.jdbc.PostgresProfile
@@ -20,7 +21,8 @@ import scala.concurrent.{ ExecutionContext, Future }
 
 final class MessagingServiceImpl(implicit system: ActorSystem) extends MessagingService
   with AuthTokenHelper
-  with MessagingServiceHelper {
+  with MessagingServiceHelper
+  with RpcErrorHandler {
 
   // todo: use separate dispatcher for rpc handlers
   override implicit val ec: ExecutionContext = system.dispatcher
