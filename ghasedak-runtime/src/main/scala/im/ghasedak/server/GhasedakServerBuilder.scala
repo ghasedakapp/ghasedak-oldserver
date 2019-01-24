@@ -2,20 +2,16 @@ package im.ghasedak.server
 
 import akka.actor.ActorSystem
 import akka.cluster.Cluster
+import akka.grpc.scaladsl.ServiceHandler
+import akka.http.scaladsl.model.{ HttpRequest, HttpResponse }
 import akka.stream.{ ActorMaterializer, Materializer }
 import com.typesafe.config.Config
 import im.ghasedak.rpc.auth.AuthServiceHandler
 import im.ghasedak.rpc.contact.ContactServiceHandler
 import im.ghasedak.rpc.messaging.MessagingServiceHandler
 import im.ghasedak.rpc.test.TestServiceHandler
+import im.ghasedak.rpc.update.UpdateServiceHandler
 import im.ghasedak.rpc.user.UserServiceHandler
-import io.grpc.ServerServiceDefinition
-import im.ghasedak.rpc.auth.AuthServiceGrpc
-import im.ghasedak.rpc.contact.ContactServiceGrpc
-import im.ghasedak.rpc.messaging.MessagingServiceGrpc
-import im.ghasedak.rpc.test.TestServiceGrpc
-import im.ghasedak.rpc.update.UpdateServiceGrpc
-import im.ghasedak.rpc.user.UserServiceGrpc
 import im.ghasedak.server.frontend.Frontend
 import im.ghasedak.server.rpc.auth.AuthServiceImpl
 import im.ghasedak.server.rpc.contact.ContactServiceImpl
@@ -23,13 +19,8 @@ import im.ghasedak.server.rpc.messaging.MessagingServiceImpl
 import im.ghasedak.server.rpc.test.TestServiceImpl
 import im.ghasedak.server.rpc.update.UpdateServiceImpl
 import im.ghasedak.server.rpc.user.UserServiceImpl
-import io.grpc.ServerServiceDefinition
 
 import scala.concurrent.{ ExecutionContext, Future }
-import akka.http.scaladsl.UseHttp2.Always
-import akka.http.scaladsl.model.{ HttpRequest, HttpResponse }
-import akka.http.scaladsl.{ Http, HttpConnectionContext }
-import akka.grpc.scaladsl.ServiceHandler
 
 object GhasedakServerBuilder {
 
@@ -65,14 +56,16 @@ object ServiceDescriptors {
       ContactServiceHandler.partial(new ContactServiceImpl)
     val userService: PartialFunction[HttpRequest, Future[HttpResponse]] =
       UserServiceHandler.partial(new UserServiceImpl)
+    val updateService: PartialFunction[HttpRequest, Future[HttpResponse]] =
+      UpdateServiceHandler.partial(new UpdateServiceImpl)
 
     ServiceHandler.concatOrNotFound(
       testService,
       authService,
       messagingService,
       contactService,
-      userService
-    )
+      userService,
+      updateService)
   }
 
 }

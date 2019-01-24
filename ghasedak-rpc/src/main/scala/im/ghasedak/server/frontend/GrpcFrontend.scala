@@ -2,25 +2,22 @@ package im.ghasedak.server.frontend
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.UseHttp2.Always
-import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
-import akka.http.scaladsl.{Http, HttpConnectionContext}
+import akka.http.scaladsl.model.{ HttpRequest, HttpResponse }
+import akka.http.scaladsl.{ Http, HttpConnectionContext }
 import akka.stream.Materializer
-import io.grpc._
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.duration._
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{ Await, Future }
 
 object GrpcFrontend {
 
-  private var server: Option[Server] = None
   private val logger = LoggerFactory.getLogger(getClass)
 
   def start(host: String, port: Int, services: HttpRequest ⇒ Future[HttpResponse])(
     implicit
     system: ActorSystem,
-    mat:    Materializer
-  ): Future[Unit] = {
+    mat:    Materializer): Future[Unit] = {
 
     implicit val ec = system.dispatcher
 
@@ -32,21 +29,17 @@ object GrpcFrontend {
       parallelism = 256,
       connectionContext = HttpConnectionContext(http2 = Always))
 
-    //    serverBuilder.intercept(new LoggingServerInterceptor).intercept(new TokenServerInterceptor)
-    //
     sys.addShutdownHook {
       logger.error("*** shutting down gRPC server since JVM is shutting down")
-      Await.result(bound, 10.seconds)
-        .terminate(hardDeadline = 3.seconds)
+      Await.result(bound, 10 seconds).terminate(hardDeadline = 3 seconds)
       logger.error("*** server shut down")
     }
 
     bound.foreach { binding ⇒
-      println(s"gRPC server bound to: ${binding.localAddress}")
+      logger.debug("gRPC server bound to: {}", binding.localAddress)
     }
 
-    bound map (_ => ())
-
+    bound map (_ ⇒ ())
   }
 
 }

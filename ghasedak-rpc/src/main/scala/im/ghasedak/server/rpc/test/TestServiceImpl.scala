@@ -1,11 +1,8 @@
 package im.ghasedak.server.rpc.test
 
 import akka.actor.ActorSystem
-import akka.event.{ Logging, LoggingAdapter }
-import im.ghasedak.server.db.DbExtension
-import im.ghasedak.rpc.test.{ RequestTestAuth, ResponseTestAuth, TestService }
+import akka.event._
 import im.ghasedak.rpc.misc.ResponseVoid
-import im.ghasedak.rpc.test.TestServiceGrpc.TestService
 import im.ghasedak.rpc.test._
 import im.ghasedak.server.SeqUpdateExtension
 import im.ghasedak.server.db.DbExtension
@@ -34,7 +31,8 @@ final class TestServiceImpl(implicit system: ActorSystem) extends TestService
 
   override def sendUpdate(request: RequestSendUpdate): Future[ResponseVoid] = {
     authorize { clientData ⇒
-      seqUpdateExt.deliverUserUpdate(clientData.userId, request.getUpdateContainer) map (_ ⇒ ResponseVoid())
+      seqUpdateExt.deliverUserUpdate(clientData.userId, request.getUpdateContainer)
+        .map(_ ⇒ ResponseVoid())
     }
   }
 
