@@ -6,13 +6,13 @@ import java.util.UUID
 
 import im.ghasedak.rpc.auth.{ RequestSignOut, RequestSignUp, RequestStartPhoneAuth, RequestValidateCode }
 import im.ghasedak.rpc.test.RequestTestAuth
+import im.ghasedak.server.GrpcBaseSuit
+import im.ghasedak.server.repo.auth.{ AuthTransactionRepo, GateAuthCodeRepo }
+import im.ghasedak.server.rpc.Constant
 import io.grpc.Status.Code
 import io.grpc.StatusRuntimeException
-import im.ghasedak.server.repo.auth.{ AuthTransactionRepo, GateAuthCodeRepo }
-import im.ghasedak.server.GrpcBaseSuit
-import im.ghasedak.server.rpc.Constant
 
-import scala.util.{ Failure, Random, Try }
+import scala.util.Random
 
 class AuthServiceSpec extends GrpcBaseSuit {
 
@@ -75,20 +75,21 @@ class AuthServiceSpec extends GrpcBaseSuit {
 
   def invalidPhoneNumber(): Unit = {
     val request = RequestStartPhoneAuth(2, officialApiKeys.head.apiKey)
-    Try(authStub.startPhoneAuth.invoke(request).futureValue) match {
-      case Failure(ex: StatusRuntimeException) ⇒
+    authStub.startPhoneAuth.invoke(request).failed.futureValue match {
+      case ex: StatusRuntimeException ⇒
         ex.getStatus.getCode shouldEqual Code.INTERNAL
-        ex.getTrailers.get(Constant.TAG_METADATA_KEY) shouldEqual "INVALID_PHONE_NUMBER"
+        ex.getStatus.getDescription shouldEqual "INVALID_PHONE_NUMBER"
     }
   }
 
   def invalidTransaction(): Unit = {
     val request = RequestValidateCode(UUID.randomUUID().toString, "12345")
-    Try(authStub.validateCode.invoke(request).futureValue) match {
-      case Failure(ex: StatusRuntimeException) ⇒
+    authStub.validateCode.invoke(request).failed.futureValue match {
+      case ex: StatusRuntimeException ⇒
         ex.getStatus.getCode shouldEqual Code.INTERNAL
-        ex.getTrailers.get(Constant.TAG_METADATA_KEY) shouldEqual "AUTH_CODE_EXPIRED"
+        ex.getStatus.getDescription shouldEqual "AUTH_CODE_EXPIRED"
     }
+
   }
 
   def testValidateCode(): Unit = {
@@ -105,10 +106,10 @@ class AuthServiceSpec extends GrpcBaseSuit {
     val request1 = RequestStartPhoneAuth(generatePhoneNumber(), officialApiKeys.head.apiKey)
     val response1 = authStub.startPhoneAuth.invoke(request1).futureValue
     val request2 = RequestValidateCode(response1.transactionHash, "12345")
-    Try(authStub.validateCode.invoke(request2)) match {
-      case Failure(ex: StatusRuntimeException) ⇒
+    authStub.validateCode.invoke(request2).failed.futureValue match {
+      case ex: StatusRuntimeException ⇒
         ex.getStatus.getCode shouldEqual Code.INTERNAL
-        ex.getTrailers.get(Constant.TAG_METADATA_KEY) shouldEqual "INVALID_AUTH_CODE"
+        ex.getStatus.getDescription shouldEqual "INVALID_AUTH_CODE"
     }
   }
 
@@ -121,10 +122,10 @@ class AuthServiceSpec extends GrpcBaseSuit {
     db.run(AuthTransactionRepo.updateCreateAt(response1.transactionHash, oldDate)).futureValue
     val codeGate = db.run(GateAuthCodeRepo.find(response1.transactionHash)).futureValue
     val request2 = RequestValidateCode(response1.transactionHash, codeGate.get.codeHash)
-    Try(authStub.validateCode.invoke(request2)) match {
-      case Failure(ex: StatusRuntimeException) ⇒
+    authStub.validateCode.invoke(request2).failed.futureValue match {
+      case ex: StatusRuntimeException ⇒
         ex.getStatus.getCode shouldEqual Code.INTERNAL
-        ex.getTrailers.get(Constant.TAG_METADATA_KEY) shouldEqual "AUTH_CODE_EXPIRED"
+        ex.getStatus.getDescription shouldEqual "AUTH_CODE_EXPIRED"
     }
   }
 
@@ -177,10 +178,10 @@ class AuthServiceSpec extends GrpcBaseSuit {
 
   def rightAuthorizeError(): Unit = {
     val user = createUserWithPhone()
-    Try(testStub.testAuth.addHeader("token", user.token).invoke(RequestTestAuth(true))) match {
-      case Failure(ex: StatusRuntimeException) ⇒
+    testStub.testAuth.addHeader("token", user.token).invoke(RequestTestAuth(true)).failed.futureValue match {
+      case ex: StatusRuntimeException ⇒
         ex.getStatus.getCode shouldEqual Code.INTERNAL
-        ex.getTrailers.get(Constant.TAG_METADATA_KEY) shouldEqual "AUTH_TEST_ERROR"
+        ex.getStatus.getDescription shouldEqual "AUTH_TEST_ERROR"
     }
   }
 
@@ -197,10 +198,10 @@ class AuthServiceSpec extends GrpcBaseSuit {
   def signOut(): Unit = {
     val user = createUserWithPhone()
     authStub.signOut().addHeader("token", user.token).invoke(RequestSignOut()).futureValue
-    Try(testStub.testAuth().addHeader("token", user.token).invoke(RequestTestAuth()).futureValue) match {
-      case Failure(ex: StatusRuntimeException) ⇒
+    testStub.testAuth().addHeader("token", user.token).invoke(RequestTestAuth()).failed.futureValue match {
+      case ex: StatusRuntimeException ⇒
         ex.getStatus.getCode shouldEqual Code.UNAUTHENTICATED
-        ex.getTrailers.get(Constant.TAG_METADATA_KEY) shouldEqual "INVALID_TOKEN"
+        ex.getStatus.getDescription shouldEqual "INVALID_TOKEN"
     }
   }
 

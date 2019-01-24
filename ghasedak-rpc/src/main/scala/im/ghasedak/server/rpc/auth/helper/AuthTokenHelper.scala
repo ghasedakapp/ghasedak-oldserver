@@ -3,15 +3,13 @@ package im.ghasedak.server.rpc.auth.helper
 import java.util.UUID
 
 import akka.event.LoggingAdapter
-import akka.grpc.scaladsl.Metadata
+import akka.grpc.GrpcServiceException
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.JWTVerificationException
 import com.auth0.jwt.interfaces.DecodedJWT
-import io.grpc.{ Context, Metadata, StatusRuntimeException }
-import im.ghasedak.server.repo.auth.AuthTokenRepo
 import im.ghasedak.server.model.auth.AuthToken
-import im.ghasedak.server.rpc.Constant
+import im.ghasedak.server.repo.auth.AuthTokenRepo
 import im.ghasedak.server.rpc.auth.AuthRpcErrors
 import im.ghasedak.server.rpc.common.CommonRpcErrors._
 import slick.jdbc.PostgresProfile
@@ -61,7 +59,7 @@ trait AuthTokenHelper {
             case ex: JWTVerificationException ⇒
               log.error(ex, "invalid token {}", token)
               Future.failed(InvalidToken)
-            case ex: StatusRuntimeException ⇒
+            case ex: GrpcServiceException ⇒
               Future.failed(ex)
             case ex: Throwable ⇒
               log.error(ex, "Error in handling request")

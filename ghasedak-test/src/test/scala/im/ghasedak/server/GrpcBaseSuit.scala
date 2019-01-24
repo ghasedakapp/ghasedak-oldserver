@@ -5,6 +5,7 @@ import java.net.ServerSocket
 import akka.actor.ActorSystem
 import akka.grpc.GrpcClientSettings
 import akka.stream.ActorMaterializer
+import akka.util.Timeout
 import com.typesafe.config.{ Config, ConfigFactory }
 import im.ghasedak.rpc.auth.{ AuthServiceClient, AuthServiceClientPowerApi }
 import im.ghasedak.rpc.contact.{ ContactServiceClient, ContactServiceClientPowerApi }
@@ -21,6 +22,7 @@ import org.scalatest.{ BeforeAndAfterAll, FlatSpec, Inside, Matchers }
 import scala.collection.JavaConverters._
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
+import scala.concurrent.duration._
 
 // todo: config this for parallel execution
 abstract class GrpcBaseSuit extends FlatSpec
@@ -96,5 +98,8 @@ abstract class GrpcBaseSuit extends FlatSpec
     super.afterAll()
     Await.result(system.terminate(), Duration.Inf)
   }
+
+  override implicit val patienceConfig: PatienceConfig = PatienceConfig(timeout = 2 seconds)
+  implicit val timeout: Timeout = Timeout(patienceConfig.timeout)
 
 }
