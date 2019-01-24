@@ -1,34 +1,52 @@
 package im.ghasedak.server.frontend
 
+import akka.actor.ActorSystem
+import akka.http.scaladsl.UseHttp2.Always
+import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
+import akka.http.scaladsl.{Http, HttpConnectionContext}
+import akka.stream.Materializer
 import io.grpc._
 import org.slf4j.LoggerFactory
+
+import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
 
 object GrpcFrontend {
 
   private var server: Option[Server] = None
   private val logger = LoggerFactory.getLogger(getClass)
 
-  def start(host: String, port: Int, services: Seq[ServerServiceDefinition]): Unit = {
-    val serverBuilder = ServerBuilder.forPort(port)
+  def start(host: String, port: Int, services: HttpRequest ⇒ Future[HttpResponse])(
+    implicit
+    system: ActorSystem,
+    mat:    Materializer
+  ): Future[Unit] = {
 
-    services foreach serverBuilder.addService
+    implicit val ec = system.dispatcher
 
-    serverBuilder
-      .intercept(new LoggingServerInterceptor)
-      .intercept(new TokenServerInterceptor)
+    val bound = Http().bindAndHandleAsync(
+      services,
+      interface = host,
+      port = port,
+      // Needed until akka-http 10.1.5 see  https://github.com/akka/akka-http/issues/2168
+      parallelism = 256,
+      connectionContext = HttpConnectionContext(http2 = Always))
 
-    server = Some(serverBuilder.build().start)
-    logger.info("Server started, listening on " + port)
-
+    //    serverBuilder.intercept(new LoggingServerInterceptor).intercept(new TokenServerInterceptor)
+    //
     sys.addShutdownHook {
       logger.error("*** shutting down gRPC server since JVM is shutting down")
-      stop()
+      Await.result(bound, 10.seconds)
+        .terminate(hardDeadline = 3.seconds)
       logger.error("*** server shut down")
     }
-  }
 
-  private def stop(): Unit = {
-    server foreach (_.shutdown)
+    bound.foreach { binding ⇒
+      println(s"gRPC server bound to: ${binding.localAddress}")
+    }
+
+    bound map (_ => ())
+
   }
 
 }

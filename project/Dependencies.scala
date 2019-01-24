@@ -30,10 +30,6 @@ object Dependencies {
     val flyway = "org.flywaydb" % "flyway-core" % V.flyway
 
     val scalapbRuntime = "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf"
-    val grpc = Seq(
-      "io.grpc" % "grpc-netty" % scalapb.compiler.Version.grpcJavaVersion,
-      "com.thesamet.scalapb" %% "scalapb-runtime-grpc" % scalapb.compiler.Version.scalapbVersion
-    )
 
     val logback = "ch.qos.logback" % "logback-classic" % "1.2.3"
 
@@ -72,7 +68,7 @@ object Dependencies {
     logback
   )
 
-  val sdk: Seq[ModuleID] = shared ++ grpc
+  val sdk: Seq[ModuleID] = shared
 
   val model: Seq[ModuleID] = shared ++ Seq(
     config
@@ -95,7 +91,7 @@ object Dependencies {
   val rpc: Seq[ModuleID] = shared ++ Seq(
     jwt,
     stream
-  ) ++ grpc
+  )
 
   val persist: Seq[ModuleID] = shared ++ Seq(
     actor,

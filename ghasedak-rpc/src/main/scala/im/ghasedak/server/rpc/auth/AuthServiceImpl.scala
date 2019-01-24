@@ -5,7 +5,6 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import akka.event.{ Logging, LoggingAdapter }
-import im.ghasedak.rpc.auth.AuthServiceGrpc.AuthService
 import im.ghasedak.rpc.auth._
 import im.ghasedak.rpc.misc.ResponseVoid
 import im.ghasedak.server.db.DbExtension

@@ -11,13 +11,12 @@ lazy val commonSettings = Seq(
   organization := "im.ghasedak",
   scalaVersion := "2.12.8",
   mainClass in Compile := Some("im.ghasedak.server.Main"),
-  PB.targets in Compile := Seq(
-    scalapb.gen() -> (sourceManaged in Compile).value),
-  PB.includePaths in Compile ++= Seq(
-    file("ghasedak-model/src/main/protobuf"),
-    file("ghasedak-sdk/src/main/protobuf")
-  ),
-  scalaSource in ProtocPlugin.ProtobufConfig := sourceManaged.value,
+//  PB.targets in Compile := Seq(
+//    scalapb.gen() -> (sourceManaged in Compile).value),
+//  PB.includePaths in Compile ++= Seq(
+//    file("ghasedak-sdk/src/main/protobuf")
+//  ),
+//    scalaSource in ProtocPlugin.ProtobufConfig := sourceManaged.value,
   scalariformPreferences := scalariformPreferences.value
     .setPreference(RewriteArrowSymbols, true)
     .setPreference(AlignParameters, true)
@@ -38,7 +37,8 @@ lazy val root = (project in file("."))
 lazy val sdk = ghasedakModule("ghasedak-sdk")
   .settings(
     libraryDependencies ++= Dependencies.sdk
-  )
+  ).enablePlugins(AkkaGrpcPlugin)
+
 
 lazy val model = ghasedakModule("ghasedak-model")
   .settings(

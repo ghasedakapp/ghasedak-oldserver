@@ -5,12 +5,6 @@ package im.ghasedak.api;
 option java_package = "im.ghasedak.api.update";
 option java_multiple_files = true;
 
-option (scalapb.options) = {
-  flat_package: true
-};
-
-import "scalapb/scalapb.proto";
-
 message ApiSeqState {
     int32 seq = 1;
     bytes state = 2;

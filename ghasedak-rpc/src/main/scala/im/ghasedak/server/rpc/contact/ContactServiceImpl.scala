@@ -2,7 +2,6 @@ package im.ghasedak.server.rpc.contact
 
 import akka.actor.ActorSystem
 import akka.event.{ Logging, LoggingAdapter }
-import im.ghasedak.rpc.contact.ContactServiceGrpc.ContactService
 import im.ghasedak.rpc.contact._
 import im.ghasedak.rpc.misc.ResponseVoid
 import im.ghasedak.server.db.DbExtension
