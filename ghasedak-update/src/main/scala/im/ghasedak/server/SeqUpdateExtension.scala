@@ -45,7 +45,7 @@ final class SeqUpdateExtensionImpl(system: ActorSystem) extends Extension
     MessageId.fromJava(MessageIdImpl.fromByteArray(seqState.state.toByteArray))
   }
 
-  // todo: find better way for get pulsar state
+  // fixme: find better way for get pulsar state
   def getState(userId: Int): Future[ApiSeqState] = {
     val topic = getUserUpdateTopic(userId)
     val readerConfig = ReaderConfig(topic, MessageId.earliest)

@@ -1,16 +1,18 @@
 package im.ghasedak.server.rpc.update
 
-import com.sksamuel.pulsar4s.{ ConsumerMessage, MessageId, Reader }
+import akka.NotUsed
+import akka.stream.scaladsl.Source
+import com.sksamuel.pulsar4s.{ ConsumerMessage, Reader }
 import im.ghasedak.api.update.ApiSeqState
 import im.ghasedak.rpc.update.ResponseGetDifference
 import im.ghasedak.server.rpc.common.CommonRpcErrors
 import im.ghasedak.server.update.UpdateMapping
 import io.grpc.stub.StreamObserver
-import org.apache.pulsar.client.impl.MessageIdImpl
 
 trait UpdateServiceHelper {
   this: UpdateServiceImpl ⇒
 
+  // todo: remove this after akka grpc
   def getDifference(
     userId:           Int,
     tokenId:          String,
@@ -21,6 +23,7 @@ trait UpdateServiceHelper {
     getDifference(userId, tokenId, reader, responseObserver)
   }
 
+  // todo: remove this after akka grpc
   def getDifference(
     userId:           Int,
     tokenId:          String,
@@ -36,6 +39,7 @@ trait UpdateServiceHelper {
     }
   }
 
+  // todo: remove this after akka grpc
   def sendDifference(
     userId:           Int,
     tokenId:          String,
@@ -51,6 +55,15 @@ trait UpdateServiceHelper {
         log.warning(ex.getMessage)
         reader.closeAsync
     }
+  }
+
+  def getDifference(
+    userId:   Int,
+    tokenId:  String,
+    seqState: ApiSeqState): Source[ResponseGetDifference, NotUsed] = {
+    val messageId = seqUpdateExt.getMessageId(seqState)
+    seqUpdateExt.getDifference(userId, messageId)
+      .map(cm ⇒ buildDifference(tokenId, cm))
   }
 
   def buildDifference(tokenId: String, consumerMessage: ConsumerMessage[UpdateMapping]): ResponseGetDifference = {
