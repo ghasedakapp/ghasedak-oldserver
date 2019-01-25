@@ -16,6 +16,7 @@ trait UpdateServiceHelper {
     seqState: ApiSeqState): Source[ResponseGetDifference, Control] = {
     val messageId = seqUpdateExt.getMessageId(seqState)
     seqUpdateExt.getDifference(userId, messageId)
+      .filter(cm ⇒ cm.messageId != messageId) // because of pulsar architecture
       .map(cm ⇒ buildDifference(tokenId, cm))
   }
 

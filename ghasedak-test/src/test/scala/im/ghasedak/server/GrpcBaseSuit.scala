@@ -29,7 +29,7 @@ abstract class GrpcBaseSuit extends FlatSpec
   with ScalaFutures
   with Inside
   with UserTestUtils
-  //  with UpdateMatcher
+  with UpdateMatcher
   with BeforeAndAfterAll {
 
   private def randomPort: Int = {
