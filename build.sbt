@@ -1,3 +1,4 @@
+import akka.grpc.sbt.AkkaGrpcPlugin.GeneratorOption
 import im.ghasedak.Dependencies
 import scalariform.formatter.preferences._
 
@@ -11,12 +12,6 @@ lazy val commonSettings = Seq(
   organization := "im.ghasedak",
   scalaVersion := "2.12.8",
   mainClass in Compile := Some("im.ghasedak.server.Main"),
-//  PB.targets in Compile := Seq(
-//    scalapb.gen() -> (sourceManaged in Compile).value),
-//  PB.includePaths in Compile ++= Seq(
-//    file("ghasedak-sdk/src/main/protobuf")
-//  ),
-//    scalaSource in ProtocPlugin.ProtobufConfig := sourceManaged.value,
   scalariformPreferences := scalariformPreferences.value
     .setPreference(RewriteArrowSymbols, true)
     .setPreference(AlignParameters, true)
@@ -24,7 +19,6 @@ lazy val commonSettings = Seq(
     .setPreference(SpacesAroundMultiImports, true),
   parallelExecution in Test := false
 )
-
 lazy val root = (project in file("."))
   .settings(
     commonSettings,
@@ -36,9 +30,11 @@ lazy val root = (project in file("."))
 // Every protobuf that transfer between client and server
 lazy val sdk = ghasedakModule("ghasedak-sdk")
   .settings(
-    libraryDependencies ++= Dependencies.sdk
+    libraryDependencies ++= Dependencies.sdk,
+    akkaGrpcCodeGeneratorSettings += "server_power_apis",
+    akkaGrpcGeneratedSources := Seq(AkkaGrpc.Server, AkkaGrpc.Client),
+    resolvers += Resolver.url("ghasedak-repo", url("https://raw.github.com/ghasedakapp/ghasedak-repositories/master"))(Resolver.ivyStylePatterns)
   ).enablePlugins(AkkaGrpcPlugin)
-
 
 lazy val model = ghasedakModule("ghasedak-model")
   .settings(

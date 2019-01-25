@@ -1,10 +1,10 @@
 package im.ghasedak.server.rpc
 
+import akka.grpc.GrpcServiceException
 import io.grpc._
 
-case class RpcError(status: Status, tag: String, description: String) extends StatusRuntimeException(
-  status.withDescription(description),
-  new MetadataBuilder().put(Constant.TAG_METADATA_KEY, tag).build)
+case class RpcError(code: Status, tag: String, description: String) extends GrpcServiceException(
+  code.withDescription(tag))
 
 object RpcError {
   def apply(status: Status, tag: String): RpcError = new RpcError(status, tag, null)

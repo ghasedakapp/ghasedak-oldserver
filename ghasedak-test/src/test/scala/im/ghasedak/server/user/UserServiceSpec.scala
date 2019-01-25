@@ -14,9 +14,9 @@ class UserServiceSpec extends GrpcBaseSuit {
     val ali = createUserWithPhone()
     val sara = createUserWithPhone()
 
-    val aliStubUser1 = userStub.withInterceptors(clientTokenInterceptor(ali.token))
+    val aliStubUser1 = userStub.loadUsers().addHeader("token", ali.token)
 
-    val rsp = aliStubUser1.loadUsers(RequestLoadUsers(Seq(sara.userId)))
+    val rsp = aliStubUser1.invoke(RequestLoadUsers(Seq(sara.userId))).futureValue
 
     rsp.users should have size 1
     rsp.users.head should have(
@@ -30,9 +30,9 @@ class UserServiceSpec extends GrpcBaseSuit {
   it should "load more than one user without contact" in {
     val users = createUsersWithPhone(5)
 
-    val userStubUser1 = userStub.withInterceptors(clientTokenInterceptor(users.head.token))
+    val userStubUser1 = userStub.loadUsers().addHeader("token", users.head.token)
 
-    val rsp = userStubUser1.loadUsers(RequestLoadUsers(users.map(_.userId)))
+    val rsp = userStubUser1.invoke(RequestLoadUsers(users.map(_.userId))).futureValue
 
     rsp.users should have size users.size
     rsp.users shouldBe users.map(u ⇒ ApiUser(
@@ -46,9 +46,9 @@ class UserServiceSpec extends GrpcBaseSuit {
   it should "load user with local name" in {
     val users = createUsersWithPhone(6)
 
-    val contactStubUser1 = contactStub.withInterceptors(clientTokenInterceptor(users.head.token))
-    val contactStubUser2 = contactStub.withInterceptors(clientTokenInterceptor(users(1).token))
-    val userStubUser1 = userStub.withInterceptors(clientTokenInterceptor(users.head.token))
+    val contactStubUser1 = contactStub.addContact().addHeader("token", users.head.token)
+    val contactStubUser2 = contactStub.addContact().addHeader("token", users(1).token)
+    val userStubUser1 = userStub.loadUsers().addHeader("token", users.head.token)
 
     val userForContact = users.slice(2, 5)
 
@@ -60,10 +60,10 @@ class UserServiceSpec extends GrpcBaseSuit {
           contactRecord = Some(ApiContactRecord().withPhoneNumber(user.phoneNumber.get)))
     }
 
-    requests foreach contactStubUser1.addContact
-    requests foreach contactStubUser2.addContact
+    requests foreach (contactStubUser1.invoke(_).futureValue)
+    requests foreach (contactStubUser2.invoke(_).futureValue)
 
-    val rsp = userStubUser1.loadUsers(RequestLoadUsers(userForContact.map(_.userId)))
+    val rsp = userStubUser1.invoke(RequestLoadUsers(userForContact.map(_.userId))).futureValue
 
     val userForContactApiUsers = userForContact.zipWithIndex.map {
       case (user, index) ⇒ ApiUser(

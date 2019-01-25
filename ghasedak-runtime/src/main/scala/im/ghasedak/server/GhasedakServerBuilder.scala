@@ -63,8 +63,7 @@ object ServiceDescriptors {
       authService,
       messagingService,
       contactService,
-      userService
-    )
+      userService)
   }
 
 }
