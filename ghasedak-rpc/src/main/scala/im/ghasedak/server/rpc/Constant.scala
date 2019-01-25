@@ -5,10 +5,12 @@ import io.grpc.{ Context, Metadata }
 
 object Constant {
 
-  val TOKEN_CONTEXT_KEY: Context.Key[String] = Context.key[String]("token")
+  val tokenMetadataKey = "token"
 
-  val TOKEN_METADATA_KEY: Metadata.Key[String] = Metadata.Key.of("token", ASCII_STRING_MARSHALLER)
+  // todo: remove this in future
+  val TOKEN_CONTEXT_KEY: Context.Key[String] = Context.key[String](tokenMetadataKey)
 
-  val TAG_METADATA_KEY: Metadata.Key[String] = Metadata.Key.of("tag", ASCII_STRING_MARSHALLER)
+  // todo: remove this in future
+  val TOKEN_METADATA_KEY: Metadata.Key[String] = Metadata.Key.of(tokenMetadataKey, ASCII_STRING_MARSHALLER)
 
 }

@@ -3,7 +3,7 @@ package im.ghasedak.server.rpc.user
 import akka.actor.ActorSystem
 import akka.event.{ Logging, LoggingAdapter }
 import akka.grpc.scaladsl.Metadata
-import im.ghasedak.rpc.user.{ RequestLoadUsers, ResponseLoadUsers, UserService, UserServicePowerApi }
+import im.ghasedak.rpc.user._
 import im.ghasedak.server.db.DbExtension
 import im.ghasedak.server.rpc.auth.helper.AuthTokenHelper
 import im.ghasedak.server.rpc.common.CommonRpcErrors
@@ -28,15 +28,8 @@ final class UserServiceImpl(implicit system: ActorSystem) extends UserServicePow
 
   protected val userExt = UserExtension(system)
 
-  override def loadUsers(request: RequestLoadUsers, metadata: Metadata): Future[ResponseLoadUsers] =
+  override def loadUsers(request: RequestLoadUsers, metadata: Metadata): Future[ResponseLoadUsers] = {
     authorize(metadata) { clientData ⇒
-      // todo: config
-      if (request.userIds.size > 100)
-        Future.failed(CommonRpcErrors.CollectionSizeLimitExceed)
-      else
-        userExt.getUsers(clientData.orgId, clientData.userId, request.userIds) map (ResponseLoadUsers(_))
-  override def loadUsers(request: RequestLoadUsers): Future[ResponseLoadUsers] = {
-    authorize { clientData ⇒
       val action: Result[ResponseLoadUsers] = for {
         // todo: config
         _ ← fromBoolean(CommonRpcErrors.CollectionSizeLimitExceed)(request.userIds.size <= 100)

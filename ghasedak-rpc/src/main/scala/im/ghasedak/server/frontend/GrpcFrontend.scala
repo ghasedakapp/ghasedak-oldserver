@@ -29,21 +29,17 @@ object GrpcFrontend {
       parallelism = 256,
       connectionContext = HttpConnectionContext(http2 = Always))
 
-    //    serverBuilder.intercept(new LoggingServerInterceptor).intercept(new TokenServerInterceptor)
-    //
     sys.addShutdownHook {
       logger.error("*** shutting down gRPC server since JVM is shutting down")
-      Await.result(bound, 10.seconds)
-        .terminate(hardDeadline = 3.seconds)
+      Await.result(bound, 10 seconds).terminate(hardDeadline = 3 seconds)
       logger.error("*** server shut down")
     }
 
     bound.foreach { binding ⇒
-      println(s"gRPC server bound to: ${binding.localAddress}")
+      logger.debug("gRPC server bound to: {}", binding.localAddress)
     }
 
     bound map (_ ⇒ ())
-
   }
 
 }

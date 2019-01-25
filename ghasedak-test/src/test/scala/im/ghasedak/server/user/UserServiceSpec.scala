@@ -14,7 +14,7 @@ class UserServiceSpec extends GrpcBaseSuit {
     val ali = createUserWithPhone()
     val sara = createUserWithPhone()
 
-    val aliStubUser1 = userStub.loadUsers().addHeader("token", ali.token)
+    val aliStubUser1 = userStub.loadUsers.addHeader(tokenMetadataKey, ali.token)
 
     val rsp = aliStubUser1.invoke(RequestLoadUsers(Seq(sara.userId))).futureValue
 
@@ -30,7 +30,7 @@ class UserServiceSpec extends GrpcBaseSuit {
   it should "load more than one user without contact" in {
     val users = createUsersWithPhone(5)
 
-    val userStubUser1 = userStub.loadUsers().addHeader("token", users.head.token)
+    val userStubUser1 = userStub.loadUsers.addHeader(tokenMetadataKey, users.head.token)
 
     val rsp = userStubUser1.invoke(RequestLoadUsers(users.map(_.userId))).futureValue
 
@@ -46,9 +46,9 @@ class UserServiceSpec extends GrpcBaseSuit {
   it should "load user with local name" in {
     val users = createUsersWithPhone(6)
 
-    val contactStubUser1 = contactStub.addContact().addHeader("token", users.head.token)
-    val contactStubUser2 = contactStub.addContact().addHeader("token", users(1).token)
-    val userStubUser1 = userStub.loadUsers().addHeader("token", users.head.token)
+    val contactStubUser1 = contactStub.addContact.addHeader(tokenMetadataKey, users.head.token)
+    val contactStubUser2 = contactStub.addContact.addHeader(tokenMetadataKey, users(1).token)
+    val userStubUser1 = userStub.loadUsers.addHeader(tokenMetadataKey, users.head.token)
 
     val userForContact = users.slice(2, 5)
 

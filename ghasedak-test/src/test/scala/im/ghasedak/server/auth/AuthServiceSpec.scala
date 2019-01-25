@@ -9,14 +9,6 @@ import im.ghasedak.rpc.misc.ResponseVoid
 import im.ghasedak.rpc.test.RequestCheckAuth
 import im.ghasedak.server.GrpcBaseSuit
 import im.ghasedak.server.repo.auth._
-import im.ghasedak.server.rpc.Constant
-import io.grpc.Status.Code
-import io.grpc.StatusRuntimeException
-import im.ghasedak.rpc.auth.{ RequestSignOut, RequestSignUp, RequestStartPhoneAuth, RequestValidateCode }
-import im.ghasedak.rpc.test.RequestTestAuth
-import im.ghasedak.server.GrpcBaseSuit
-import im.ghasedak.server.repo.auth.{ AuthTransactionRepo, GateAuthCodeRepo }
-import im.ghasedak.server.rpc.Constant
 import io.grpc.Status.Code
 import io.grpc.StatusRuntimeException
 
@@ -177,8 +169,8 @@ class AuthServiceSpec extends GrpcBaseSuit {
 
   def authorizedAfterSignUp(): Unit = {
     val user = createUserWithPhone()
-    val response = testStub.testAuth.addHeader("token", user.token).invoke(RequestTestAuth()).futureValue
-    response.auth shouldEqual true
+    val response = testStub.checkAuth.addHeader(tokenMetadataKey, user.token).invoke(RequestCheckAuth()).futureValue
+    response shouldEqual ResponseVoid()
   }
 
   def differentTransactionHashAfterValidate(): Unit = {
@@ -186,15 +178,15 @@ class AuthServiceSpec extends GrpcBaseSuit {
     val response1 = authStub.startPhoneAuth.invoke(request1).futureValue
     val codeGate = db.run(GateAuthCodeRepo.find(response1.transactionHash)).futureValue
     val request2 = RequestValidateCode(response1.transactionHash, codeGate.get.codeHash)
-    val response2 = authStub.validateCode.invoke(request2).futureValue
+    authStub.validateCode.invoke(request2).futureValue
     val response3 = authStub.startPhoneAuth.invoke(request1).futureValue
     response3.transactionHash should not equal response1.transactionHash
   }
 
   def signOut(): Unit = {
     val user = createUserWithPhone()
-    authStub.signOut().addHeader("token", user.token).invoke(RequestSignOut()).futureValue
-    testStub.testAuth().addHeader("token", user.token).invoke(RequestTestAuth()).failed.futureValue match {
+    authStub.signOut.addHeader(tokenMetadataKey, user.token).invoke(RequestSignOut()).futureValue
+    testStub.checkAuth.addHeader(tokenMetadataKey, user.token).invoke(RequestCheckAuth()).failed.futureValue match {
       case ex: StatusRuntimeException ⇒
         ex.getStatus.getCode shouldEqual Code.UNAUTHENTICATED
         ex.getStatus.getDescription shouldEqual "INVALID_TOKEN"

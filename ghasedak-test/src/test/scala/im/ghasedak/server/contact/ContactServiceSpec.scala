@@ -3,13 +3,12 @@ package im.ghasedak.server.contact
 import im.ghasedak.api.contact.ApiContactRecord
 import im.ghasedak.rpc.contact.{ RequestAddContact, RequestGetContacts, RequestRemoveContact }
 import im.ghasedak.rpc.user.RequestLoadUsers
+import im.ghasedak.server.GrpcBaseSuit
+import im.ghasedak.server.repo.user.UserRepo
 import io.grpc.Status.Code
 import io.grpc.StatusRuntimeException
-import im.ghasedak.server.repo.user.UserRepo
-import im.ghasedak.server.GrpcBaseSuit
-import im.ghasedak.server.rpc.Constant
 
-import scala.util.{ Failure, Random, Try }
+import scala.util.Random
 
 class ContactServiceSpec extends GrpcBaseSuit {
 
@@ -34,7 +33,7 @@ class ContactServiceSpec extends GrpcBaseSuit {
   def addContactWithPhoneNumber(): Unit = {
     val user1 = createUserWithPhone()
     val user2 = createUserWithPhone()
-    val stub = contactStub.addContact().addHeader("token", user1.token)
+    val stub = contactStub.addContact.addHeader(tokenMetadataKey, user1.token)
     val request = RequestAddContact(
       localName = Some(Random.alphanumeric.take(20).mkString),
       Some(ApiContactRecord().withPhoneNumber(user2.phoneNumber.get)))
@@ -44,7 +43,7 @@ class ContactServiceSpec extends GrpcBaseSuit {
 
   def invalidContactError(): Unit = {
     val user1 = createUserWithPhone()
-    val stub = contactStub.addContact().addHeader("token", user1.token)
+    val stub = contactStub.addContact.addHeader(tokenMetadataKey, user1.token)
     val request1 = RequestAddContact(Some(Random.alphanumeric.take(20).mkString))
     stub.invoke(request1).failed.futureValue match {
       case ex: StatusRuntimeException ⇒
@@ -61,7 +60,7 @@ class ContactServiceSpec extends GrpcBaseSuit {
 
   def cantAddSelfError(): Unit = {
     val user = createUserWithPhone()
-    val stub = contactStub.addContact().addHeader("token", user.token)
+    val stub = contactStub.addContact.addHeader(tokenMetadataKey, user.token)
     val request = RequestAddContact(
       Some(Random.alphanumeric.take(20).mkString),
       Some(ApiContactRecord().withPhoneNumber(user.phoneNumber.get)))
@@ -75,7 +74,7 @@ class ContactServiceSpec extends GrpcBaseSuit {
   def contactAlreadyExist(): Unit = {
     val user1 = createUserWithPhone()
     val user2 = createUserWithPhone()
-    val stub = contactStub.addContact().addHeader("token", user1.token)
+    val stub = contactStub.addContact.addHeader(tokenMetadataKey, user1.token)
     val request = RequestAddContact(
       localName = Some(Random.alphanumeric.take(20).mkString),
       Some(ApiContactRecord().withPhoneNumber(user2.phoneNumber.get)))
@@ -89,7 +88,7 @@ class ContactServiceSpec extends GrpcBaseSuit {
 
   def userNotFound(): Unit = {
     val user = createUserWithPhone()
-    val stub = contactStub.addContact().addHeader("token", user.token)
+    val stub = contactStub.addContact.addHeader(tokenMetadataKey, user.token)
     val request = RequestAddContact(
       Some(Random.alphanumeric.take(20).mkString),
       Some(ApiContactRecord().withPhoneNumber(generatePhoneNumber())))
@@ -104,8 +103,8 @@ class ContactServiceSpec extends GrpcBaseSuit {
     val n = 10
     val user = createUserWithPhone()
     val contacts = Seq.fill(n)(createUserWithPhone())
-    val stub = contactStub.addContact().addHeader("token", user.token)
-    val getContactStub = contactStub.getContacts().addHeader("token", user.token)
+    val stub = contactStub.addContact.addHeader(tokenMetadataKey, user.token)
+    val getContactStub = contactStub.getContacts().addHeader(tokenMetadataKey, user.token)
     contacts foreach { contact ⇒
       val request = RequestAddContact(
         localName = Some(Random.alphanumeric.take(20).mkString),
@@ -120,9 +119,9 @@ class ContactServiceSpec extends GrpcBaseSuit {
   def removeContact(): Unit = {
     val user1 = createUserWithPhone()
     val user2 = createUserWithPhone()
-    val addContactStub = contactStub.addContact().addHeader("token", user1.token)
-    val getContactStub = contactStub.getContacts().addHeader("token", user1.token)
-    val removeContactStub = contactStub.removeContact().addHeader("token", user1.token)
+    val addContactStub = contactStub.addContact.addHeader(tokenMetadataKey, user1.token)
+    val getContactStub = contactStub.getContacts.addHeader(tokenMetadataKey, user1.token)
+    val removeContactStub = contactStub.removeContact().addHeader(tokenMetadataKey, user1.token)
     val request = RequestAddContact(
       localName = Some(Random.alphanumeric.take(20).mkString),
       Some(ApiContactRecord().withPhoneNumber(user2.phoneNumber.get)))
@@ -135,8 +134,8 @@ class ContactServiceSpec extends GrpcBaseSuit {
   def addWithoutLocalName(): Unit = {
     val user1 = createUserWithPhone()
     val user2 = createUserWithPhone()
-    val stub = contactStub.addContact().addHeader("token", user1.token)
-    val uStub = userStub.loadUsers().addHeader("token", user1.token)
+    val stub = contactStub.addContact.addHeader(tokenMetadataKey, user1.token)
+    val uStub = userStub.loadUsers.addHeader(tokenMetadataKey, user1.token)
     val request = RequestAddContact(
       localName = None,
       Some(ApiContactRecord().withPhoneNumber(user2.phoneNumber.get)))

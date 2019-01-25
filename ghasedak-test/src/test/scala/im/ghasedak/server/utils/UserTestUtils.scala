@@ -18,6 +18,9 @@ object UserTestUtils {
 trait UserTestUtils {
   this: GrpcBaseSuit ⇒
 
+  protected val tokenMetadataKey = Constant.tokenMetadataKey
+
+  // todo: remove this in future
   protected def clientTokenInterceptor(token: String): ClientInterceptor = {
     new ClientInterceptor {
       override def interceptCall[ReqT, RespT](method: MethodDescriptor[ReqT, RespT], callOptions: CallOptions, next: Channel): ClientCall[ReqT, RespT] = {
