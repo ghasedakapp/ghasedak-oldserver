@@ -1,8 +1,8 @@
 package im.ghasedak.server.messaging
 
-import im.ghasedak.api.messaging.{ ApiMessage, ApiTextMessage }
-import im.ghasedak.api.peer.{ ApiPeer, ApiPeerType }
-import im.ghasedak.rpc.messaging.{ RequestLoadDialogs, RequestLoadHistory, RequestMessageRead, RequestSendMessage }
+import im.ghasedak.api.messaging._
+import im.ghasedak.api.peer._
+import im.ghasedak.rpc.messaging._
 import im.ghasedak.server.GrpcBaseSuit
 
 import scala.util.Random
@@ -12,9 +12,10 @@ class MessagingServiceSpec extends GrpcBaseSuit {
   behavior of "MessagingServiceImpl"
 
   it should "send message, load history, load dialog" in sendMessage
+
   //  it should "read message" in readMessage
 
-  def sendMessage: Unit = {
+  def sendMessage(): Unit = {
     val aliUser = createUserWithPhone()
     val aliPeer = Some(ApiPeer(ApiPeerType.PRIVATE, aliUser.userId))
     val hosseinUser = createUserWithPhone()
@@ -22,12 +23,12 @@ class MessagingServiceSpec extends GrpcBaseSuit {
     val salehUser = createUserWithPhone()
     val salehPeer = Some(ApiPeer(ApiPeerType.PRIVATE, salehUser.userId))
 
-    val stubAli = messagingStub.sendMessage().addHeader("token", aliUser.token)
-    val loadHistoryStubAli = messagingStub.loadHistory().addHeader("token", aliUser.token)
-    val loadDialogStubAli = messagingStub.loadDialogs().addHeader("token", aliUser.token)
+    val stubAli = messagingStub.sendMessage.addHeader(tokenMetadataKey, aliUser.token)
+    val loadHistoryStubAli = messagingStub.loadHistory.addHeader(tokenMetadataKey, aliUser.token)
+    val loadDialogStubAli = messagingStub.loadDialogs.addHeader(tokenMetadataKey, aliUser.token)
 
-    val stubHossein = messagingStub.sendMessage().addHeader("token", hosseinUser.token)
-    val loadHistoryStubHossein = messagingStub.loadHistory().addHeader("token", hosseinUser.token)
+    val stubHossein = messagingStub.sendMessage.addHeader(tokenMetadataKey, hosseinUser.token)
+    val loadHistoryStubHossein = messagingStub.loadHistory.addHeader(tokenMetadataKey, hosseinUser.token)
 
     val msgToHossein = ApiMessage().withTextMessage(ApiTextMessage("salamToHossein"))
     val msgToAli = ApiMessage().withTextMessage(ApiTextMessage("salamToAli"))
@@ -66,7 +67,7 @@ class MessagingServiceSpec extends GrpcBaseSuit {
     dialogRspAli.dialogs.map(_.message.get.message.get) shouldBe Seq(msgToSaleh, msgToAli)
   }
 
-  def readMessage: Unit = {
+  def readMessage(): Unit = {
     val aliUser = createUserWithPhone()
     val aliPeer = Some(ApiPeer(ApiPeerType.PRIVATE, aliUser.userId))
     val hosseinUser = createUserWithPhone()
@@ -74,12 +75,12 @@ class MessagingServiceSpec extends GrpcBaseSuit {
     val salehUser = createUserWithPhone()
     val salehPeer = Some(ApiPeer(ApiPeerType.PRIVATE, salehUser.userId))
 
-    val stubAli = messagingStub.sendMessage().addHeader("token", aliUser.token)
-    val loadDialogStubAli = messagingStub.loadDialogs().addHeader("token", aliUser.token)
+    val stubAli = messagingStub.sendMessage.addHeader(tokenMetadataKey, aliUser.token)
+    val loadDialogStubAli = messagingStub.loadDialogs.addHeader(tokenMetadataKey, aliUser.token)
 
-    val stubHossein = messagingStub.sendMessage().addHeader("token", hosseinUser.token)
-    val loadDialogStubHossein = messagingStub.loadDialogs().addHeader("token", hosseinUser.token)
-    val messageReadStubHossein = messagingStub.messageRead().addHeader("token", hosseinUser.token)
+    val stubHossein = messagingStub.sendMessage().addHeader(tokenMetadataKey, hosseinUser.token)
+    val loadDialogStubHossein = messagingStub.loadDialogs.addHeader(tokenMetadataKey, hosseinUser.token)
+    val messageReadStubHossein = messagingStub.messageRead.addHeader(tokenMetadataKey, hosseinUser.token)
 
     val msgToHossein1 = ApiMessage().withTextMessage(ApiTextMessage("salamToHossein1"))
     val msgToHossein2 = ApiMessage().withTextMessage(ApiTextMessage("salamToHossein2"))

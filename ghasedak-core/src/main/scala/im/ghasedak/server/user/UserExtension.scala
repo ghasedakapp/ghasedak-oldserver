@@ -22,6 +22,7 @@ final class UserExtensionImpl(system: ExtendedActorSystem) extends Extension {
 
   private implicit val _system: ActorSystem = system
 
+  // todo: use separate dispatcher for user extension jobs and users actor
   private implicit val ec: ExecutionContext = system.dispatcher
 
   private implicit val db: PostgresProfile.backend.Database = DbExtension(system).db

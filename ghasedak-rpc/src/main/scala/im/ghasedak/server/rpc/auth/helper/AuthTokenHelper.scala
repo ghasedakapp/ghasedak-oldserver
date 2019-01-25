@@ -10,6 +10,7 @@ import com.auth0.jwt.exceptions.JWTVerificationException
 import com.auth0.jwt.interfaces.DecodedJWT
 import im.ghasedak.server.model.auth.AuthToken
 import im.ghasedak.server.repo.auth.AuthTokenRepo
+import im.ghasedak.server.rpc.Constant
 import im.ghasedak.server.rpc.auth.AuthRpcErrors
 import im.ghasedak.server.rpc.common.CommonRpcErrors._
 import slick.jdbc.PostgresProfile
@@ -60,6 +61,7 @@ trait AuthTokenHelper {
               log.error(ex, "invalid token {}", token)
               Future.failed(InvalidToken)
             case ex: GrpcServiceException ⇒
+              log.warning(ex.getMessage)
               Future.failed(ex)
             case ex: Throwable ⇒
               log.error(ex, "Error in handling request")
@@ -72,10 +74,11 @@ trait AuthTokenHelper {
         }
     }
   }
+
   import akka.grpc.scaladsl.Metadata
 
   def authorize[T](metadata: Metadata)(f: ClientData ⇒ Future[T]): Future[T] =
-    authorize(metadata.getText("token"))(f)
+    authorize(metadata.getText(Constant.tokenMetadataKey))(f)
 
   def generateToken(userId: Int, orgId: Int): Future[(String, String)] = {
     val tokenKey = UUID.randomUUID().toString

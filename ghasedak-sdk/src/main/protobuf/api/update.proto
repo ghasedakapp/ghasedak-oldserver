@@ -17,4 +17,5 @@ message ApiUpdateContainer {
 }
 
 message UpdatePong {
+    int32 i = 1;
 }

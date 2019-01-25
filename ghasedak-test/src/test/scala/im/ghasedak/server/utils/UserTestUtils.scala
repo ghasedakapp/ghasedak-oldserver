@@ -1,11 +1,11 @@
 package im.ghasedak.server.utils
 
-import im.ghasedak.rpc.auth.{ RequestSignUp, RequestStartPhoneAuth, RequestValidateCode }
-import io.grpc._
-import im.ghasedak.server.repo.auth.GateAuthCodeRepo
+import im.ghasedak.rpc.auth._
 import im.ghasedak.server.GrpcBaseSuit
+import im.ghasedak.server.repo.auth.GateAuthCodeRepo
 import im.ghasedak.server.rpc.Constant
 import im.ghasedak.server.utils.UserTestUtils.TestClientData
+import io.grpc._
 
 import scala.util.Random
 
@@ -18,6 +18,9 @@ object UserTestUtils {
 trait UserTestUtils {
   this: GrpcBaseSuit ⇒
 
+  protected val tokenMetadataKey = Constant.tokenMetadataKey
+
+  // todo: remove this in future
   protected def clientTokenInterceptor(token: String): ClientInterceptor = {
     new ClientInterceptor {
       override def interceptCall[ReqT, RespT](method: MethodDescriptor[ReqT, RespT], callOptions: CallOptions, next: Channel): ClientCall[ReqT, RespT] = {
@@ -43,7 +46,7 @@ trait UserTestUtils {
     (strPhone.toLong, code)
   }
 
-  protected def createUserWithPhone(): TestClientData = {
+  protected def createUserWithPhone(): TestUser = {
     val phone = generatePhoneNumber()
     val request1 = RequestStartPhoneAuth(phone, officialApiKeys.head.apiKey)
     val response1 = authStub.startPhoneAuth.invoke(request1).futureValue
@@ -62,7 +65,7 @@ trait UserTestUtils {
       Some(name))
   }
 
-  protected def createUsersWithPhone(num: Int): Seq[TestClientData] =
+  protected def createUsersWithPhone(num: Int): Seq[TestUser] =
     1 to num map (_ ⇒ createUserWithPhone())
 
 }

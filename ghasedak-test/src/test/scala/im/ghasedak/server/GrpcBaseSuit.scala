@@ -5,23 +5,22 @@ import java.net.ServerSocket
 import akka.actor.ActorSystem
 import akka.grpc.GrpcClientSettings
 import akka.stream.ActorMaterializer
-import akka.util.Timeout
-import com.typesafe.config.{ Config, ConfigFactory }
-import im.ghasedak.rpc.auth.{ AuthServiceClient, AuthServiceClientPowerApi }
-import im.ghasedak.rpc.contact.{ ContactServiceClient, ContactServiceClientPowerApi }
-import im.ghasedak.rpc.messaging.{ MessagingServiceClient, MessagingServiceClientPowerApi }
-import im.ghasedak.rpc.test.{ TestServiceClient, TestServiceClientPowerApi }
-import im.ghasedak.rpc.user.{ UserServiceClient, UserServiceClientPowerApi }
-import im.ghasedak.server.config.{ AppType, GhasedakConfigFactory }
+import com.typesafe.config._
+import im.ghasedak.rpc.auth._
+import im.ghasedak.rpc.contact._
+import im.ghasedak.rpc.messaging._
+import im.ghasedak.rpc.test._
+import im.ghasedak.rpc.update._
+import im.ghasedak.rpc.user._
+import im.ghasedak.server.config._
 import im.ghasedak.server.db.DbExtension
 import im.ghasedak.server.model.org.ApiKey
-import im.ghasedak.server.utils.UserTestUtils
+import im.ghasedak.server.utils._
+import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.{ BeforeAndAfterAll, FlatSpec, Inside, Matchers }
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Await
-import scala.concurrent.duration.Duration
 import scala.concurrent.duration._
 
 // todo: config this for parallel execution
@@ -30,6 +29,7 @@ abstract class GrpcBaseSuit extends FlatSpec
   with ScalaFutures
   with Inside
   with UserTestUtils
+  with UpdateMatcher
   with BeforeAndAfterAll {
 
   private def randomPort: Int = {
@@ -64,6 +64,8 @@ abstract class GrpcBaseSuit extends FlatSpec
       .withFallback(GhasedakConfigFactory.load(AppType.Test))
   }
 
+  protected type TestUser = UserTestUtils.TestClientData
+
   protected val randomAkkaPort: Int = randomPort
 
   protected val randomGrpcPort: Int = randomPort
@@ -78,8 +80,12 @@ abstract class GrpcBaseSuit extends FlatSpec
           conf.getString("api-key"))
       }
 
+  override implicit val patienceConfig: PatienceConfig = PatienceConfig(timeout = 5 seconds)
+
   protected implicit val system: ActorSystem = GhasedakServerBuilder.start(config)
+
   protected implicit val mat = ActorMaterializer()
+
   protected implicit val ec = system.dispatcher
 
   protected val db = DbExtension(system).db
@@ -94,12 +100,11 @@ abstract class GrpcBaseSuit extends FlatSpec
 
   protected val userStub: UserServiceClientPowerApi = UserServiceClient(GrpcClientSettings.fromConfig("ghasedak"))
 
+  protected val updateStub: UpdateServiceClientPowerApi = UpdateServiceClient(GrpcClientSettings.fromConfig("ghasedak"))
+
   override def afterAll(): Unit = {
     super.afterAll()
     Await.result(system.terminate(), Duration.Inf)
   }
-
-  override implicit val patienceConfig: PatienceConfig = PatienceConfig(timeout = 2 seconds)
-  implicit val timeout: Timeout = Timeout(patienceConfig.timeout)
 
 }

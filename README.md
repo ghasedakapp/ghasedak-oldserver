@@ -6,9 +6,9 @@ Fast and secure Messaging Platform
 
 ### Prerequisites
 
-* JDK8
+* JDK 8
 
-* Postgresql
+* PostgreSQL
 
 * Apache Pulsar
 

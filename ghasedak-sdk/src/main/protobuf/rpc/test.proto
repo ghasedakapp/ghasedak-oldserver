@@ -5,14 +5,17 @@ package im.ghasedak.rpc;
 option java_package = "im.ghasedak.rpc.test";
 option java_multiple_files = true;
 
+import "api/update.proto";
+import "rpc/misc.proto";
+
 service TestService {
-    rpc TestAuth (RequestTestAuth) returns (ResponseTestAuth);
+    rpc CheckAuth (RequestCheckAuth) returns (ResponseVoid);
+    rpc SendUpdate (RequestSendUpdate) returns (ResponseVoid);
 }
 
-message RequestTestAuth {
-    bool exception = 1;
+message RequestCheckAuth {
 }
 
-message ResponseTestAuth {
-    bool auth = 1;
+message RequestSendUpdate {
+    im.ghasedak.api.ApiUpdateContainer update_container = 1;
 }

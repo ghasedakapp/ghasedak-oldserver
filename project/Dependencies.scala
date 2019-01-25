@@ -19,6 +19,7 @@ object Dependencies {
     val cluster = "com.typesafe.akka" %% "akka-cluster" % V.akka
     val sharding = "com.typesafe.akka" %% "akka-cluster-sharding" % V.akka
     val akkaSlf4j = "com.typesafe.akka" %% "akka-slf4j" % V.akka
+    val stream = "com.typesafe.akka" %% "akka-stream" % V.akka
 
     val config = "com.typesafe" % "config" % V.config
 
@@ -41,9 +42,7 @@ object Dependencies {
 
     val pulsar4s = Seq(
       "com.sksamuel.pulsar4s" %% "pulsar4s-core" % V.pulsar4s,
-      "com.sksamuel.pulsar4s" %% "pulsar4s-akka-streams" % V.pulsar4s,
-      "com.sksamuel.pulsar4s" %% "pulsar4s-monix" % V.pulsar4s,
-      "com.sksamuel.pulsar4s" %% "pulsar4s-cats-effect" % V.pulsar4s
+      "com.sksamuel.pulsar4s" %% "pulsar4s-akka-streams" % V.pulsar4s
     )
   }
 
@@ -72,15 +71,18 @@ object Dependencies {
     cluster,
     sharding,
     akkaSlf4j,
-    caffeine
+    caffeine,
+    stream
   )
 
   val update: Seq[ModuleID] = shared ++ Seq(
-    actor
+    actor,
+    stream
   ) ++ pulsar4s
 
   val rpc: Seq[ModuleID] = shared ++ Seq(
-    jwt
+    jwt,
+    stream
   )
 
   val persist: Seq[ModuleID] = shared ++ Seq(
@@ -102,7 +104,8 @@ object Dependencies {
   val test: Seq[ModuleID] = shared ++ Seq(
     scalatic,
     scalaTest,
-    akkaTestkit
+    akkaTestkit,
+    stream
   )
 
 }

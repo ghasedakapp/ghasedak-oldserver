@@ -6,12 +6,12 @@ import akka.grpc.scaladsl.Metadata
 import im.ghasedak.rpc.contact._
 import im.ghasedak.rpc.misc.ResponseVoid
 import im.ghasedak.server.db.DbExtension
+import im.ghasedak.server.model.contact.UserContact
 import im.ghasedak.server.repo.contact.UserContactRepo
 import im.ghasedak.server.repo.user.UserRepo
-import im.ghasedak.server.model.contact.UserContact
-import im.ghasedak.server.rpc.RpcError
 import im.ghasedak.server.rpc.auth.helper.AuthTokenHelper
 import im.ghasedak.server.rpc.common.CommonRpcErrors
+import im.ghasedak.server.rpc.{ RpcError, RpcErrorHandler }
 import im.ghasedak.server.utils.StringUtils._
 import im.ghasedak.server.utils.concurrent.DBIOResult
 import slick.jdbc.PostgresProfile
@@ -21,20 +21,15 @@ import scala.concurrent.{ ExecutionContext, Future }
 final class ContactServiceImpl(implicit system: ActorSystem) extends ContactServicePowerApi
   with AuthTokenHelper
   with ContactServiceHelper
-  with DBIOResult[RpcError] {
+  with DBIOResult[RpcError]
+  with RpcErrorHandler {
 
+  // todo: use separate dispatcher for rpc handlers
   override implicit val ec: ExecutionContext = system.dispatcher
 
   override val db: PostgresProfile.backend.Database = DbExtension(system).db
 
   override val log: LoggingAdapter = Logging.getLogger(system, this)
-
-  implicit private def onFailure: PartialFunction[Throwable, RpcError] = {
-    case rpcError: RpcError ⇒ rpcError
-    case ex ⇒
-      log.error(ex, "Internal error")
-      CommonRpcErrors.InternalError
-  }
 
   override def getContacts(request: RequestGetContacts, metadata: Metadata): Future[ResponseGetContacts] = {
     authorize(metadata) { clientData ⇒
