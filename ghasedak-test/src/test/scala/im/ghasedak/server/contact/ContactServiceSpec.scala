@@ -48,13 +48,13 @@
 //    val request1 = RequestAddContact(Some(Random.alphanumeric.take(20).mkString))
 //    Try(stub.addContact(request1)) match {
 //      case Failure(ex: StatusRuntimeException) ⇒
-//        ex.getStatus.getCode shouldEqual Code.INTERNAL
+//        ex.getStatus.getCode shouldEqual Code.INVALID_ARGUMENT
 //        ex.getTrailers.get(Constant.TAG_METADATA_KEY) shouldEqual "INVALID_CONTACT_RECORD"
 //    }
 //    val request2 = RequestAddContact(Some(Random.alphanumeric.take(20).mkString), Some(ApiContactRecord()))
 //    Try(stub.addContact(request2)) match {
 //      case Failure(ex: StatusRuntimeException) ⇒
-//        ex.getStatus.getCode shouldEqual Code.INTERNAL
+//        ex.getStatus.getCode shouldEqual Code.INVALID_ARGUMENT
 //        ex.getTrailers.get(Constant.TAG_METADATA_KEY) shouldEqual "INVALID_CONTACT_RECORD"
 //    }
 //  }
@@ -67,7 +67,7 @@
 //      Some(ApiContactRecord().withPhoneNumber(user.phoneNumber.get)))
 //    Try(stub.addContact(request)) match {
 //      case Failure(ex: StatusRuntimeException) ⇒
-//        ex.getStatus.getCode shouldEqual Code.INTERNAL
+//        ex.getStatus.getCode shouldEqual Code.FAILED_PRECONDITION
 //        ex.getTrailers.get(Constant.TAG_METADATA_KEY) shouldEqual "CANT_ADD_SELF"
 //    }
 //  }
@@ -82,7 +82,7 @@
 //    stub.addContact(request)
 //    Try(stub.addContact(request)) match {
 //      case Failure(ex: StatusRuntimeException) ⇒
-//        ex.getStatus.getCode shouldEqual Code.INTERNAL
+//        ex.getStatus.getCode shouldEqual Code.FAILED_PRECONDITION
 //        ex.getTrailers.get(Constant.TAG_METADATA_KEY) shouldEqual "CONTACT_ALREADY_EXISTS"
 //    }
 //  }

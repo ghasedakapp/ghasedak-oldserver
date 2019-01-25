@@ -77,7 +77,7 @@ class AuthServiceSpec extends GrpcBaseSuit {
     val request = RequestStartPhoneAuth(2, officialApiKeys.head.apiKey)
     authStub.startPhoneAuth.invoke(request).failed.futureValue match {
       case ex: StatusRuntimeException ⇒
-        ex.getStatus.getCode shouldEqual Code.INTERNAL
+        ex.getStatus.getCode shouldEqual Code.INVALID_ARGUMENT
         ex.getStatus.getDescription shouldEqual "INVALID_PHONE_NUMBER"
     }
   }
@@ -86,7 +86,7 @@ class AuthServiceSpec extends GrpcBaseSuit {
     val request = RequestValidateCode(UUID.randomUUID().toString, "12345")
     authStub.validateCode.invoke(request).failed.futureValue match {
       case ex: StatusRuntimeException ⇒
-        ex.getStatus.getCode shouldEqual Code.INTERNAL
+        ex.getStatus.getCode shouldEqual Code.INVALID_ARGUMENT
         ex.getStatus.getDescription shouldEqual "AUTH_CODE_EXPIRED"
     }
 
@@ -108,7 +108,7 @@ class AuthServiceSpec extends GrpcBaseSuit {
     val request2 = RequestValidateCode(response1.transactionHash, "12345")
     authStub.validateCode.invoke(request2).failed.futureValue match {
       case ex: StatusRuntimeException ⇒
-        ex.getStatus.getCode shouldEqual Code.INTERNAL
+        ex.getStatus.getCode shouldEqual Code.INVALID_ARGUMENT
         ex.getStatus.getDescription shouldEqual "INVALID_AUTH_CODE"
     }
   }
@@ -124,7 +124,7 @@ class AuthServiceSpec extends GrpcBaseSuit {
     val request2 = RequestValidateCode(response1.transactionHash, codeGate.get.codeHash)
     authStub.validateCode.invoke(request2).failed.futureValue match {
       case ex: StatusRuntimeException ⇒
-        ex.getStatus.getCode shouldEqual Code.INTERNAL
+        ex.getStatus.getCode shouldEqual Code.INVALID_ARGUMENT
         ex.getStatus.getDescription shouldEqual "AUTH_CODE_EXPIRED"
     }
   }
