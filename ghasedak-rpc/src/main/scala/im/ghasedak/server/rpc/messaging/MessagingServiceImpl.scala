@@ -4,6 +4,7 @@ import java.time.ZoneOffset
 
 import akka.actor.ActorSystem
 import akka.event.{ Logging, LoggingAdapter }
+import akka.grpc.scaladsl.Metadata
 import com.google.protobuf.CodedInputStream
 import im.ghasedak.api.messaging.{ ApiMessage, ApiMessageContainer }
 import im.ghasedak.api.peer.ApiPeer
@@ -19,7 +20,7 @@ import slick.jdbc.PostgresProfile
 
 import scala.concurrent.{ ExecutionContext, Future }
 
-final class MessagingServiceImpl(implicit system: ActorSystem) extends MessagingService
+final class MessagingServiceImpl(implicit system: ActorSystem) extends MessagingServicePowerApi
   with AuthTokenHelper
   with MessagingServiceHelper
   with RpcErrorHandler {
@@ -34,8 +35,8 @@ final class MessagingServiceImpl(implicit system: ActorSystem) extends Messaging
   protected val userExt = UserExtension(system)
   protected val dialogExt = DialogExtension(system)
 
-  override def sendMessage(request: RequestSendMessage): Future[ResponseSendMessage] =
-    authorize { clientData ⇒
+  override def sendMessage(request: RequestSendMessage, metadata: Metadata): Future[ResponseSendMessage] =
+    authorize(metadata) { clientData ⇒
       val (peer, randomId, message) = RequestSendMessage.unapply(request).get
       withValidPeer(peer, clientData.userId) {
         userExt.sendMessage(
@@ -46,13 +47,13 @@ final class MessagingServiceImpl(implicit system: ActorSystem) extends Messaging
       }
     }
 
-  override def loadDialogs(request: RequestLoadDialogs): Future[ResponseLoadDialogs] =
-    authorize { clientData ⇒
+  override def loadDialogs(request: RequestLoadDialogs, metadata: Metadata): Future[ResponseLoadDialogs] =
+    authorize(metadata) { clientData ⇒
       dialogExt.loadDialogs(clientData.userId, request.limit)
     }
 
-  override def loadHistory(request: RequestLoadHistory): Future[ResponseLoadHistory] =
-    authorize { clientData ⇒
+  override def loadHistory(request: RequestLoadHistory, metadata: Metadata): Future[ResponseLoadHistory] =
+    authorize(metadata) { clientData ⇒
       val (peer, seq, _, limit) = RequestLoadHistory.unapply(request).get
       db.run(HistoryMessageRepo.findBefore(
         clientData.userId,
@@ -67,14 +68,14 @@ final class MessagingServiceImpl(implicit system: ActorSystem) extends Messaging
       } map (ResponseLoadHistory(_))
     }
 
-  override def messageReceived(request: RequestMessageReceived): Future[ResponseVoid] =
-    authorize { clientData ⇒
+  override def messageReceived(request: RequestMessageReceived, metadata: Metadata): Future[ResponseVoid] =
+    authorize(metadata) { clientData ⇒
       val (peer, seq) = RequestMessageReceived.unapply(request).get
       userExt.messageReceived(clientData.userId, peer.getOrElse(throw MessagingRpcErrors.InvalidPeer), seq)
     }
 
-  override def messageRead(request: RequestMessageRead): Future[ResponseVoid] =
-    authorize { clientData ⇒
+  override def messageRead(request: RequestMessageRead, metadata: Metadata): Future[ResponseVoid] =
+    authorize(metadata) { clientData ⇒
       val (peer, seq) = RequestMessageRead.unapply(request).get
       userExt.messageRead(clientData.userId, peer.getOrElse(throw MessagingRpcErrors.InvalidPeer), seq)
     }

@@ -1,10 +1,22 @@
 import im.ghasedak.BuildSettings._
+import akka.grpc.sbt.AkkaGrpcPlugin.GeneratorOption
 import im.ghasedak.Dependencies
 
 name := "ghasedak"
 
 enablePlugins(JavaAppPackaging)
 
+lazy val commonSettings = Seq(
+  organization := "im.ghasedak",
+  scalaVersion := "2.12.8",
+  mainClass in Compile := Some("im.ghasedak.server.Main"),
+  scalariformPreferences := scalariformPreferences.value
+    .setPreference(RewriteArrowSymbols, true)
+    .setPreference(AlignParameters, true)
+    .setPreference(AlignSingleLineCaseStatements, true)
+    .setPreference(SpacesAroundMultiImports, true),
+  parallelExecution in Test := false
+)
 lazy val root = (project in file("."))
   .settings(
     commonSettings,
@@ -16,9 +28,11 @@ lazy val root = (project in file("."))
 // Every protobuf that transfer between client and server
 lazy val sdk = ghasedakModule("ghasedak-sdk")
   .settings(
-    libraryDependencies ++= Dependencies.sdk
-  )
-  .enablePlugins(AkkaGrpcPlugin)
+    libraryDependencies ++= Dependencies.sdk,
+    akkaGrpcCodeGeneratorSettings += "server_power_apis",
+    akkaGrpcGeneratedSources := Seq(AkkaGrpc.Server, AkkaGrpc.Client),
+    resolvers += Resolver.url("ghasedak-repo", url("https://raw.github.com/ghasedakapp/ghasedak-repositories/master"))(Resolver.ivyStylePatterns)
+  ).enablePlugins(AkkaGrpcPlugin)
 
 lazy val model = ghasedakModule("ghasedak-model")
   .settings(
@@ -37,7 +51,6 @@ lazy val update = ghasedakModule("ghasedak-update")
     libraryDependencies ++= Dependencies.update
   )
   .dependsOn(sdk, model, commons)
-  .enablePlugins(AkkaGrpcPlugin)
 
 lazy val rpc = ghasedakModule("ghasedak-rpc")
   .settings(

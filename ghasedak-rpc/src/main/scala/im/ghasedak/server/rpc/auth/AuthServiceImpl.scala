@@ -5,6 +5,7 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import akka.event.{ Logging, LoggingAdapter }
+import akka.grpc.scaladsl.Metadata
 import im.ghasedak.rpc.auth._
 import im.ghasedak.rpc.misc.ResponseVoid
 import im.ghasedak.server.db.DbExtension
@@ -19,7 +20,7 @@ import slick.jdbc.PostgresProfile
 
 import scala.concurrent.{ ExecutionContext, Future }
 
-final class AuthServiceImpl(implicit system: ActorSystem) extends AuthService
+final class AuthServiceImpl(implicit system: ActorSystem) extends AuthServicePowerApi
   with AuthServiceHelper
   with AuthTokenHelper
   with DBIOResult[RpcError]
@@ -32,7 +33,7 @@ final class AuthServiceImpl(implicit system: ActorSystem) extends AuthService
 
   override val log: LoggingAdapter = Logging.getLogger(system, this)
 
-  override def startPhoneAuth(request: RequestStartPhoneAuth): Future[ResponseStartPhoneAuth] = {
+  override def startPhoneAuth(request: RequestStartPhoneAuth, metadata: Metadata): Future[ResponseStartPhoneAuth] = {
     val action: Result[ResponseStartPhoneAuth] = for {
       optApiKey ← getApiKey(request.apiKey)
       apiKey ← fromOption(AuthRpcErrors.InvalidApiKey)(optApiKey)
@@ -61,7 +62,7 @@ final class AuthServiceImpl(implicit system: ActorSystem) extends AuthService
     result
   }
 
-  override def validateCode(request: RequestValidateCode): Future[ResponseAuth] = {
+  override def validateCode(request: RequestValidateCode, metadata: Metadata): Future[ResponseAuth] = {
     val action: Result[ResponseAuth] = for {
       transaction ← fromDBIOOption(AuthRpcErrors.AuthCodeExpired)(AuthTransactionRepo.findChildren(request.transactionHash))
       _ ← validateCode(transaction, request.code)
@@ -78,7 +79,7 @@ final class AuthServiceImpl(implicit system: ActorSystem) extends AuthService
     result
   }
 
-  override def signUp(request: RequestSignUp): Future[ResponseAuth] = {
+  override def signUp(request: RequestSignUp, metadata: Metadata): Future[ResponseAuth] = {
     val action: Result[ResponseAuth] = for {
       transaction ← fromDBIOOption(AuthRpcErrors.AuthCodeExpired)(AuthTransactionRepo.findChildren(request.transactionHash))
       _ ← fromBoolean(AuthRpcErrors.NotValidated)(transaction.isChecked)
@@ -90,8 +91,8 @@ final class AuthServiceImpl(implicit system: ActorSystem) extends AuthService
     result
   }
 
-  override def signOut(request: RequestSignOut): Future[ResponseVoid] = {
-    authorize { clientData ⇒
+  override def signOut(request: RequestSignOut, metadata: Metadata): Future[ResponseVoid] = {
+    authorize(metadata) { clientData ⇒
       val action: Result[ResponseVoid] = for {
         _ ← fromDBIO(AuthTokenRepo.delete(clientData.tokenId))
         _ ← fromDBIO(AuthSessionRepo.delete(clientData.tokenId))
