@@ -42,15 +42,7 @@ object Dependencies {
 
     val pulsar4s = Seq(
       "com.sksamuel.pulsar4s" %% "pulsar4s-core" % V.pulsar4s,
-      "com.sksamuel.pulsar4s" %% "pulsar4s-akka-streams" % V.pulsar4s,
-      "com.sksamuel.pulsar4s" %% "pulsar4s-circe" % V.pulsar4s,
-      "com.sksamuel.pulsar4s" %% "pulsar4s-json4s" % V.pulsar4s,
-      "com.sksamuel.pulsar4s" %% "pulsar4s-jackson" % V.pulsar4s,
-      "com.sksamuel.pulsar4s" %% "pulsar4s-spray-json" % V.pulsar4s,
-      "com.sksamuel.pulsar4s" %% "pulsar4s-play-json" % V.pulsar4s,
-      "com.sksamuel.pulsar4s" %% "pulsar4s-monix" % V.pulsar4s,
-      "com.sksamuel.pulsar4s" %% "pulsar4s-scalaz" % V.pulsar4s,
-      "com.sksamuel.pulsar4s" %% "pulsar4s-cats-effect" % V.pulsar4s
+      "com.sksamuel.pulsar4s" %% "pulsar4s-akka-streams" % V.pulsar4s
     )
   }
 
