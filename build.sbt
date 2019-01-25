@@ -31,8 +31,9 @@ lazy val root = (project in file("."))
 lazy val sdk = ghasedakModule("ghasedak-sdk")
   .settings(
     libraryDependencies ++= Dependencies.sdk,
-  akkaGrpcCodeGeneratorSettings += "server_power_apis",
-    akkaGrpcGeneratedSources := Seq(AkkaGrpc.Server, AkkaGrpc.Client)
+    akkaGrpcCodeGeneratorSettings += "server_power_apis",
+    akkaGrpcGeneratedSources := Seq(AkkaGrpc.Server, AkkaGrpc.Client),
+    resolvers += Resolver.url("ghasedak-repo", url("https://raw.github.com/ghasedakapp/ghasedak-repositories/master"))(Resolver.ivyStylePatterns)
   ).enablePlugins(AkkaGrpcPlugin)
 
 lazy val model = ghasedakModule("ghasedak-model")
