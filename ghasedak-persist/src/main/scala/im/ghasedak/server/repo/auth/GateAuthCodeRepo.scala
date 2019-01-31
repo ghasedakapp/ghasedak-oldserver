@@ -12,9 +12,11 @@ final class GateAuthCodeTable(tag: Tag) extends Table[GateAuthCode](tag, "gate_a
 
   def codeHash = column[String]("code_hash")
 
+  def attempts = column[Int]("attempts")
+
   def isDeleted = column[Boolean]("is_deleted")
 
-  def * = (transactionHash, codeHash, isDeleted) <> (GateAuthCode.tupled, GateAuthCode.unapply)
+  def * = (transactionHash, codeHash, attempts, isDeleted) <> (GateAuthCode.tupled, GateAuthCode.unapply)
 
 }
 
@@ -32,5 +34,8 @@ object GateAuthCodeRepo {
 
   def delete(transactionHash: String): FixedSqlAction[Int, NoStream, Effect.Write] =
     codes.filter(_.transactionHash === transactionHash).map(_.isDeleted).update(true)
+
+  def incrementAttempts(transactionHash: String, attempts: Int): FixedSqlAction[Int, NoStream, Effect.Write] =
+    codes.filter(_.transactionHash === transactionHash).map(_.attempts).update(attempts + 1)
 
 }

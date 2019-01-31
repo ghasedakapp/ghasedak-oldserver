@@ -5,12 +5,12 @@ import java.time.{ LocalDateTime, ZoneOffset }
 
 import im.ghasedak.api.auth.ApiAuth
 import im.ghasedak.api.user.ApiUser
-import im.ghasedak.server.repo.auth.{ AuthSessionRepo, AuthTransactionRepo, GateAuthCodeRepo }
-import im.ghasedak.server.repo.org.ApiKeyRepo
-import im.ghasedak.server.repo.user.{ UserAuthRepo, UserRepo }
 import im.ghasedak.server.model.auth.{ AuthPhoneTransaction, AuthSession, AuthTransactionBase }
 import im.ghasedak.server.model.org.ApiKey
 import im.ghasedak.server.model.user.{ User, UserAuth }
+import im.ghasedak.server.repo.auth.{ AuthSessionRepo, AuthTransactionRepo, GateAuthCodeRepo }
+import im.ghasedak.server.repo.org.ApiKeyRepo
+import im.ghasedak.server.repo.user.{ UserAuthRepo, UserRepo }
 import im.ghasedak.server.rpc.auth.{ AuthRpcErrors, AuthServiceImpl }
 import im.ghasedak.server.rpc.common.CommonRpcErrors
 import im.ghasedak.server.user.UserUtils
@@ -22,7 +22,9 @@ import im.ghasedak.server.utils.number.PhoneNumberUtils._
 trait AuthServiceHelper {
   this: AuthServiceImpl ⇒
 
-  private val maximumValidCodeMinutes = 15 // for 15 minutes phone code is valid
+  private val maximumAttempts: Int = 4 // attempts
+
+  private val maximumValidCodeMinutes: Int = 15 // for 15 minutes phone code is valid
 
   protected def getApiKey(apiKey: String): Result[Option[ApiKey]] = {
     AuthSession.isOfficialApiKey(apiKey) match {
@@ -50,6 +52,7 @@ trait AuthServiceHelper {
     }
   }
 
+  // fixme: better implementation with adaptor method
   protected def sendSmsCode(phoneNumber: Long, transactionHash: String): Result[Unit] = {
     val codeHash = genPhoneCode(phoneNumber)
     for {
@@ -58,13 +61,23 @@ trait AuthServiceHelper {
     } yield ()
   }
 
+  // fixme: better implementation with adaptor method
   protected def validateCode(transaction: AuthTransactionBase, code: String): Result[Unit] = {
     val now = LocalDateTime.now(ZoneOffset.UTC)
     val until = transaction.createdAt.until(now, ChronoUnit.MINUTES)
     for {
       gateAuthCode ← fromDBIOOption(AuthRpcErrors.AuthCodeExpired)(GateAuthCodeRepo.find(transaction.transactionHash))
-      _ ← fromBoolean(AuthRpcErrors.InvalidAuthCode)(gateAuthCode.codeHash == code)
+      attemptsIsOk ← if (gateAuthCode.attempts + 1 > maximumAttempts)
+        for {
+          _ ← fromDBIO(GateAuthCodeRepo.delete(transaction.transactionHash))
+          _ ← fromDBIO(AuthTransactionRepo.delete(transaction.transactionHash))
+        } yield false
+      else
+        fromDBIO(GateAuthCodeRepo.incrementAttempts(transaction.transactionHash, gateAuthCode.attempts)) map (_ ⇒ true)
+      _ ← fromBoolean(AuthRpcErrors.AuthCodeExpired)(attemptsIsOk)
       _ ← fromBoolean(AuthRpcErrors.AuthCodeExpired)(until < maximumValidCodeMinutes)
+      _ ← fromBoolean(AuthRpcErrors.InvalidAuthCode)(gateAuthCode.codeHash == code)
+      _ ← fromDBIO(GateAuthCodeRepo.delete(transaction.transactionHash))
       _ ← fromDBIO(AuthTransactionRepo.updateSetChecked(transaction.transactionHash))
     } yield ()
   }

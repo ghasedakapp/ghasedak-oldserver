@@ -1,6 +1,7 @@
 package im.ghasedak.server.db
 
 import akka.actor.{ ExtendedActorSystem, Extension, ExtensionId }
+import com.typesafe.config.{ Config, ConfigFactory }
 import javax.sql.DataSource
 import org.flywaydb.core.Flyway
 import slick.jdbc.PostgresProfile.backend.Database
@@ -12,12 +13,12 @@ import scala.util.{ Failure, Success, Try }
 object DbExtension extends ExtensionId[DbExtensionImpl] {
 
   override def createExtension(system: ExtendedActorSystem): DbExtensionImpl = {
-    val db: PostgresProfile.backend.Database = Database.forConfig("services.postgresql")
+    val db: PostgresProfile.backend.Database = initDb(system.settings.config)
     system.registerOnTermination {
       db.close()
     }
     val ext = new DbExtensionImpl(db)
-    val migrationEnable = system.settings.config.getBoolean("services.postgresql.migration.enable")
+    val migrationEnable = system.settings.config.getBoolean("services.postgresql.migration")
     if (migrationEnable) {
       Try(ext.migrate()) match {
         case Success(_) ⇒
@@ -27,6 +28,19 @@ object DbExtension extends ExtensionId[DbExtensionImpl] {
       }
     }
     ext
+  }
+
+  private def initDb(config: Config): Database = {
+    val sqlConfig = config.getConfig("services.postgresql")
+    val useConfig = for {
+      host ← Try(sqlConfig.getString("host"))
+      port ← Try(sqlConfig.getString("port"))
+      db ← Try(sqlConfig.getString("db"))
+    } yield sqlConfig.withFallback(ConfigFactory.parseString(
+      s"""
+         |url: "jdbc:postgresql://"$host":"$port"/"$db
+      """.stripMargin))
+    Database.forConfig("", useConfig.get)
   }
 
 }
