@@ -4,11 +4,15 @@ import im.ghasedak.Dependencies
 name := "ghasedak"
 
 enablePlugins(JavaAppPackaging)
+enablePlugins(DockerPlugin)
 
 lazy val root = (project in file("."))
   .settings(
     commonSettings,
-    packagingSettings
+    packagingSettings,
+    dockerBaseImage := "openjdk:8",
+    packageName in Docker := "ghasedakapp/ghasedak-server",
+    version in Docker := (version in ThisBuild).value
   )
   .dependsOn(model, sdk, core, update, rpc, persist, commons, runtime, test)
   .aggregate(model, sdk, core, update, rpc, persist, commons, runtime, test)

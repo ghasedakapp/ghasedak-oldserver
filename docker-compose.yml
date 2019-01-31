@@ -1,0 +1,46 @@
+version: '3'
+services:
+  postgres:
+    image: postgres
+    container_name: postgres
+    environment:
+      POSTGRES_DB: ghasedak
+      POSTGRES_USER: ghasedak
+      POSTGRES_PASSWORD: ghasedak
+    ports:
+      - 5432:5432
+  pulsar:
+    image: apachepulsar/pulsar
+    container_name: pulsar
+    ports:
+      - 6650:6650
+    environment:
+      - PULSAR_MEM="-Xms512m -Xmx512m -XX:MaxDirectMemorySize=1g"
+    command: >
+      /bin/bash -c
+      "bin/apply-config-from-env.py conf/standalone.conf
+      && bin/pulsar standalone"
+  ghasedak-server:
+    image: ghasedakapp/ghasedak-server:0.1.6-SNAPSHOT
+    container_name: ghasedak-server
+    depends_on:
+      - postgres
+      - pulsar
+    environment:
+      - AKKA_HOSTNAME=0.0.0.0
+      - AKKA_PORT=2552
+      - GRPC_INTERFACE=0.0.0.0
+      - GRPC_PORT=6060
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=ghasedak
+      - POSTGRES_USER=ghasedak
+      - POSTGRES_PASSWORD=ghasedak
+      - PULSAR_HOST=pulsar
+      - PULSAR_PORT=6065
+      - TZ=Asia/Tehran
+#    volumes:
+#      - ./conf:/opt/docker/conf
+    ports:
+      - 2552:2552
+      - 6060:6060
