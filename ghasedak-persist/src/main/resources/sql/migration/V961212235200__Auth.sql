@@ -16,6 +16,7 @@ CREATE TABLE auth_phone_transactions (
 CREATE TABLE gate_auth_codes (
   transaction_hash VARCHAR (255) NOT NULL ,
   code_hash        VARCHAR (255) NOT NULL ,
+  attempts         INT NOT NULL,
   is_deleted       BOOLEAN NOT NULL ,
   primary key(transaction_hash)
 );

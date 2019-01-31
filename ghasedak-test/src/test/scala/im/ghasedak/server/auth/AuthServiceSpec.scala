@@ -46,6 +46,8 @@ class AuthServiceSpec extends GrpcBaseSuit {
 
   it should "successfully login with test phone number" in testPhoneNumber
 
+  it should "invalidate transaction hash after more attempts" in moreAttemptsForInvalidate
+
   def startPhoneAuth(): Unit = {
     val request = RequestStartPhoneAuth(generatePhoneNumber(), officialApiKeys.head.apiKey)
     val response = authStub.startPhoneAuth.invoke(request).futureValue
@@ -207,6 +209,28 @@ class AuthServiceSpec extends GrpcBaseSuit {
     val response3 = authStub.signUp.invoke(request3).futureValue
     response3.isRegistered shouldEqual true
     response3.apiAuth should not be None
+  }
+
+  def moreAttemptsForInvalidate(): Unit = {
+    val request = RequestStartPhoneAuth(generatePhoneNumber(), officialApiKeys.head.apiKey)
+    val response1 = authStub.startPhoneAuth.invoke(request).futureValue
+    val codeGate = db.run(GateAuthCodeRepo.find(response1.transactionHash)).futureValue
+    for (_ ← 1 to 4) {
+      val request2 = RequestValidateCode(response1.transactionHash, "11111")
+      authStub.validateCode.invoke(request2).failed.futureValue match {
+        case ex: StatusRuntimeException ⇒
+          ex.getStatus.getCode shouldEqual Code.INVALID_ARGUMENT
+          ex.getStatus.getDescription shouldEqual "INVALID_AUTH_CODE"
+      }
+    }
+    val request2 = RequestValidateCode(response1.transactionHash, codeGate.get.codeHash)
+    authStub.validateCode.invoke(request2).failed.futureValue match {
+      case ex: StatusRuntimeException ⇒
+        ex.getStatus.getCode shouldEqual Code.INVALID_ARGUMENT
+        ex.getStatus.getDescription shouldEqual "AUTH_CODE_EXPIRED"
+    }
+    val response2 = authStub.startPhoneAuth.invoke(request).futureValue
+    response1.transactionHash should not equal response2.transactionHash
   }
 
 }
