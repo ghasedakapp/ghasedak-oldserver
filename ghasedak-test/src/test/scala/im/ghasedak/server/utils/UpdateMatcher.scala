@@ -2,8 +2,8 @@ package im.ghasedak.server.utils
 
 import java.util.concurrent._
 
-import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.Sink
+import akka.stream.{ActorMaterializer, OverflowStrategy}
+import akka.stream.scaladsl.{Keep, Sink, Source}
 import com.google.protobuf.ByteString
 import com.sksamuel.pulsar4s.MessageId
 import im.ghasedak.api.update._
@@ -68,15 +68,13 @@ trait UpdateMatcher {
 
   def expectOrderUpdate(orderOfUpdates: Seq[Update], seqState: ApiSeqState = defaultSeqState)(implicit testUser: TestUser): Unit = {
     val localMat = ActorMaterializer()
-    var orderIndex = 0
     val latch = new CountDownLatch(orderOfUpdates.length)
     val stub = updateStub.getDifference.addHeader(tokenMetadataKey, testUser.token)
-    stub.invoke(RequestGetDifference(Some(seqState)))
-      .map { response ⇒
-        if (orderOfUpdates(orderIndex) == response.getUpdateContainer.update)
+    stub.invoke(RequestGetDifference(Some(seqState))).zipWithIndex.map {
+      case (response, index) ⇒
+        if (orderOfUpdates(index.toInt) == response.getUpdateContainer.update)
           latch.countDown()
-        orderIndex += 1
-      }
+    }
       .runWith(Sink.ignore)(localMat)
     assert(latch.await(sleepForUpdates, TimeUnit.MILLISECONDS))
     localMat.shutdown()

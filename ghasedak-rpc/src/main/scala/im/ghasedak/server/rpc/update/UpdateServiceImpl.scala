@@ -49,4 +49,15 @@ final class UpdateServiceImpl(implicit system: ActorSystem) extends UpdateServic
       .mapMaterializedValue(_ ⇒ NotUsed)
   }
 
+  override def streamGetDifference(in: Source[StreamRequestGetDifference, NotUsed], metadata: Metadata): Source[StreamResponseGetDifference, NotUsed] =
+    authorizeS(metadata) { clientData ⇒
+      in.mapAsync(1) { req ⇒
+        val result = if (req.ackState.isEmpty)
+          receiveAsync(clientData.userId, clientData.tokenId)
+        else
+          ack(clientData.userId, req.ackState)
+            .flatMap(_ ⇒ receiveAsync(clientData.userId, clientData.tokenId))
+        result
+      }
+    }
 }

@@ -2,8 +2,10 @@ package im.ghasedak.server.rpc.auth.helper
 
 import java.util.UUID
 
+import akka.NotUsed
 import akka.event.LoggingAdapter
 import akka.grpc.GrpcServiceException
+import akka.stream.scaladsl.Source
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.JWTVerificationException
@@ -79,6 +81,10 @@ trait AuthTokenHelper {
 
   def authorize[T](metadata: Metadata)(f: ClientData ⇒ Future[T]): Future[T] =
     authorize(metadata.getText(Constant.tokenMetadataKey))(f)
+
+  def authorizeS[T](metadata: Metadata)(f: ClientData ⇒ Source[T, NotUsed]): Source[T, NotUsed] =
+    Source.fromFutureSource(authorize(metadata)(f.andThen(Future.successful)))
+      .mapMaterializedValue(_ ⇒ NotUsed)
 
   def generateToken(userId: Int, orgId: Int): Future[(String, String)] = {
     val tokenKey = UUID.randomUUID().toString
