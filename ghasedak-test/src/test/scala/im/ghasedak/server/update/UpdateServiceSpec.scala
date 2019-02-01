@@ -14,14 +14,14 @@ class UpdateServiceSpec extends GrpcBaseSuit {
 
   private val n = 10 // number of updates
 
-  ignore should "get state without any update" in {
+  it should "get state without any update" in {
     val user = createUserWithPhone()
     val stub = updateStub.getState.addHeader(tokenMetadataKey, user.token)
     val seqState = stub.invoke(RequestGetState()).futureValue.seqState.get
     seqState.seq shouldEqual -1
   }
 
-  ignore should "get state with n update" in {
+  it should "get state with n update" in {
     val user = createUserWithPhone()
     val stub1 = updateStub.getState.addHeader(tokenMetadataKey, user.token)
     val stub2 = testStub.sendUpdate.addHeader(tokenMetadataKey, user.token)
@@ -35,7 +35,7 @@ class UpdateServiceSpec extends GrpcBaseSuit {
     seqState2.seq shouldEqual n - 1
   }
 
-  ignore should "get one update after send it" in {
+  it should "get one update after send it" in {
     val user = createUserWithPhone()
     val stub = testStub.sendUpdate.addHeader(tokenMetadataKey, user.token)
 
@@ -47,7 +47,7 @@ class UpdateServiceSpec extends GrpcBaseSuit {
     }
   }
 
-  ignore should "get n update after send it" in {
+  it should "get n update after send it" in {
     val user = createUserWithPhone()
     val stub = testStub.sendUpdate.addHeader(tokenMetadataKey, user.token)
 
@@ -62,7 +62,7 @@ class UpdateServiceSpec extends GrpcBaseSuit {
     }
   }
 
-  ignore should "get 2 * n update with two get difference" in {
+  it should "get 2 * n update with two get difference" in {
     val user = createUserWithPhone()
     val stub1 = updateStub.getState.addHeader(tokenMetadataKey, user.token)
     val stub2 = testStub.sendUpdate.addHeader(tokenMetadataKey, user.token)
@@ -99,7 +99,7 @@ class UpdateServiceSpec extends GrpcBaseSuit {
     }
   }
 
-  ignore should "get n update with keep sending order" in {
+  it should "get n update with keep sending order" in {
     val user = createUserWithPhone()
     val stub = testStub.sendUpdate.addHeader(tokenMetadataKey, user.token)
 
@@ -114,7 +114,7 @@ class UpdateServiceSpec extends GrpcBaseSuit {
     }
   }
 
-  ignore should "send n update and don't get any update after that" in {
+  it should "send n update and don't get any update after that" in {
     val user = createUserWithPhone()
     val stub1 = updateStub.getState.addHeader(tokenMetadataKey, user.token)
     val stub2 = testStub.sendUpdate.addHeader(tokenMetadataKey, user.token)
@@ -135,21 +135,6 @@ class UpdateServiceSpec extends GrpcBaseSuit {
     {
       implicit val testUser: TestUser = user
       expectNoUpdate(seqState)
-    }
-  }
-
-  it should "get n update after send it" in {
-    val user = createUserWithPhone()
-    val stub = testStub.sendUpdate.addHeader(tokenMetadataKey, user.token)
-
-    val orderOfUpdates = Seq.fill(n)(ApiUpdateContainer().withPong(UpdatePong(Random.nextInt())))
-    orderOfUpdates foreach { update ⇒
-      stub.invoke(RequestSendUpdate(Some(update))).futureValue
-    }
-
-    {
-      implicit val testUser: TestUser = user
-      expectNUpdate(n)
     }
   }
 

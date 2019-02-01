@@ -37,27 +37,22 @@ final class UpdateServiceImpl(implicit system: ActorSystem) extends UpdateServic
     }
   }
 
-  override def getDifference(request: RequestGetDifference, metadata: Metadata): Source[ResponseGetDifference, NotUsed] = {
-    Source.fromFutureSource {
-      authorize(metadata) { clientData ⇒
-        val difference = fromOption(UpdateRpcErrors.SeqStateNotFound)(request.seqState) map (seqState ⇒ {
-          getDifference(clientData.userId, clientData.tokenId, seqState)
-        })
-        difference.value
-      }
+  override def getDifference(request: RequestGetDifference, metadata: Metadata): Source[StreamingResponseGetDifference, NotUsed] = {
+    authorizeFutureStream(metadata) { clientData ⇒
+      fromOption(UpdateRpcErrors.SeqStateNotFound)(request.seqState) map (seqState ⇒ {
+        getDifference(clientData.userId, clientData.tokenId, seqState)
+      }) value
     }
-      .mapMaterializedValue(_ ⇒ NotUsed)
   }
 
-  override def streamGetDifference(in: Source[StreamRequestGetDifference, NotUsed], metadata: Metadata): Source[StreamResponseGetDifference, NotUsed] =
-    authorizeS(metadata) { clientData ⇒
-      in.mapAsync(1) { req ⇒
-        val result = if (req.ackState.isEmpty)
-          receiveAsync(clientData.userId, clientData.tokenId)
-        else
-          ack(clientData.userId, req.ackState)
-            .flatMap(_ ⇒ receiveAsync(clientData.userId, clientData.tokenId))
-        result
+  override def streamingGetDifference(requestStream: Source[StreamingRequestGetDifference, NotUsed], metadata: Metadata): Source[StreamingResponseGetDifference, NotUsed] = {
+    authorizeStream(metadata) { clientData ⇒
+      val consumer = seqUpdateExt.getConsumer(clientData.userId, clientData.tokenId)
+      requestStream.mapAsync(1) { req ⇒
+        acknowledge(consumer, req.seqStateAck)
+          .flatMap(_ ⇒ getDifference(clientData.tokenId, consumer))
       }
     }
+  }
+
 }

@@ -82,8 +82,12 @@ trait AuthTokenHelper {
   def authorize[T](metadata: Metadata)(f: ClientData ⇒ Future[T]): Future[T] =
     authorize(metadata.getText(Constant.tokenMetadataKey))(f)
 
-  def authorizeS[T](metadata: Metadata)(f: ClientData ⇒ Source[T, NotUsed]): Source[T, NotUsed] =
+  def authorizeStream[T, M](metadata: Metadata)(f: ClientData ⇒ Source[T, M]): Source[T, NotUsed] =
     Source.fromFutureSource(authorize(metadata)(f.andThen(Future.successful)))
+      .mapMaterializedValue(_ ⇒ NotUsed)
+
+  def authorizeFutureStream[T, M](metadata: Metadata)(f: ClientData ⇒ Future[Source[T, M]]): Source[T, NotUsed] =
+    Source.fromFutureSource(authorize(metadata)(f))
       .mapMaterializedValue(_ ⇒ NotUsed)
 
   def generateToken(userId: Int, orgId: Int): Future[(String, String)] = {

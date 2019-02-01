@@ -9,8 +9,8 @@ import "api/update.proto";
 
 service UpdateService {
     rpc GetState (RequestGetState) returns (ResponseGetState);
-    rpc GetDifference (RequestGetDifference) returns (stream ResponseGetDifference);
-    rpc StreamGetDifference (stream StreamRequestGetDifference) returns (stream StreamResponseGetDifference);
+    rpc GetDifference (RequestGetDifference) returns (stream StreamingResponseGetDifference);
+    rpc StreamingGetDifference (stream StreamingRequestGetDifference) returns (stream StreamingResponseGetDifference);
 }
 
 message RequestGetState {
@@ -24,16 +24,11 @@ message RequestGetDifference {
     im.ghasedak.api.ApiSeqState seq_state = 1;
 }
 
-message ResponseGetDifference {
-    im.ghasedak.api.ApiSeqState seq_state = 1;
-    im.ghasedak.api.ApiUpdateContainer update_container = 2;
+message StreamingRequestGetDifference {
+    im.ghasedak.api.ApiSeqState seq_state_ack = 1;
 }
 
-message StreamRequestGetDifference {
-    im.ghasedak.api.ApiSeqState ack_state = 1;
-}
-
-message StreamResponseGetDifference {
+message StreamingResponseGetDifference {
     im.ghasedak.api.ApiSeqState seq_state = 1;
     im.ghasedak.api.ApiUpdateContainer update_container = 2;
 }
