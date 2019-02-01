@@ -138,4 +138,28 @@ class UpdateServiceSpec extends GrpcBaseSuit {
     }
   }
 
+  //  it should "send n update and don't get any update after that" in {
+  //    val user = createUserWithPhone()
+  //    val stub1 = updateStub.getState.addHeader(tokenMetadataKey, user.token)
+  //    val stub2 = testStub.sendUpdate.addHeader(tokenMetadataKey, user.token)
+  //
+  //    val orderOfUpdates1 = Seq.fill(n)(ApiUpdateContainer().withPong(UpdatePong(Random.nextInt())))
+  //    orderOfUpdates1 foreach { update ⇒
+  //      stub2.invoke(RequestSendUpdate(Some(update))).futureValue
+  //    }
+  //
+  //    {
+  //      implicit val testUser: TestUser = user
+  //      expectNStreamingUpdate(n)
+  //    }
+  //
+  //    val seqState = stub1.invoke(RequestGetState()).futureValue.seqState.get
+  //    seqState.seq shouldEqual n - 1
+  //
+  //    {
+  //      implicit val testUser: TestUser = user
+  //      expectNoUpdate(seqState)
+  //    }
+  //  }
+
 }

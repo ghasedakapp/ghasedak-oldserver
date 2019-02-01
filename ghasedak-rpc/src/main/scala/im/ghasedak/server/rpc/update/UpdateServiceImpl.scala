@@ -45,14 +45,15 @@ final class UpdateServiceImpl(implicit system: ActorSystem) extends UpdateServic
     }
   }
 
-  override def streamingGetDifference(requestStream: Source[StreamingRequestGetDifference, NotUsed], metadata: Metadata): Source[StreamingResponseGetDifference, NotUsed] = {
+  override def streamingGetDifference(requestStream: Source[StreamingRequestGetDifference, NotUsed], metadata: Metadata): Source[StreamingResponseGetDifference, NotUsed] =
     authorizeStream(metadata) { clientData ⇒
       val consumer = seqUpdateExt.getConsumer(clientData.userId, clientData.tokenId)
-      requestStream.mapAsync(1) { req ⇒
-        acknowledge(consumer, req.seqStateAck)
-          .flatMap(_ ⇒ getDifference(clientData.tokenId, consumer))
+      requestStream.flatMapConcat { req ⇒
+        val result = acknowledge(consumer, req.seqStateAck).map { _ ⇒
+          getDifference(clientData.userId, clientData.tokenId, req.seqStateAck.get).take(10)
+        }
+        Source.fromFutureSource(result)
       }
     }
-  }
 
 }

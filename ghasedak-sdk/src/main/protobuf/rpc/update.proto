@@ -26,9 +26,17 @@ message RequestGetDifference {
 
 message StreamingRequestGetDifference {
     im.ghasedak.api.ApiSeqState seq_state_ack = 1;
+
+    // The maximum number of updates returned for this request.
+    // May return fewer than the number specified.
+    int32 max_messages = 2;
+}
+
+message ReceivedUpdate {
+    im.ghasedak.api.ApiSeqState seq_state = 1;
+    im.ghasedak.api.ApiUpdateContainer update_container = 2;
 }
 
 message StreamingResponseGetDifference {
-    im.ghasedak.api.ApiSeqState seq_state = 1;
-    im.ghasedak.api.ApiUpdateContainer update_container = 2;
+    repeated ReceivedUpdate received_updates = 1;
 }

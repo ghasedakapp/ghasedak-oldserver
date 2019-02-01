@@ -28,8 +28,8 @@ trait UpdateMatcher {
     val stub = updateStub.getDifference.addHeader(tokenMetadataKey, testUser.token)
     stub.invoke(RequestGetDifference(Some(seqState)))
       .map { response ⇒
-        if (response.getUpdateContainer.update.getClass == clazz) {
-          updateContainer = response.getUpdateContainer
+        if (response.receivedUpdates.head.getUpdateContainer.update.getClass == clazz) {
+          updateContainer = response.receivedUpdates.head.getUpdateContainer
           latch.countDown()
         }
       }
@@ -44,6 +44,20 @@ trait UpdateMatcher {
     val latch = new CountDownLatch(n)
     val stub = updateStub.getDifference.addHeader(tokenMetadataKey, testUser.token)
     stub.invoke(RequestGetDifference(Some(seqState)))
+      .map { _ ⇒
+        latch.countDown()
+      }
+      .runWith(Sink.ignore)(localMat)
+    assert(latch.await(sleepForUpdates, TimeUnit.MILLISECONDS))
+    localMat.shutdown()
+  }
+
+  def expectNStreamingUpdate(n: Int, seqState: ApiSeqState = defaultSeqState)(implicit testUser: TestUser): Unit = {
+    val localMat = ActorMaterializer()
+    val latch = new CountDownLatch(n)
+    val stub = updateStub.streamingGetDifference().addHeader(tokenMetadataKey, testUser.token)
+    val s = Source.single(StreamingRequestGetDifference(Some(seqState), 2))
+    stub.invoke(s)
       .map { _ ⇒
         latch.countDown()
       }
@@ -72,7 +86,7 @@ trait UpdateMatcher {
     val stub = updateStub.getDifference.addHeader(tokenMetadataKey, testUser.token)
     stub.invoke(RequestGetDifference(Some(seqState))).zipWithIndex.map {
       case (response, index) ⇒
-        if (orderOfUpdates(index.toInt) == response.getUpdateContainer.update)
+        if (orderOfUpdates(index.toInt) == response.receivedUpdates.head.getUpdateContainer.update)
           latch.countDown()
     }
       .runWith(Sink.ignore)(localMat)
