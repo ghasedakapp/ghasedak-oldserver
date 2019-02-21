@@ -34,6 +34,7 @@ final class SeqUpdateExtensionImpl(system: ActorSystem) extends Extension
   protected implicit val updateMappingSchema: Schema[UpdateMapping] = UpdateMappingSchema()
 
   def getUserUpdateTopic(userId: Int): Topic = Topic(s"user_update_$userId")
+  def getRoomUpdateTopic(roomId: Long): Topic = Topic(s"room_update_$roomId")
 
   def getApiSeqState(messageId: MessageId): ApiSeqState = {
     val state = MessageIdImpl.fromByteArray(messageId.bytes).asInstanceOf[MessageIdImpl]
@@ -45,9 +46,14 @@ final class SeqUpdateExtensionImpl(system: ActorSystem) extends Extension
     MessageId.fromJava(MessageIdImpl.fromByteArray(seqState.state.toByteArray))
   }
 
+  def getRoomState(roomId:Long): Future[ApiSeqState] =
+    getState(getRoomUpdateTopic(roomId))
+
+  def getUserState(userId:Int): Future[ApiSeqState] =
+    getState(getUserUpdateTopic(userId))
+
   // fixme: find better way for get pulsar state
-  def getState(userId: Int): Future[ApiSeqState] = {
-    val topic = getUserUpdateTopic(userId)
+  def getState(topic: Topic): Future[ApiSeqState] = {
     val readerConfig = ReaderConfig(topic, MessageId.earliest)
     val reader = pulsarClient.reader[UpdateMapping](readerConfig)
 

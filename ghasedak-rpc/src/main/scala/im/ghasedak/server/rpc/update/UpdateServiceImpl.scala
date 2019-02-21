@@ -32,8 +32,16 @@ final class UpdateServiceImpl(implicit system: ActorSystem) extends UpdateServic
 
   override def getState(request: RequestGetState, metadata: Metadata): Future[ResponseGetState] = {
     authorize(metadata) { clientData ⇒
-      seqUpdateExt.getState(clientData.userId)
-        .map(seqState ⇒ ResponseGetState(Some(seqState)))
+      //TODO topic validation
+      if(request.roomIds.isEmpty){
+        seqUpdateExt.getUserState(clientData.userId).map(state ⇒ Seq(ReceivedSeqState(clientData.userId.toLong, Some(state))))
+      }else {
+      Future.sequence(request.roomIds.map(t ⇒
+        seqUpdateExt.getRoomState(t).map(state ⇒ ReceivedSeqState(t, Some(state)))))
+
+      }
+        .map(ResponseGetState(_))
+
     }
   }
 
@@ -46,14 +54,15 @@ final class UpdateServiceImpl(implicit system: ActorSystem) extends UpdateServic
   }
 
   override def streamingGetDifference(requestStream: Source[StreamingRequestGetDifference, NotUsed], metadata: Metadata): Source[StreamingResponseGetDifference, NotUsed] =
-    authorizeStream(metadata) { clientData ⇒
-      val consumer = seqUpdateExt.getConsumer(clientData.userId, clientData.tokenId)
-      requestStream.flatMapConcat { req ⇒
-        val result = acknowledge(consumer, req.seqStateAck).map { _ ⇒
-          getDifference(clientData.userId, clientData.tokenId, req.seqStateAck.get).take(10)
-        }
-        Source.fromFutureSource(result)
-      }
-    }
+    //    authorizeStream(metadata) { clientData ⇒
+    //      val consumer = seqUpdateExt.getConsumer(clientData.userId, clientData.tokenId)
+    //      requestStream.flatMapConcat { req ⇒
+    //        val result = acknowledge(consumer, req.seqStateAck).map { _ ⇒
+    //          getDifference(clientData.userId, clientData.tokenId, req.seqStateAck.get).take(10)
+    //        }
+    //        Source.fromFutureSource(result)
+    //      }
+    //    }
+    Source.empty
 
 }

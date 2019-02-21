@@ -17,7 +17,16 @@ trait DeliveryOperations {
     update:    ApiUpdateContainer,
     reduceKey: Option[String]     = None): Future[ApiSeqState] =
     deliverUpdate(
-      userId,
+      getUserUpdateTopic(userId),
+      UpdateMapping(default = Some(update)),
+      reduceKey)
+
+  def deliverRoomUpdate(
+    roomId:    Long,
+    update:    ApiUpdateContainer,
+    reduceKey: Option[String]     = None): Future[ApiSeqState] =
+    deliverUpdate(
+      getRoomUpdateTopic(roomId),
       UpdateMapping(default = Some(update)),
       reduceKey)
 
@@ -26,37 +35,24 @@ trait DeliveryOperations {
     update:    ApiUpdateContainer,
     reduceKey: Option[String]     = None): Future[Unit] =
     broadcastUpdate(
-      userIds,
+      userIds.map(getUserUpdateTopic),
       UpdateMapping(default = Some(update)),
       reduceKey)
 
   def deliverCustomUpdate(
-    userId:  Int,
+    topic:   Topic,
     default: ApiUpdateContainer,
     custom:  Map[String, ApiUpdateContainer]): Future[ApiSeqState] =
     deliverUpdate(
-      userId,
+      topic,
       UpdateMapping(
         default = Some(default),
         custom = custom))
 
-  def broadcastUserUpdate(
-    userId:       Int,
-    bcastUserIds: Set[Int],
-    update:       ApiUpdateContainer,
-    reduceKey:    Option[String]     = None): Future[ApiSeqState] = {
-    val mapping = UpdateMapping(default = Some(update))
-    for {
-      seqState ← deliverUpdate(userId, mapping, reduceKey)
-      _ ← broadcastUpdate((bcastUserIds - userId).toSeq, mapping, reduceKey)
-    } yield seqState
-  }
-
   private def deliverUpdate(
-    userId:    Int,
+    topic:     Topic,
     mapping:   UpdateMapping,
     reduceKey: Option[String] = None): Future[ApiSeqState] = {
-    val topic = getUserUpdateTopic(userId)
     val producerConfig = getBaseUserUpdateProducerConfig.copy(topic = topic)
     val producer = pulsarClient.producer[UpdateMapping](producerConfig)
     val message = DefaultProducerMessage(reduceKey, mapping)
@@ -67,10 +63,10 @@ trait DeliveryOperations {
   }
 
   private def broadcastUpdate(
-    userIds:   Seq[Int],
+    topics:    Seq[Topic],
     mapping:   UpdateMapping,
     reduceKey: Option[String] = None): Future[Unit] = {
-    Future.sequence(userIds map (userId ⇒ deliverUpdate(userId, mapping, reduceKey))) map (_ ⇒ ())
+    Future.sequence(topics map (topic ⇒ deliverUpdate(topic, mapping, reduceKey))) map (_ ⇒ ())
   }
 
 }
