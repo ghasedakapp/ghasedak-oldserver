@@ -21,12 +21,12 @@ trait UpdateMatcher {
 
   private val defaultSeqState = ApiSeqState(-1, ByteString.copyFrom(MessageId.earliest.bytes))
 
-  def expectUpdate(clazz: UpdateClass, seqState: ApiSeqState = defaultSeqState)(f: Update ⇒ Unit = _ ⇒ ())(implicit testUser: TestUser): Unit = {
+  def expectStreamUpdate(clazz: UpdateClass, seqState: ApiSeqState = defaultSeqState)(f: Update ⇒ Unit = _ ⇒ ())(implicit testUser: TestUser): Unit = {
     val localMat = ActorMaterializer()
     val latch = new CountDownLatch(1)
     var updateContainer = ApiUpdateContainer()
-    val stub = updateStub.getDifference.addHeader(tokenMetadataKey, testUser.token)
-    stub.invoke(RequestGetDifference(Some(seqState)))
+    val stub = updateStub.streamingGetDifference().addHeader(tokenMetadataKey, testUser.token)
+    stub.invoke(Source.single(StreamingRequestGetDifference(Some(seqState))))
       .map { response ⇒
         if (response.receivedUpdates.head.getUpdateContainer.update.getClass == clazz) {
           updateContainer = response.receivedUpdates.head.getUpdateContainer
@@ -39,11 +39,11 @@ trait UpdateMatcher {
     localMat.shutdown()
   }
 
-  def expectNUpdate(n: Int, seqState: ApiSeqState = defaultSeqState)(implicit testUser: TestUser): Unit = {
+  def expectStreamNUpdate(n: Int, seqState: ApiSeqState = defaultSeqState)(implicit testUser: TestUser): Unit = {
     val localMat = ActorMaterializer()
     val latch = new CountDownLatch(n)
-    val stub = updateStub.getDifference.addHeader(tokenMetadataKey, testUser.token)
-    stub.invoke(RequestGetDifference(Some(seqState)))
+    val stub = updateStub.streamingGetDifference.addHeader(tokenMetadataKey, testUser.token)
+    stub.invoke(Source.single(StreamingRequestGetDifference(Some(seqState))))
       .map { _ ⇒
         latch.countDown()
       }
@@ -56,7 +56,7 @@ trait UpdateMatcher {
     val localMat = ActorMaterializer()
     val latch = new CountDownLatch(n)
     val stub = updateStub.streamingGetDifference().addHeader(tokenMetadataKey, testUser.token)
-    val s = Source.single(StreamingRequestGetDifference(Some(seqState), 2))
+    val s = Source.single(StreamingRequestGetDifference(Some(seqState)))
     stub.invoke(s)
       .map { _ ⇒
         latch.countDown()
@@ -66,11 +66,11 @@ trait UpdateMatcher {
     localMat.shutdown()
   }
 
-  def expectNoUpdate(seqState: ApiSeqState = defaultSeqState)(implicit testUser: TestUser): Unit = {
+  def expectStreamNoUpdate(seqState: ApiSeqState = defaultSeqState)(implicit testUser: TestUser): Unit = {
     val localMat = ActorMaterializer()
     var hashAnyUpdate = false
-    val stub = updateStub.getDifference.addHeader(tokenMetadataKey, testUser.token)
-    stub.invoke(RequestGetDifference(Some(seqState)))
+    val stub = updateStub.streamingGetDifference().addHeader(tokenMetadataKey, testUser.token)
+    stub.invoke(Source.single(StreamingRequestGetDifference(Some(seqState))))
       .map { _ ⇒
         hashAnyUpdate = true
       }
@@ -80,15 +80,16 @@ trait UpdateMatcher {
     localMat.shutdown()
   }
 
-  def expectOrderUpdate(orderOfUpdates: Seq[Update], seqState: ApiSeqState = defaultSeqState)(implicit testUser: TestUser): Unit = {
+  def expectStreamOrderUpdate(orderOfUpdates: Seq[Update], seqState: ApiSeqState = defaultSeqState)(implicit testUser: TestUser): Unit = {
     val localMat = ActorMaterializer()
     val latch = new CountDownLatch(orderOfUpdates.length)
-    val stub = updateStub.getDifference.addHeader(tokenMetadataKey, testUser.token)
-    stub.invoke(RequestGetDifference(Some(seqState))).zipWithIndex.map {
-      case (response, index) ⇒
-        if (orderOfUpdates(index.toInt) == response.receivedUpdates.head.getUpdateContainer.update)
-          latch.countDown()
-    }
+    val stub = updateStub.streamingGetDifference().addHeader(tokenMetadataKey, testUser.token)
+    stub.invoke(Source.single(StreamingRequestGetDifference(Some(seqState))))
+      .zipWithIndex.map {
+        case (response, index) ⇒
+          if (orderOfUpdates(index.toInt) == response.receivedUpdates.head.getUpdateContainer.update)
+            latch.countDown()
+      }
       .runWith(Sink.ignore)(localMat)
     assert(latch.await(sleepForUpdates, TimeUnit.MILLISECONDS))
     localMat.shutdown()

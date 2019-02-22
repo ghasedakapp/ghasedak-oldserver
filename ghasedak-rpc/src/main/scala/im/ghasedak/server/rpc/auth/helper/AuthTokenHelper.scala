@@ -6,13 +6,14 @@ import akka.NotUsed
 import akka.event.LoggingAdapter
 import akka.grpc.GrpcServiceException
 import akka.stream.scaladsl.Source
+import cats.data.EitherT
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.JWTVerificationException
 import com.auth0.jwt.interfaces.DecodedJWT
 import im.ghasedak.server.model.auth.AuthToken
 import im.ghasedak.server.repo.auth.AuthTokenRepo
-import im.ghasedak.server.rpc.Constant
+import im.ghasedak.server.rpc.{ Constant, RpcError }
 import im.ghasedak.server.rpc.auth.AuthRpcErrors
 import im.ghasedak.server.rpc.common.CommonRpcErrors._
 import slick.jdbc.PostgresProfile
@@ -81,6 +82,14 @@ trait AuthTokenHelper {
 
   def authorize[T](metadata: Metadata)(f: ClientData ⇒ Future[T]): Future[T] =
     authorize(metadata.getText(Constant.tokenMetadataKey))(f)
+
+  def authorizeT[T](metadata: Metadata)(f: ClientData ⇒ Future[Either[RpcError, T]]): Future[T] = {
+    authorize(metadata.getText(Constant.tokenMetadataKey))(
+      f.andThen(a ⇒ a.flatMap {
+        case Right(value) ⇒ Future.successful(value)
+        case Left(e)      ⇒ Future.failed(e)
+      }))
+  }
 
   def authorizeStream[T, M](metadata: Metadata)(f: ClientData ⇒ Source[T, M]): Source[T, NotUsed] =
     Source.fromFutureSource(authorize(metadata)(f.andThen(Future.successful)))

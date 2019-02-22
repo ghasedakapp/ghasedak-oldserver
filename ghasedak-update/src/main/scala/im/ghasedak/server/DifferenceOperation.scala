@@ -23,22 +23,32 @@ trait DifferenceOperation {
     pulsarClient.consumer[UpdateMapping](consumerConfig)
   }
 
-  // todo: config message retention and ttl on pulsar
-  def getDifference(userId: Int, messageId: MessageId): Source[ConsumerMessage[UpdateMapping], Control] = {
+  def generateConsumer(userId: Int): Consumer[UpdateMapping] = {
     val topic = getUserUpdateTopic(userId)
     val consumerConfig = getBaseUserUpdateConsumerConfig.copy(topics = Seq(topic))
-    val consumer = pulsarClient.consumer[UpdateMapping](consumerConfig)
-    source(() ⇒ consumer, Some(messageId))
+    pulsarClient.consumer[UpdateMapping](consumerConfig)
   }
 
   // todo: config message retention and ttl on pulsar
-  def getDifference(consumer: Consumer[UpdateMapping]): Future[ConsumerMessage[UpdateMapping]] = {
+  def streamGetDifference(userId: Int, tokenId: String): Source[ConsumerMessage[UpdateMapping], Control] = {
+    val consumer = getConsumer(userId, tokenId)
+    source(() ⇒ consumer, None)
+  }
+
+  // todo: config message retention and ttl on pulsar
+  def getDifference(userId: Int, tokenId: String): Future[ConsumerMessage[UpdateMapping]] = {
+    val consumer = getConsumer(userId, tokenId)
     consumer.receiveAsync
   }
 
-  // todo: config message retention and ttl on pulsar
-  def acknowledge(consumer: Consumer[UpdateMapping], messageId: MessageId): Future[Unit] = {
+  def acknowledge(userId: Int, tokenId: String, messageId: MessageId): Future[Unit] = {
+    val consumer = getConsumer(userId, tokenId)
     consumer.acknowledgeCumulativeAsync(messageId)
+  }
+
+  def seek(userId: Int, tokenId: String, messageId: MessageId): Future[Unit] = {
+    val consumer = getConsumer(userId, tokenId)
+    consumer.seekAsync(messageId)
   }
 
 }
