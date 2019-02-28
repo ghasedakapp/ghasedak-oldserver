@@ -5,7 +5,7 @@ import akka.stream.scaladsl.Source
 import com.sksamuel.pulsar4s.ConsumerMessage
 import com.sksamuel.pulsar4s.akka.streams.Control
 import im.ghasedak.api.update.ApiSeqState
-import im.ghasedak.rpc.update.{ ReceivedUpdate, ResponseGetDifference, StreamingRequestGetDifference, StreamingResponseGetDifference }
+import im.ghasedak.rpc.update._
 import im.ghasedak.server.update.UpdateMapping
 
 import scala.concurrent.Future
@@ -58,7 +58,7 @@ trait UpdateServiceHelper {
       updateMapping.custom(tokenId)
     else
       updateMapping.default.get
-    ResponseGetDifference(Seq(ReceivedUpdate(Some(seqState), Some(updateContainer))))
+    ResponseGetDifference(Seq(ApiReceivedUpdate(Some(seqState), Some(updateContainer))))
   }
 
 }
