@@ -51,7 +51,7 @@ final class UpdateServiceImpl(implicit system: ActorSystem) extends UpdateServic
     }
 
   override def seek(request: SeekRequest, metadata: Metadata): Future[ResponseVoid] =
-    authorizeT(metadata) { clientData ⇒
+    authorize(metadata) { clientData ⇒
       val result = for {
         id ← fromOption(UpdateRpcErrors.SeqStateNotFound)(request.messageId)
         r ← fromFuture(seek(clientData.userId, clientData.tokenId, id) map (_ ⇒ ResponseVoid()))
