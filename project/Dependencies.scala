@@ -50,6 +50,7 @@ object Dependencies {
     val scalatic = "org.scalactic" %% "scalactic" % "3.0.5"
     val scalaTest = "org.scalatest" %% "scalatest" % "3.0.5" % "test"
     val akkaTestkit = "com.typesafe.akka" %% "akka-testkit" % V.akka % "test"
+    val akkaStreamTestkit ="com.typesafe.akka" %% "akka-stream-testkit" %  V.akka % "test"
   }
 
   import Compile._
@@ -105,6 +106,7 @@ object Dependencies {
     scalatic,
     scalaTest,
     akkaTestkit,
+    akkaStreamTestkit,
     stream
   )
 

@@ -15,6 +15,12 @@ trait DifferenceOperation {
   def getBaseUserUpdateConsumerConfig: ConsumerConfig =
     ConsumerConfig(Subscription.generate)
 
+  def subscribe(userId: Int, tokenId: String): Future[Unit] =
+    Future {
+      val consumer = getConsumer(userId, tokenId)
+      consumer.close()
+    }
+
   def getConsumer(userId: Int, tokenId: String): Consumer[UpdateMapping] = {
     val topic = getUserUpdateTopic(userId)
     val consumerConfig = ConsumerConfig(
@@ -42,7 +48,7 @@ trait DifferenceOperation {
   }
 
   def acknowledge(userId: Int, tokenId: String, messageId: MessageId): Future[Unit] = {
-    val consumer = getConsumer(userId, tokenId)
+    val consumer = getConsumer(userId, tokenId + "-ack")
     consumer.acknowledgeCumulativeAsync(messageId)
   }
 

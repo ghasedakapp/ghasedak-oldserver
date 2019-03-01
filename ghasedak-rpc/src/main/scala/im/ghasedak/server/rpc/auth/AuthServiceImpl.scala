@@ -6,8 +6,10 @@ import java.util.UUID
 import akka.actor.ActorSystem
 import akka.event.{ Logging, LoggingAdapter }
 import akka.grpc.scaladsl.Metadata
+import com.auth0.jwt.JWT
 import im.ghasedak.rpc.auth._
 import im.ghasedak.rpc.misc.ResponseVoid
+import im.ghasedak.server.SeqUpdateExtension
 import im.ghasedak.server.db.DbExtension
 import im.ghasedak.server.model.auth.AuthPhoneTransaction
 import im.ghasedak.server.repo.auth._
@@ -20,7 +22,7 @@ import slick.jdbc.PostgresProfile
 
 import scala.concurrent.{ ExecutionContext, Future }
 
-final class AuthServiceImpl(implicit system: ActorSystem) extends AuthServicePowerApi
+final class AuthServiceImpl(implicit val system: ActorSystem) extends AuthServicePowerApi
   with AuthServiceHelper
   with AuthTokenHelper
   with DBIOResult[RpcError]
@@ -74,6 +76,8 @@ final class AuthServiceImpl(implicit system: ActorSystem) extends AuthServicePow
             optApiAuth ← getOptApiAuth(apt, optUserAuth)
           } yield optApiAuth
       }
+      // todo: make it async and retryable
+      _ ← fromFuture(subscribe(optApiAuth))
     } yield ResponseAuth(optApiAuth.isDefined, optApiAuth)
     val result = db.run(action.value)
     result
@@ -86,6 +90,7 @@ final class AuthServiceImpl(implicit system: ActorSystem) extends AuthServicePow
       optApiAuth ← transaction match {
         case apt: AuthPhoneTransaction ⇒ newUserPhoneSignUp(apt, request.name)
       }
+      _ ← fromFuture(subscribe(optApiAuth))
     } yield ResponseAuth(optApiAuth.isDefined, optApiAuth)
     val result = db.run(action.value)
     result
