@@ -5,18 +5,50 @@ import com.sksamuel.pulsar4s._
 import com.sksamuel.pulsar4s.akka.streams.{ Control, source }
 import im.ghasedak.server.update.UpdateMapping
 
+import scala.concurrent.Future
+
 trait DifferenceOperation {
   this: SeqUpdateExtensionImpl ⇒
+
+  def getSubscription(userId: Int, tokenId: String): Subscription = Subscription(s"${userId}_$tokenId")
 
   def getBaseUserUpdateConsumerConfig: ConsumerConfig =
     ConsumerConfig(Subscription.generate)
 
-  // todo: config message retention and ttl on pulsar
-  def getDifference(userId: Int, messageId: MessageId): Source[ConsumerMessage[UpdateMapping], Control] = {
+  def getConsumer(userId: Int, tokenId: String): Consumer[UpdateMapping] = {
+    val topic = getUserUpdateTopic(userId)
+    val consumerConfig = ConsumerConfig(
+      subscriptionName = getSubscription(userId, tokenId),
+      topics = Seq(topic))
+    pulsarClient.consumer[UpdateMapping](consumerConfig)
+  }
+
+  def generateConsumer(userId: Int): Consumer[UpdateMapping] = {
     val topic = getUserUpdateTopic(userId)
     val consumerConfig = getBaseUserUpdateConsumerConfig.copy(topics = Seq(topic))
-    val consumer = pulsarClient.consumer[UpdateMapping](consumerConfig)
-    source(() ⇒ consumer, Some(messageId))
+    pulsarClient.consumer[UpdateMapping](consumerConfig)
+  }
+
+  // todo: config message retention and ttl on pulsar
+  def streamGetDifference(userId: Int, tokenId: String): Source[ConsumerMessage[UpdateMapping], Control] = {
+    val consumer = getConsumer(userId, tokenId)
+    source(() ⇒ consumer, None)
+  }
+
+  // todo: config message retention and ttl on pulsar
+  def getDifference(userId: Int, tokenId: String): Future[ConsumerMessage[UpdateMapping]] = {
+    val consumer = getConsumer(userId, tokenId)
+    consumer.receiveAsync
+  }
+
+  def acknowledge(userId: Int, tokenId: String, messageId: MessageId): Future[Unit] = {
+    val consumer = getConsumer(userId, tokenId)
+    consumer.acknowledgeCumulativeAsync(messageId)
+  }
+
+  def seek(userId: Int, tokenId: String, messageId: MessageId): Future[Unit] = {
+    val consumer = getConsumer(userId, tokenId)
+    consumer.seekAsync(messageId)
   }
 
 }

@@ -4,7 +4,9 @@ import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.event.{ Logging, LoggingAdapter }
 import akka.grpc.scaladsl.Metadata
+import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
+import im.ghasedak.rpc.misc.ResponseVoid
 import im.ghasedak.rpc.update._
 import im.ghasedak.server.SeqUpdateExtension
 import im.ghasedak.server.db.DbExtension
@@ -21,6 +23,10 @@ final class UpdateServiceImpl(implicit system: ActorSystem) extends UpdateServic
   with FutureResult[RpcError]
   with RpcErrorHandler {
 
+  implicit protected val mat: ActorMaterializer = ActorMaterializer()
+
+  protected val seqUpdateExt = SeqUpdateExtension(system)
+
   // todo: use separate dispatcher for rpc handlers
   override implicit val ec: ExecutionContext = system.dispatcher
 
@@ -28,25 +34,28 @@ final class UpdateServiceImpl(implicit system: ActorSystem) extends UpdateServic
 
   override val log: LoggingAdapter = Logging.getLogger(system, this)
 
-  protected val seqUpdateExt = SeqUpdateExtension(system)
-
-  override def getState(request: RequestGetState, metadata: Metadata): Future[ResponseGetState] = {
+  override def getDifference(request: RequestGetDifference, metadata: Metadata): Future[ResponseGetDifference] =
     authorize(metadata) { clientData ⇒
-      seqUpdateExt.getState(clientData.userId)
-        .map(seqState ⇒ ResponseGetState(Some(seqState)))
+      getDifference(clientData.userId, clientData.tokenId)
     }
-  }
 
-  override def getDifference(request: RequestGetDifference, metadata: Metadata): Source[ResponseGetDifference, NotUsed] = {
-    Source.fromFutureSource {
-      authorize(metadata) { clientData ⇒
-        val difference = fromOption(UpdateRpcErrors.SeqStateNotFound)(request.seqState) map (seqState ⇒ {
-          getDifference(clientData.userId, clientData.tokenId, seqState)
-        })
-        difference.value
-      }
+  override def streamingGetDifference(requestStream: Source[StreamingRequestGetDifference, NotUsed], metadata: Metadata): Source[StreamingResponseGetDifference, NotUsed] =
+    authorizeStream(metadata) { clientData ⇒
+      acknowledge(requestStream, clientData.userId, clientData.tokenId)
+      streamGetDifference(clientData.userId, clientData.tokenId)
     }
-      .mapMaterializedValue(_ ⇒ NotUsed)
-  }
 
+  override def acknowledge(request: RequestAcknowledge, metadata: Metadata): Future[ResponseVoid] =
+    authorize(metadata) { clientData ⇒
+      acknowledge(clientData.userId, clientData.tokenId, request.ackId) map (_ ⇒ ResponseVoid())
+    }
+
+  override def seek(request: SeekRequest, metadata: Metadata): Future[ResponseVoid] =
+    authorize(metadata) { clientData ⇒
+      val result = for {
+        id ← fromOption(UpdateRpcErrors.SeqStateNotFound)(request.messageId)
+        r ← fromFuture(seek(clientData.userId, clientData.tokenId, id) map (_ ⇒ ResponseVoid()))
+      } yield r
+      result.value
+    }
 }

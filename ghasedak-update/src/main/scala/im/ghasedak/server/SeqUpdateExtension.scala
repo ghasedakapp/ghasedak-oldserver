@@ -45,26 +45,6 @@ final class SeqUpdateExtensionImpl(system: ActorSystem) extends Extension
     MessageId.fromJava(MessageIdImpl.fromByteArray(seqState.state.toByteArray))
   }
 
-  // fixme: find better way for get pulsar state
-  def getState(userId: Int): Future[ApiSeqState] = {
-    val topic = getUserUpdateTopic(userId)
-    val readerConfig = ReaderConfig(topic, MessageId.earliest)
-    val reader = pulsarClient.reader[UpdateMapping](readerConfig)
-
-    def getPulsarState(messageId: MessageId = MessageId.earliest): Future[MessageId] = {
-      if (reader.hasMessageAvailable) {
-        reader.nextAsync.flatMap(m ⇒ getPulsarState(m.messageId))
-      } else {
-        Future.successful(messageId)
-      }
-    }
-
-    getPulsarState() map { messageId ⇒
-      reader.closeAsync
-      getApiSeqState(messageId)
-    }
-  }
-
 }
 
 object SeqUpdateExtension extends ExtensionId[SeqUpdateExtensionImpl] with ExtensionIdProvider {
