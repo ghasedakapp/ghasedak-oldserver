@@ -5,10 +5,10 @@ import akka.event.{ Logging, LoggingAdapter }
 import akka.grpc.scaladsl.Metadata
 import im.ghasedak.rpc.misc.ResponseVoid
 import im.ghasedak.rpc.test.{ TestServicePowerApi, _ }
-import im.ghasedak.server.SeqUpdateExtension
 import im.ghasedak.server.db.DbExtension
 import im.ghasedak.server.rpc.RpcErrorHandler
 import im.ghasedak.server.rpc.auth.helper.AuthTokenHelper
+import im.ghasedak.server.update.SeqUpdateExtension
 import slick.jdbc.PostgresProfile
 
 import scala.concurrent.{ ExecutionContext, Future }

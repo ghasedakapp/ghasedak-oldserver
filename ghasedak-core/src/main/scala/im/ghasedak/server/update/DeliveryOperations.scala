@@ -1,8 +1,7 @@
-package im.ghasedak.server
+package im.ghasedak.server.update
 
 import com.sksamuel.pulsar4s._
 import im.ghasedak.api.update.{ ApiSeqState, ApiUpdateContainer }
-import im.ghasedak.server.update.UpdateMapping
 
 import scala.concurrent.Future
 

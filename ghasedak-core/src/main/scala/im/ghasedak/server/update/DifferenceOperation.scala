@@ -1,9 +1,8 @@
-package im.ghasedak.server
+package im.ghasedak.server.update
 
 import akka.stream.scaladsl.Source
 import com.sksamuel.pulsar4s._
 import com.sksamuel.pulsar4s.akka.streams.{ Control, source }
-import im.ghasedak.server.update.UpdateMapping
 
 import scala.concurrent.Future
 

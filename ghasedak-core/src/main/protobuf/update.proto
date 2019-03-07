@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package im.ghasedak.server.update;
+
+option java_package = "im.ghasedak.server.update";
+option java_multiple_files = true;
+
+option (scalapb.options) = {
+    flat_package: true
+    import: "im.ghasedak.server.serializer.CoreTypeMapper._"
+    primitive_wrappers: true
+    single_file: true
+    preamble: "trait UpdatePayload"
+//    preamble: "sealed trait UpdateCommand { val replyTo:im.ghasedak.server.ActorRefContainer } "
+};
+
+
+import "api/update.proto";
+import "scalapb/scalapb.proto";
+
+message UpdateMapping {
+    im.ghasedak.api.ApiUpdateContainer default = 1;
+    map<string, im.ghasedak.api.ApiUpdateContainer> custom = 2;
+}
+
+message UpdateEnvelope {
+    int32 user_id = 1;
+    int32 token_id = 2;
+    oneof payload {
+        Deliver deliver = 3;
+    }
+
+    message Deliver {
+        option (scalapb.message).extends = "UpdatePayload";
+
+    }
+}

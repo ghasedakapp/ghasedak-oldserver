@@ -1,15 +1,14 @@
-package im.ghasedak.server
+package im.ghasedak.server.update
 
 import akka.actor._
 import com.google.protobuf.ByteString
 import com.sksamuel.pulsar4s._
 import com.typesafe.config.Config
 import im.ghasedak.api.update.ApiSeqState
-import im.ghasedak.server.update.UpdateMapping
 import org.apache.pulsar.client.api.Schema
 import org.apache.pulsar.client.impl.MessageIdImpl
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.ExecutionContext
 
 final class SeqUpdateExtensionImpl(system: ActorSystem) extends Extension
   with DeliveryOperations
