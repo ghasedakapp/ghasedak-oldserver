@@ -1,22 +1,21 @@
 package im.ghasedak.server.update
 
-import akka.actor.typed.{ ActorRef, Props }
+import akka.actor.typed.ActorRef
+import akka.actor.typed.scaladsl.adapter._
 import akka.actor.{ ActorSystem, ExtendedActorSystem, Extension, ExtensionId, ExtensionIdProvider, Scheduler }
+import akka.cluster.sharding.typed.ShardingMessageExtractor
 import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, Entity, EntityRef }
 import akka.util.Timeout
 import com.google.protobuf.ByteString
-import com.typesafe.config.Config
+import com.sksamuel.pulsar4s.{ MessageId, Topic }
 import im.ghasedak.api.update.ApiSeqState
+import im.ghasedak.server.serializer.ActorRefConversions._
+import im.ghasedak.server.update.UpdateEnvelope.Deliver
+import im.ghasedak.server.update.UpdateProcessor.StopOffice
 import org.apache.pulsar.client.impl.MessageIdImpl
 
-import scala.concurrent.{ ExecutionContext, Future }
 import scala.concurrent.duration._
-import akka.actor.typed.scaladsl.adapter._
-import akka.cluster.sharding.typed.{ ClusterShardingSettings, ShardingEnvelope, ShardingMessageExtractor }
-import com.sksamuel.pulsar4s.{ MessageId, Topic }
-import akka.pattern.ask
-import im.ghasedak.server.update.UpdateEnvelope.Deliver
-import im.ghasedak.server.serializer.ActorRefConversions._
+import scala.concurrent.{ ExecutionContext, Future }
 
 final class SeqUpdateExtensionImpl(system: ActorSystem) extends Extension
   with DeliveryOperations
@@ -33,8 +32,8 @@ final class SeqUpdateExtensionImpl(system: ActorSystem) extends Extension
   private val sharding = ClusterSharding(system.toTyped)
 
   private val shardRegion: ActorRef[UpdateEnvelope] = sharding.init(Entity(
-    typeKey = UpdateManager.ShardingTypeName,
-    createBehavior = ctx ⇒ UpdateManager.shardingBehavior(ctx.entityId)).withStopMessage(StopOffice)
+    typeKey = UpdateProcessor.ShardingTypeName,
+    createBehavior = ctx ⇒ UpdateProcessor.apply(ctx.entityId)).withStopMessage(StopOffice)
     .withMessageExtractor[UpdateEnvelope](new ShardingMessageExtractor[UpdateEnvelope, UpdatePayload] {
       override def entityId(message: UpdateEnvelope): String = s"${message.userId}_${message.tokenId}"
 
@@ -44,7 +43,7 @@ final class SeqUpdateExtensionImpl(system: ActorSystem) extends Extension
     }))
 
   private def entity(userId: Int, tokenId: Long): EntityRef[UpdatePayload] = {
-    sharding.entityRefFor(UpdateManager.ShardingTypeName, s"${userId}_${tokenId}")
+    sharding.entityRefFor(UpdateProcessor.ShardingTypeName, s"${userId}_${tokenId}")
   }
 
   private def construct(r: ActorRef[String]): Deliver = Deliver(replyTo = r)

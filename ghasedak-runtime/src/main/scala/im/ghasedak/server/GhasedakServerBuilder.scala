@@ -19,9 +19,8 @@ import im.ghasedak.server.rpc.messaging.MessagingServiceImpl
 import im.ghasedak.server.rpc.test.TestServiceImpl
 import im.ghasedak.server.rpc.update.UpdateServiceImpl
 import im.ghasedak.server.rpc.user.UserServiceImpl
-import im.ghasedak.server.update.SeqUpdateExtension
 
-import scala.concurrent.{ Await, ExecutionContext, Future }
+import scala.concurrent.{ ExecutionContext, Future }
 
 object GhasedakServerBuilder {
 
