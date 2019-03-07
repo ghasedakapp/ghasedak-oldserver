@@ -32,6 +32,7 @@ message UpdateEnvelope {
 
     message Deliver {
         option (scalapb.message).extends = "UpdatePayload";
+        string reply_to = 1 [(scalapb.field).type = "im.ghasedak.server.serializer.ActorRefContainer"];
 
     }
 }

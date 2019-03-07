@@ -55,14 +55,15 @@ trait DeliveryOperations {
     userId:    Int,
     mapping:   UpdateMapping,
     reduceKey: Option[String] = None): Future[ApiSeqState] = {
-    val topic = getUserUpdateTopic(userId)
-    val producerConfig = getBaseUserUpdateProducerConfig.copy(topic = topic)
-    val producer = pulsarClient.producer[UpdateMapping](producerConfig)
-    val message = DefaultProducerMessage(reduceKey, mapping)
-    producer.sendAsync(message) map { messageId ⇒
-      producer.closeAsync
-      getApiSeqState(messageId)
-    }
+    Future.successful(ApiSeqState())
+    //    val topic = getUserUpdateTopic(userId)
+    //    val producerConfig = getBaseUserUpdateProducerConfig.copy(topic = topic)
+    //    val producer = pulsarClient.producer[UpdateMapping](producerConfig)
+    //    val message = DefaultProducerMessage(reduceKey, mapping)
+    //    producer.sendAsync(message) map { messageId ⇒
+    //      producer.closeAsync
+    //      getApiSeqState(messageId)
+    //    }
   }
 
   private def broadcastUpdate(

@@ -1,14 +1,22 @@
 package im.ghasedak.server.update
 
-import akka.actor._
+import akka.actor.typed.{ ActorRef, Props }
+import akka.actor.{ ActorSystem, ExtendedActorSystem, Extension, ExtensionId, ExtensionIdProvider, Scheduler }
+import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, Entity, EntityRef }
+import akka.util.Timeout
 import com.google.protobuf.ByteString
-import com.sksamuel.pulsar4s._
 import com.typesafe.config.Config
 import im.ghasedak.api.update.ApiSeqState
-import org.apache.pulsar.client.api.Schema
 import org.apache.pulsar.client.impl.MessageIdImpl
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.duration._
+import akka.actor.typed.scaladsl.adapter._
+import akka.cluster.sharding.typed.{ ClusterShardingSettings, ShardingEnvelope, ShardingMessageExtractor }
+import com.sksamuel.pulsar4s.{ MessageId, Topic }
+import akka.pattern.ask
+import im.ghasedak.server.update.UpdateEnvelope.Deliver
+import im.ghasedak.server.serializer.ActorRefConversions._
 
 final class SeqUpdateExtensionImpl(system: ActorSystem) extends Extension
   with DeliveryOperations
@@ -19,18 +27,31 @@ final class SeqUpdateExtensionImpl(system: ActorSystem) extends Extension
   // todo: use separate dispatcher for updates
   protected implicit val ec: ExecutionContext = system.dispatcher
 
-  private val config: Config = system.settings.config
+  protected implicit val timeout: Timeout = 15.seconds
+  protected implicit val scheduler: Scheduler = system.scheduler
 
-  private val pulsarHost: String = config.getString("module.update.pulsar.host")
-  private val pulsarPort: Int = config.getInt("module.update.pulsar.port")
+  private val sharding = ClusterSharding(system.toTyped)
 
-  private val pulsarClientConfig: PulsarClientConfig =
-    PulsarClientConfig(s"pulsar://$pulsarHost:$pulsarPort")
+  private val shardRegion: ActorRef[UpdateEnvelope] = sharding.init(Entity(
+    typeKey = UpdateManager.ShardingTypeName,
+    createBehavior = ctx ⇒ UpdateManager.shardingBehavior(ctx.entityId)).withStopMessage(StopOffice)
+    .withMessageExtractor[UpdateEnvelope](new ShardingMessageExtractor[UpdateEnvelope, UpdatePayload] {
+      override def entityId(message: UpdateEnvelope): String = s"${message.userId}_${message.tokenId}"
 
-  protected val pulsarClient: PulsarClient =
-    PulsarClient(pulsarClientConfig)
+      override def shardId(entityId: String): String = (entityId.split("_").head.toInt % 10).toString
 
-  protected implicit val updateMappingSchema: Schema[UpdateMapping] = UpdateMappingSchema()
+      override def unwrapMessage(message: UpdateEnvelope): UpdatePayload = message.payload.value.asInstanceOf[UpdatePayload]
+    }))
+
+  private def entity(userId: Int, tokenId: Long): EntityRef[UpdatePayload] = {
+    sharding.entityRefFor(UpdateManager.ShardingTypeName, s"${userId}_${tokenId}")
+  }
+
+  private def construct(r: ActorRef[String]): Deliver = Deliver(replyTo = r)
+
+  def deliver: Future[String] = {
+    entity(10, 1000) ? construct
+  }
 
   def getUserUpdateTopic(userId: Int): Topic = Topic(s"user_update_$userId")
 
