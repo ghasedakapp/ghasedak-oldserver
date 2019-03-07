@@ -8,6 +8,7 @@ import akka.cluster.sharding.typed.scaladsl.EntityTypeKey
 import akka.event.Logging
 import com.sksamuel.pulsar4s.{ PulsarClient, PulsarClientConfig }
 import com.typesafe.config.Config
+import im.ghasedak.server.Processor
 import im.ghasedak.server.db.DbExtension
 import im.ghasedak.server.serializer.ImplicitActorRef._
 import im.ghasedak.server.update.UpdateEnvelope.Deliver
@@ -27,7 +28,7 @@ object UpdateProcessor {
   }
 }
 
-class UpdateProcessor(context: ActorContext[UpdatePayload], entityId: String) extends AbstractBehavior[UpdatePayload] {
+class UpdateProcessor(context: ActorContext[UpdatePayload], entityId: String) extends Processor[UpdatePayload] {
   private implicit val system: ActorSystem = context.system.toUntyped
   private implicit val ec: ExecutionContext = system.dispatcher
   private implicit val db: PostgresProfile.backend.Database = DbExtension(system).db
@@ -49,18 +50,16 @@ class UpdateProcessor(context: ActorContext[UpdatePayload], entityId: String) ex
       throw e
   }
 
-  override def onMessage(msg: UpdatePayload): Behavior[UpdatePayload] = {
-    msg match {
-      case d: Deliver ⇒
-        d.replyTo ! "ack"
-        Behaviors.same
+  override def onReceive: Receive = {
+    case d: Deliver ⇒
+      d.replyTo ! "ack"
+      Behaviors.same
 
-      case StopOffice ⇒
-        log.debug("Stopping ......")
-        Behaviors.stopped
-      case _ ⇒
-        Behaviors.unhandled
-    }
+    case StopOffice ⇒
+      log.debug("Stopping ......")
+      Behaviors.stopped
+    case _ ⇒
+      Behaviors.unhandled
   }
 
   override def onSignal: PartialFunction[Signal, Behavior[UpdatePayload]] = {
