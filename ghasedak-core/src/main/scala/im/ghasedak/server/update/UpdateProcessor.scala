@@ -14,7 +14,7 @@ import im.ghasedak.rpc.update.ResponseGetDifference
 import im.ghasedak.server.Processor
 import im.ghasedak.server.db.DbExtension
 import im.ghasedak.server.serializer.ImplicitActorRef._
-import im.ghasedak.server.update.UpdateEnvelope.{ StreamGetDifference, Subscribe }
+import im.ghasedak.server.update.UpdateEnvelope.{ Acknowledge, StreamGetDifference, Subscribe }
 import im.ghasedak.server.update.UpdateProcessor.StopOffice
 import org.apache.pulsar.client.api.Schema
 import slick.jdbc.PostgresProfile
@@ -54,8 +54,8 @@ class UpdateProcessor(context: ActorContext[UpdatePayload], entityId: String) ex
 
   override def onReceive: Receive = {
     case s: StreamGetDifference ⇒
-      val src = com.sksamuel.pulsar4s.akka.streams.source(() ⇒ createConsumer, None)
-        .map(i ⇒ buildDifference(tokenId, i))
+      val src = com.sksamuel.pulsar4s.akka.streams.committableSource(() ⇒ createConsumer, None)
+        .map(i ⇒ buildDifference(tokenId, i.message))
 
       val ref: Future[SourceRef[ResponseGetDifference]] = src.runWith(StreamRefs.sourceRef[ResponseGetDifference]())
 
@@ -66,6 +66,11 @@ class UpdateProcessor(context: ActorContext[UpdatePayload], entityId: String) ex
       createConsumer
 
       s.replyTo ! Done
+      Behaviors.same
+
+    case Acknowledge(replyTo, ack) ⇒
+      consumer.foreach(_.acknowledge(getMessageId(ack.get)))
+      replyTo ! Done
       Behaviors.same
 
     case StopOffice ⇒
