@@ -3,8 +3,10 @@ package im.ghasedak.server.rpc.auth.helper
 import java.time.temporal.ChronoUnit
 import java.time.{ LocalDateTime, ZoneOffset }
 
+import com.auth0.jwt.JWT
 import im.ghasedak.api.auth.ApiAuth
 import im.ghasedak.api.user.ApiUser
+import im.ghasedak.server.SeqUpdateExtension
 import im.ghasedak.server.model.auth.{ AuthPhoneTransaction, AuthSession, AuthTransactionBase }
 import im.ghasedak.server.model.org.ApiKey
 import im.ghasedak.server.model.user.{ User, UserAuth }
@@ -19,12 +21,16 @@ import im.ghasedak.server.utils.StringUtils._
 import im.ghasedak.server.utils.number.IdUtils._
 import im.ghasedak.server.utils.number.PhoneNumberUtils._
 
+import scala.concurrent.Future
+
 trait AuthServiceHelper {
   this: AuthServiceImpl ⇒
 
   private val maximumAttempts: Int = 4 // attempts
 
   private val maximumValidCodeMinutes: Int = 15 // for 15 minutes phone code is valid
+
+  private val seqExt = SeqUpdateExtension(system)
 
   protected def getApiKey(apiKey: String): Result[Option[ApiKey]] = {
     AuthSession.isOfficialApiKey(apiKey) match {
@@ -123,6 +129,13 @@ trait AuthServiceHelper {
       _ ← fromDBIO(UserAuthRepo.create(userAuth))
       optApiAuth ← getOptApiAuth(transaction, Some(userAuth))
     } yield optApiAuth
+  }
+
+  protected def subscribe(optApiAuth: Option[ApiAuth]): Future[Unit] = {
+    if (optApiAuth.isDefined) {
+      val tokenId = JWT.decode(optApiAuth.get.token).getClaim("tokenId").asString()
+      seqExt.subscribe(optApiAuth.get.user.get.id, tokenId)
+    } else Future.successful()
   }
 
 }

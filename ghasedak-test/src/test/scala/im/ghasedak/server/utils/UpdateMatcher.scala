@@ -4,11 +4,13 @@ import java.util.concurrent._
 
 import akka.stream.{ ActorMaterializer, OverflowStrategy }
 import akka.stream.scaladsl.{ Keep, Sink, Source }
+import akka.stream.testkit.scaladsl.TestSink
 import com.google.protobuf.ByteString
 import com.sksamuel.pulsar4s.MessageId
 import im.ghasedak.api.update._
 import im.ghasedak.rpc.update._
 import im.ghasedak.server.GrpcBaseSuit
+import scala.concurrent.duration._
 
 trait UpdateMatcher {
   this: GrpcBaseSuit ⇒
@@ -41,14 +43,18 @@ trait UpdateMatcher {
 
   def expectStreamNUpdate(n: Int, seqState: ApiSeqState = defaultSeqState)(implicit testUser: TestUser): Unit = {
     val localMat = ActorMaterializer()
-    val latch = new CountDownLatch(n)
     val stub = updateStub.streamingGetDifference.addHeader(tokenMetadataKey, testUser.token)
-    stub.invoke(Source.single(StreamingRequestGetDifference(Some(seqState))))
-      .map { _ ⇒
-        latch.countDown()
-      }
-      .runWith(Sink.ignore)(localMat)
-    assert(latch.await(sleepForUpdates, TimeUnit.MILLISECONDS))
+    val src = stub.invoke(Source.single(StreamingRequestGetDifference(Some(seqState))))
+      .runWith(TestSink.probe[StreamingResponseGetDifference])(localMat)
+
+    src
+      .request(n)
+      .expectNextN(n)
+
+    src
+      .request(1)
+      .expectNoMessage(3.seconds)
+
     localMat.shutdown()
   }
 
