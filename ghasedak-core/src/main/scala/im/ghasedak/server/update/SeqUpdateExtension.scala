@@ -37,7 +37,8 @@ final class SeqUpdateExtensionImpl(val system: ActorSystem) extends Extension
 
   private val shardRegion: ActorRef[UpdateEnvelope] = sharding.init(Entity(
     typeKey = UpdateProcessor.ShardingTypeName,
-    createBehavior = ctx ⇒ UpdateProcessor.apply(ctx.entityId)).withStopMessage(StopOffice)
+    createBehavior = ctx ⇒ UpdateProcessor.apply(ctx.entityId))
+    .withStopMessage(StopOffice)
     .withMessageExtractor[UpdateEnvelope](new ShardingMessageExtractor[UpdateEnvelope, UpdatePayload] {
       override def entityId(message: UpdateEnvelope): String = s"${message.userId}_${message.tokenId}"
 

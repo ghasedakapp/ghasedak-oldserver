@@ -1,7 +1,9 @@
 package im.ghasedak.server.update
 
-import com.sksamuel.pulsar4s.{ ConsumerConfig, PulsarClient, PulsarClientConfig }
+import com.sksamuel.pulsar4s.{ Consumer, ConsumerConfig, PulsarClient, PulsarClientConfig }
 import org.apache.pulsar.client.api.Schema
+
+import scala.util.Try
 
 trait PulsarHelper {
   this: UpdateProcessor ⇒
@@ -18,6 +20,11 @@ trait PulsarHelper {
     subscriptionName = getSubscription(userId, tokenId),
     topics = Seq(topic))
 
-  protected lazy val consumer = pulsarClient.consumer[UpdateMapping](consumerConfig)
+  protected var consumer: Option[Consumer[UpdateMapping]] = None
 
+  protected def createConsumer: Consumer[UpdateMapping] = {
+    Try(consumer.foreach(_.close()))
+    consumer = Some(pulsarClient.consumer[UpdateMapping](consumerConfig))
+    consumer.get
+  }
 }

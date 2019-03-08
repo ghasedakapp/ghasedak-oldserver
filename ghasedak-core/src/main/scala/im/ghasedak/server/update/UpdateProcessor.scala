@@ -54,7 +54,7 @@ class UpdateProcessor(context: ActorContext[UpdatePayload], entityId: String) ex
 
   override def onReceive: Receive = {
     case s: StreamGetDifference ⇒
-      val src = com.sksamuel.pulsar4s.akka.streams.source(() ⇒ consumer, None)
+      val src = com.sksamuel.pulsar4s.akka.streams.source(() ⇒ createConsumer, None)
         .map(i ⇒ buildDifference(tokenId, i))
 
       val ref: Future[SourceRef[ResponseGetDifference]] = src.runWith(StreamRefs.sourceRef[ResponseGetDifference]())
@@ -63,7 +63,7 @@ class UpdateProcessor(context: ActorContext[UpdatePayload], entityId: String) ex
       Behaviors.same
 
     case s: Subscribe ⇒
-      consumer
+      createConsumer
 
       s.replyTo ! Done
       Behaviors.same
@@ -78,7 +78,7 @@ class UpdateProcessor(context: ActorContext[UpdatePayload], entityId: String) ex
   override def onSignal: PartialFunction[Signal, Behavior[UpdatePayload]] = {
     case PostStop ⇒
       context.log.info("UpdateProcessor  stopped")
-      consumer.close()
+      consumer.foreach(_.close())
       this
   }
 }
