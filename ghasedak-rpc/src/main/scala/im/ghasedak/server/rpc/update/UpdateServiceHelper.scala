@@ -6,22 +6,13 @@ import com.sksamuel.pulsar4s.ConsumerMessage
 import com.sksamuel.pulsar4s.akka.streams.Control
 import im.ghasedak.api.update.ApiSeqState
 import im.ghasedak.rpc.update._
-import im.ghasedak.server.update.UpdateMapping
+import im.ghasedak.server.update.{ UpdateHelper, UpdateMapping }
 
 import scala.concurrent.Future
 import scala.util.{ Failure, Success }
 
-trait UpdateServiceHelper {
+trait UpdateServiceHelper extends UpdateHelper {
   this: UpdateServiceImpl ⇒
-
-  def streamGetDifference(
-    userId:  Int,
-    tokenId: String): Source[StreamingResponseGetDifference, Control] = {
-    seqUpdateExt.streamGetDifference(userId, tokenId)
-      .map { cm ⇒
-        StreamingResponseGetDifference(buildDifference(tokenId, cm).receivedUpdates)
-      }
-  }
 
   def getDifference(userId: Int, tokenId: String): Future[ResponseGetDifference] = {
     seqUpdateExt.getDifference(userId, tokenId)
@@ -29,12 +20,13 @@ trait UpdateServiceHelper {
   }
 
   def acknowledge(userId: Int, tokenId: String, seqState: Option[ApiSeqState]): Future[Unit] = {
-    seqState match {
-      case Some(state) ⇒
-        val messageId = seqUpdateExt.getMessageId(state)
-        seqUpdateExt.acknowledge(userId, tokenId, messageId)
-      case None ⇒ Future.successful()
-    }
+    Future.successful()
+    //    seqState match {
+    //      case Some(state) ⇒
+    //        val messageId = getMessageId(state)
+    //        seqUpdateExt.acknowledge(userId, tokenId, messageId)
+    //      case None ⇒ Future.successful()
+    //    }
   }
 
   def acknowledge(
@@ -47,18 +39,8 @@ trait UpdateServiceHelper {
       }
 
   def seek(userId: Int, tokenId: String, state: ApiSeqState): Future[Unit] = {
-    val messageId = seqUpdateExt.getMessageId(state)
+    val messageId = getMessageId(state)
     seqUpdateExt.seek(userId, tokenId, messageId)
-  }
-
-  private def buildDifference(tokenId: String, consumerMessage: ConsumerMessage[UpdateMapping]): ResponseGetDifference = {
-    val seqState = seqUpdateExt.getApiSeqState(consumerMessage.messageId)
-    val updateMapping = consumerMessage.value
-    val updateContainer = if (updateMapping.custom.keySet.contains(tokenId))
-      updateMapping.custom(tokenId)
-    else
-      updateMapping.default.get
-    ResponseGetDifference(Seq(ApiReceivedUpdate(Some(seqState), Some(updateContainer))))
   }
 
 }

@@ -1,23 +1,27 @@
 package im.ghasedak.server.update
 
+import akka.{ Done, NotUsed }
 import akka.actor.typed.ActorRef
 import akka.actor.typed.scaladsl.adapter._
 import akka.actor.{ ActorSystem, ExtendedActorSystem, Extension, ExtensionId, ExtensionIdProvider, Scheduler }
 import akka.cluster.sharding.typed.ShardingMessageExtractor
 import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, Entity, EntityRef }
+import akka.stream.SourceRef
+import akka.stream.scaladsl.Source
 import akka.util.Timeout
 import com.google.protobuf.ByteString
 import com.sksamuel.pulsar4s.{ MessageId, Topic }
 import im.ghasedak.api.update.ApiSeqState
+import im.ghasedak.rpc.update.ResponseGetDifference
 import im.ghasedak.server.serializer.ActorRefConversions._
-import im.ghasedak.server.update.UpdateEnvelope.Deliver
+import im.ghasedak.server.update.UpdateEnvelope.{ StreamGetDifference, Subscribe }
 import im.ghasedak.server.update.UpdateProcessor.StopOffice
 import org.apache.pulsar.client.impl.MessageIdImpl
 
 import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
 
-final class SeqUpdateExtensionImpl(system: ActorSystem) extends Extension
+final class SeqUpdateExtensionImpl(val system: ActorSystem) extends Extension
   with DeliveryOperations
   with DifferenceOperation {
 
@@ -42,26 +46,19 @@ final class SeqUpdateExtensionImpl(system: ActorSystem) extends Extension
       override def unwrapMessage(message: UpdateEnvelope): UpdatePayload = message.payload.value.asInstanceOf[UpdatePayload]
     }))
 
-  private def entity(userId: Int, tokenId: Long): EntityRef[UpdatePayload] = {
+  private def entity(userId: Int, tokenId: String): EntityRef[UpdatePayload] = {
     sharding.entityRefFor(UpdateProcessor.ShardingTypeName, s"${userId}_${tokenId}")
   }
 
-  private def construct(r: ActorRef[String]): Deliver = Deliver(replyTo = r)
-
-  def deliver: Future[String] = {
-    entity(10, 1000) ? construct
+  private def streamAsk(r: ActorRef[SourceRef[ResponseGetDifference]]): StreamGetDifference = StreamGetDifference(replyTo = r)
+  def streamGetDifference(userId: Int, tokenId: String): Source[ResponseGetDifference, NotUsed] = {
+    val src = entity(userId, tokenId).ask[SourceRef[ResponseGetDifference]](f ⇒ streamAsk(f))
+    Source.fromFuture(src.map(_.source)).flatMapConcat(identity)
   }
 
-  def getUserUpdateTopic(userId: Int): Topic = Topic(s"user_update_$userId")
-
-  def getApiSeqState(messageId: MessageId): ApiSeqState = {
-    val state = MessageIdImpl.fromByteArray(messageId.bytes).asInstanceOf[MessageIdImpl]
-    val seq = state.getEntryId
-    ApiSeqState(seq.toInt, ByteString.copyFrom(state.toByteArray))
-  }
-
-  def getMessageId(seqState: ApiSeqState): MessageId = {
-    MessageId.fromJava(MessageIdImpl.fromByteArray(seqState.state.toByteArray))
+  private def subscribeAsk(r: ActorRef[Done]): Subscribe = Subscribe(replyTo = r)
+  def subscribe(userId: Int, tokenId: String): Future[Unit] = {
+    (entity(userId, tokenId) ? subscribeAsk) map (_ ⇒ ())
   }
 
 }

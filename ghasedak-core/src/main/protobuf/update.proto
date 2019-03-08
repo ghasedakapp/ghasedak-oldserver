@@ -25,14 +25,19 @@ message UpdateMapping {
 
 message UpdateEnvelope {
     int32 user_id = 1;
-    int32 token_id = 2;
+    string token_id = 2;
     oneof payload {
-        Deliver deliver = 3;
+        StreamGetDifference deliver = 3;
     }
 
-    message Deliver {
+    message StreamGetDifference {
         option (scalapb.message).extends = "UpdatePayload";
         string reply_to = 1 [(scalapb.field).type = "im.ghasedak.server.serializer.ActorRefContainer"];
 
+    }
+
+    message Subscribe {
+        option (scalapb.message).extends = "UpdatePayload";
+        string reply_to = 1 [(scalapb.field).type = "im.ghasedak.server.serializer.ActorRefContainer"];
     }
 }

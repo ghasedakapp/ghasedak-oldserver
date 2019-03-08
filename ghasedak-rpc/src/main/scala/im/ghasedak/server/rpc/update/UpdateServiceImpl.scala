@@ -42,7 +42,8 @@ final class UpdateServiceImpl(implicit system: ActorSystem) extends UpdateServic
   override def streamingGetDifference(requestStream: Source[StreamingRequestGetDifference, NotUsed], metadata: Metadata): Source[StreamingResponseGetDifference, NotUsed] =
     authorizeStream(metadata) { clientData ⇒
       acknowledge(requestStream, clientData.userId, clientData.tokenId)
-      streamGetDifference(clientData.userId, clientData.tokenId)
+      seqUpdateExt.streamGetDifference(clientData.userId, clientData.tokenId) map (r ⇒
+        StreamingResponseGetDifference(r.receivedUpdates))
     }
 
   override def acknowledge(request: RequestAcknowledge, metadata: Metadata): Future[ResponseVoid] =

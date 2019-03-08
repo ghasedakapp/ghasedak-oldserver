@@ -9,11 +9,6 @@ import scala.concurrent.Future
 trait DifferenceOperation {
   this: SeqUpdateExtensionImpl ⇒
 
-  def getSubscription(userId: Int, tokenId: String): Subscription = Subscription(s"${userId}_$tokenId")
-
-  def getBaseUserUpdateConsumerConfig: ConsumerConfig =
-    ConsumerConfig(Subscription.generate)
-
   def getConsumer(userId: Int, tokenId: String): Consumer[UpdateMapping] = ???
   //  {
   //    val topic = getUserUpdateTopic(userId)
@@ -29,12 +24,6 @@ trait DifferenceOperation {
   //    val consumerConfig = getBaseUserUpdateConsumerConfig.copy(topics = Seq(topic))
   //    pulsarClient.consumer[UpdateMapping](consumerConfig)
   //  }
-
-  // todo: config message retention and ttl on pulsar
-  def streamGetDifference(userId: Int, tokenId: String): Source[ConsumerMessage[UpdateMapping], Control] = {
-    val consumer = getConsumer(userId, tokenId)
-    source(() ⇒ consumer, None)
-  }
 
   // todo: config message retention and ttl on pulsar
   def getDifference(userId: Int, tokenId: String): Future[ConsumerMessage[UpdateMapping]] = {

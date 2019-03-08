@@ -1,22 +1,25 @@
 package im.ghasedak.server.update
 
+import akka.Done
 import akka.actor.ActorSystem
 import akka.actor.typed.scaladsl.adapter._
 import akka.actor.typed.scaladsl.{ AbstractBehavior, ActorContext, Behaviors }
 import akka.actor.typed.{ Behavior, PostStop, Signal }
 import akka.cluster.sharding.typed.scaladsl.EntityTypeKey
 import akka.event.Logging
-import com.sksamuel.pulsar4s.{ PulsarClient, PulsarClientConfig }
+import akka.stream.{ ActorMaterializer, SourceRef }
+import akka.stream.scaladsl.StreamRefs
 import com.typesafe.config.Config
+import im.ghasedak.rpc.update.ResponseGetDifference
 import im.ghasedak.server.Processor
 import im.ghasedak.server.db.DbExtension
 import im.ghasedak.server.serializer.ImplicitActorRef._
-import im.ghasedak.server.update.UpdateEnvelope.Deliver
+import im.ghasedak.server.update.UpdateEnvelope.{ StreamGetDifference, Subscribe }
 import im.ghasedak.server.update.UpdateProcessor.StopOffice
 import org.apache.pulsar.client.api.Schema
 import slick.jdbc.PostgresProfile
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ ExecutionContext, Future }
 
 object UpdateProcessor {
   val ShardingTypeName: EntityTypeKey[UpdatePayload] = EntityTypeKey[UpdatePayload]("UpdateProcessor")
@@ -28,31 +31,41 @@ object UpdateProcessor {
   }
 }
 
-class UpdateProcessor(context: ActorContext[UpdatePayload], entityId: String) extends Processor[UpdatePayload] {
+class UpdateProcessor(context: ActorContext[UpdatePayload], entityId: String) extends Processor[UpdatePayload]
+  with UpdateHelper
+  with PulsarHelper {
   private implicit val system: ActorSystem = context.system.toUntyped
+  private implicit val mat = ActorMaterializer()
   private implicit val ec: ExecutionContext = system.dispatcher
   private implicit val db: PostgresProfile.backend.Database = DbExtension(system).db
   private val log = Logging(system, getClass)
 
-  private val config: Config = system.settings.config
-  private val pulsarHost: String = config.getString("module.update.pulsar.host")
-  private val pulsarPort: Int = config.getInt("module.update.pulsar.port")
-  private val pulsarClientConfig: PulsarClientConfig = PulsarClientConfig(s"pulsar://$pulsarHost:$pulsarPort")
-  private val pulsarClient = PulsarClient(pulsarClientConfig)
+  protected val config: Config = system.settings.config
 
-  private implicit val updateMappingSchema: Schema[UpdateMapping] = UpdateMappingSchema()
-
-  val (userId, tokenId) = entityId.split("_").toList match {
-    case a :: s :: Nil ⇒ (a.toInt, s.toLong)
+  protected val (userId: Int, tokenId: String) = entityId.split("_").toList match {
+    case a :: s :: Nil ⇒ (a.toInt, s)
     case _ ⇒
       val e = new RuntimeException("Wrong actor name")
       log.error(e, e.getMessage)
-      throw e
+
   }
 
+  import im.ghasedak.server.serializer.ActorRefConversions._
+
   override def onReceive: Receive = {
-    case d: Deliver ⇒
-      d.replyTo ! "ack"
+    case s: StreamGetDifference ⇒
+      val src = com.sksamuel.pulsar4s.akka.streams.source(() ⇒ consumer, None)
+        .map(i ⇒ buildDifference(tokenId, i))
+
+      val ref: Future[SourceRef[ResponseGetDifference]] = src.runWith(StreamRefs.sourceRef[ResponseGetDifference]())
+
+      ref pipeTo s.replyTo
+      Behaviors.same
+
+    case s: Subscribe ⇒
+      consumer
+
+      s.replyTo ! Done
       Behaviors.same
 
     case StopOffice ⇒
@@ -65,6 +78,7 @@ class UpdateProcessor(context: ActorContext[UpdatePayload], entityId: String) ex
   override def onSignal: PartialFunction[Signal, Behavior[UpdatePayload]] = {
     case PostStop ⇒
       context.log.info("UpdateProcessor  stopped")
+      consumer.close()
       this
   }
 }
