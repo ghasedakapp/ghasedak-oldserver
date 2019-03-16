@@ -25,19 +25,20 @@ trait UpdateMatcher {
 
   def expectStreamUpdate(clazz: UpdateClass, seqState: ApiSeqState = defaultSeqState)(f: Update ⇒ Unit = _ ⇒ ())(implicit testUser: TestUser): Unit = {
     val localMat = ActorMaterializer()
-    val latch = new CountDownLatch(1)
-    var updateContainer = ApiUpdateContainer()
     val stub = updateStub.streamingGetDifference().addHeader(tokenMetadataKey, testUser.token)
-    stub.invoke(Source.single(StreamingRequestGetDifference(Some(seqState))))
-      .map { response ⇒
-        if (response.receivedUpdates.head.getUpdateContainer.update.getClass == clazz) {
-          updateContainer = response.receivedUpdates.head.getUpdateContainer
-          latch.countDown()
-        }
-      }
-      .runWith(Sink.ignore)(localMat)
-    assert(latch.await(sleepForUpdates, TimeUnit.MILLISECONDS))
-    f(updateContainer.update)
+    val src = stub.invoke(Source.single(StreamingRequestGetDifference(Some(seqState))))
+      .filter(_.receivedUpdates.head.getUpdateContainer.update.getClass == clazz)
+      .runWith(TestSink.probe[StreamingResponseGetDifference])(localMat)
+
+    val result = src
+      .request(1)
+      .expectNextN(1)
+
+    src
+      .request(1)
+      .expectNoMessage(3.seconds)
+
+    f(result.head.receivedUpdates.head.getUpdateContainer.update)
     localMat.shutdown()
   }
 
@@ -58,31 +59,14 @@ trait UpdateMatcher {
     localMat.shutdown()
   }
 
-  def expectNStreamingUpdate(n: Int, seqState: ApiSeqState = defaultSeqState)(implicit testUser: TestUser): Unit = {
-    val localMat = ActorMaterializer()
-    val latch = new CountDownLatch(n)
-    val stub = updateStub.streamingGetDifference().addHeader(tokenMetadataKey, testUser.token)
-    val s = Source.single(StreamingRequestGetDifference(Some(seqState)))
-    stub.invoke(s)
-      .map { _ ⇒
-        latch.countDown()
-      }
-      .runWith(Sink.ignore)(localMat)
-    assert(latch.await(sleepForUpdates, TimeUnit.MILLISECONDS))
-    localMat.shutdown()
-  }
-
   def expectStreamNoUpdate(seqState: ApiSeqState = defaultSeqState)(implicit testUser: TestUser): Unit = {
     val localMat = ActorMaterializer()
-    var hashAnyUpdate = false
     val stub = updateStub.streamingGetDifference().addHeader(tokenMetadataKey, testUser.token)
-    stub.invoke(Source.single(StreamingRequestGetDifference(Some(seqState))))
-      .map { _ ⇒
-        hashAnyUpdate = true
-      }
-      .runWith(Sink.ignore)(localMat)
-    Thread.sleep(sleepForUpdates)
-    assert(!hashAnyUpdate)
+    val src = stub.invoke(Source.single(StreamingRequestGetDifference(Some(seqState))))
+      .runWith(TestSink.probe[StreamingResponseGetDifference])(localMat)
+    src
+      .request(1)
+      .expectNoMessage(3.seconds)
     localMat.shutdown()
   }
 
