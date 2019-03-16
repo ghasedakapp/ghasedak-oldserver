@@ -14,14 +14,11 @@ import scala.util.{ Failure, Success }
 trait UpdateServiceHelper extends UpdateHelper {
   this: UpdateServiceImpl ⇒
 
-  def getDifference(userId: Int, tokenId: String): Future[ResponseGetDifference] = {
-    seqUpdateExt.getDifference(userId, tokenId)
-      .map(cm ⇒ buildDifference(tokenId, cm))
-  }
+  def getDifference(userId: Int, tokenId: String, maxMessages: Int): Future[ResponseGetDifference] =
+    seqUpdateExt.getDifference(userId, tokenId, maxMessages)
 
-  def acknowledge(userId: Int, tokenId: String, seqState: Option[ApiSeqState]): Future[Unit] = {
+  def acknowledge(userId: Int, tokenId: String, seqState: Option[ApiSeqState]): Future[Unit] =
     seqUpdateExt.acknowledge(userId, tokenId, seqState)
-  }
 
   def acknowledge(
     requestStream: Source[StreamingRequestGetDifference, NotUsed],

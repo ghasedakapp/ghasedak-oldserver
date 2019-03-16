@@ -35,7 +35,12 @@ message UpdateEnvelope {
     message StreamGetDifference {
         option (scalapb.message).extends = "UpdatePayload";
         string reply_to = 1 [(scalapb.field).type = "im.ghasedak.server.serializer.ActorRefContainer"];
+    }
 
+    message GetDifference {
+        option (scalapb.message).extends = "UpdatePayload";
+        string reply_to = 1 [(scalapb.field).type = "im.ghasedak.server.serializer.ActorRefContainer"];
+        int32 max_messages = 2;
     }
 
     message Subscribe {
@@ -47,5 +52,11 @@ message UpdateEnvelope {
         option (scalapb.message).extends = "UpdatePayload";
         string reply_to = 1 [(scalapb.field).type = "im.ghasedak.server.serializer.ActorRefContainer"];
         im.ghasedak.api.ApiSeqState ack_id = 2;
+    }
+
+    message SeekRequest {
+        option (scalapb.message).extends = "UpdatePayload";
+        string reply_to = 1 [(scalapb.field).type = "im.ghasedak.server.serializer.ActorRefContainer"];
+        im.ghasedak.api.ApiSeqState message_id = 2;
     }
 }

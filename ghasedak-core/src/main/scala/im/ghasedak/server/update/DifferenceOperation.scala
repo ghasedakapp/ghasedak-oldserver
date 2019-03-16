@@ -25,12 +25,6 @@ trait DifferenceOperation {
   //    pulsarClient.consumer[UpdateMapping](consumerConfig)
   //  }
 
-  // todo: config message retention and ttl on pulsar
-  def getDifference(userId: Int, tokenId: String): Future[ConsumerMessage[UpdateMapping]] = {
-    val consumer = getConsumer(userId, tokenId)
-    consumer.receiveAsync
-  }
-
   def seek(userId: Int, tokenId: String, messageId: MessageId): Future[Unit] = {
     val consumer = getConsumer(userId, tokenId)
     consumer.seekAsync(messageId)

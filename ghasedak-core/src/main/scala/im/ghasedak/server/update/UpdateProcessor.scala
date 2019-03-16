@@ -8,16 +8,19 @@ import akka.actor.typed.{ Behavior, PostStop, Signal }
 import akka.cluster.sharding.typed.scaladsl.EntityTypeKey
 import akka.event.Logging
 import akka.stream.ActorMaterializer
+import akka.stream.scaladsl.Sink
 import com.typesafe.config.Config
+import im.ghasedak.rpc.update.ResponseGetDifference
 import im.ghasedak.server.Processor
 import im.ghasedak.server.db.DbExtension
 import im.ghasedak.server.serializer.ActorRefConversions._
 import im.ghasedak.server.serializer.ImplicitActorRef._
-import im.ghasedak.server.update.UpdateEnvelope.{ Acknowledge, StreamGetDifference, Subscribe }
+import im.ghasedak.server.update.UpdateEnvelope.{ Acknowledge, GetDifference, StreamGetDifference, Subscribe }
 import slick.jdbc.PostgresProfile
 
 import scala.concurrent.ExecutionContext
-
+import scala.util.{ Failure, Success }
+import scala.concurrent.duration._
 object UpdateProcessor {
   val ShardingTypeName: EntityTypeKey[UpdatePayload] = EntityTypeKey[UpdatePayload]("UpdateProcessor")
 
@@ -53,8 +56,16 @@ class UpdateProcessor(context: ActorContext[UpdatePayload], entityId: String) ex
   initialize()
 
   override def onReceive: Receive = {
-    case s: StreamGetDifference ⇒
-      createSourceRef.map(_ pipeTo s.replyTo)
+    case StreamGetDifference(replyTo) ⇒
+      createSourceRef.map(_ pipeTo replyTo)
+
+      Behaviors.same
+
+    case GetDifference(replyTo, maxMessages) ⇒
+      val result = updateSource.map(_.source.map(_.receivedUpdates.head).take(maxMessages).takeWithin(1.seconds)
+        .runWith(Sink.seq))
+
+      result.map(_.map(r ⇒ ResponseGetDifference(r)) pipeTo replyTo)
 
       Behaviors.same
 

@@ -36,7 +36,7 @@ final class UpdateServiceImpl(implicit system: ActorSystem) extends UpdateServic
 
   override def getDifference(request: RequestGetDifference, metadata: Metadata): Future[ResponseGetDifference] =
     authorize(metadata) { clientData ⇒
-      getDifference(clientData.userId, clientData.tokenId)
+      getDifference(clientData.userId, clientData.tokenId, request.maxMessages)
     }
 
   override def streamingGetDifference(requestStream: Source[StreamingRequestGetDifference, NotUsed], metadata: Metadata): Source[StreamingResponseGetDifference, NotUsed] =

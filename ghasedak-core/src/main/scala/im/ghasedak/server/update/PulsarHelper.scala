@@ -40,7 +40,7 @@ trait PulsarHelper {
   protected def createSource(): SourceSwitch = {
     val matValues = com.sksamuel.pulsar4s.akka.streams.committableSource(() ⇒ createConsumer, None)
       .map(i ⇒ buildDifference(tokenId, i.message))
-      .toMat(BroadcastHub.sink(bufferSize = 256))(Keep.both)
+      .toMat(BroadcastHub.sink(bufferSize = 64))(Keep.both)
       .run()
     updateSource = Some(SourceSwitch(matValues._1, matValues._2))
     updateSource.get

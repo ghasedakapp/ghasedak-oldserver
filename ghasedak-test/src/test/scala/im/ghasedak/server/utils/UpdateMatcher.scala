@@ -55,9 +55,24 @@ trait UpdateMatcher {
     localMat.shutdown()
   }
 
+  def expectNUpdate(batchSize: Int = 1)(n: Int, seqState: ApiSeqState = defaultSeqState)(implicit testUser: TestUser): Unit = {
+    val stub = updateStub.getDifference().addHeader(tokenMetadataKey, testUser.token)
+    val result = (1 to n) flatMap (_ ⇒ stub.invoke(
+      RequestGetDifference(
+        maxMessages = batchSize)).futureValue.receivedUpdates)
+    result.size shouldBe n
+  }
+
+  def expectNoUpdate(batchSize: Int = 1)(implicit testUser: TestUser): Unit = {
+    val stub = updateStub.getDifference().addHeader(tokenMetadataKey, testUser.token)
+    val result = stub.invoke(RequestGetDifference(maxMessages = batchSize)).futureValue.receivedUpdates
+    result.size shouldBe 0
+  }
+
   def expectStreamNUpdate(n: Int, seqState: ApiSeqState = defaultSeqState)(implicit testUser: TestUser): Unit = {
     val localMat = ActorMaterializer()
     val (ackRef, source) = getAckActorStream
+    Thread.sleep(1000)
 
     val stub = updateStub.streamingGetDifference().addHeader(tokenMetadataKey, testUser.token)
     val src = stub.invoke(source)

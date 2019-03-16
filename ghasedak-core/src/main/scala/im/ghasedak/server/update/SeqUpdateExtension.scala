@@ -14,7 +14,7 @@ import com.sksamuel.pulsar4s.{ MessageId, Topic }
 import im.ghasedak.api.update.ApiSeqState
 import im.ghasedak.rpc.update.ResponseGetDifference
 import im.ghasedak.server.serializer.ActorRefConversions._
-import im.ghasedak.server.update.UpdateEnvelope.{ Acknowledge, StreamGetDifference, Subscribe }
+import im.ghasedak.server.update.UpdateEnvelope.{ Acknowledge, GetDifference, StreamGetDifference, Subscribe }
 import im.ghasedak.server.update.UpdateProcessor.StopOffice
 import org.apache.pulsar.client.impl.MessageIdImpl
 
@@ -69,6 +69,11 @@ final class SeqUpdateExtensionImpl(val system: ActorSystem) extends Extension
   private def acknowledgeAsk(seqState: Option[ApiSeqState])(r: ActorRef[Done]): Acknowledge = Acknowledge(replyTo = r, seqState)
   def acknowledge(userId: Int, tokenId: String, seqState: Option[ApiSeqState]): Future[Unit] = {
     (entity(userId, tokenId) ? acknowledgeAsk(seqState)) map (_ ⇒ ())
+  }
+
+  private def getDiffAsk(maxMessages: Int)(r: ActorRef[ResponseGetDifference]): GetDifference = GetDifference(replyTo = r, maxMessages)
+  def getDifference(userId: Int, tokenId: String, maxMessages: Int): Future[ResponseGetDifference] = {
+    entity(userId, tokenId) ? getDiffAsk(maxMessages)
   }
 
 }
