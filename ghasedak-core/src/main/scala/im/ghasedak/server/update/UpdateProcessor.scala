@@ -15,10 +15,10 @@ import im.ghasedak.server.Processor
 import im.ghasedak.server.db.DbExtension
 import im.ghasedak.server.serializer.ActorRefConversions._
 import im.ghasedak.server.serializer.ImplicitActorRef._
-import im.ghasedak.server.update.UpdateEnvelope.{ Acknowledge, GetDifference, StreamGetDifference, Subscribe }
+import im.ghasedak.server.update.UpdateEnvelope.{ Acknowledge, GetDifference, Seek, StreamGetDifference, Subscribe }
 import slick.jdbc.PostgresProfile
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 import scala.concurrent.duration._
 object UpdateProcessor {
@@ -67,6 +67,8 @@ class UpdateProcessor(context: ActorContext[UpdatePayload], entityId: String) ex
 
       result.map(_.map(r ⇒ ResponseGetDifference(r)) pipeTo replyTo)
 
+      if (result.isEmpty) log.error("Consumer not initialized yet")
+
       Behaviors.same
 
     case s: Subscribe ⇒
@@ -74,9 +76,24 @@ class UpdateProcessor(context: ActorContext[UpdatePayload], entityId: String) ex
 
       Behaviors.same
 
-    case Acknowledge(replyTo, ack) ⇒
-      val result = consumer.map(_.acknowledgeCumulativeAsync(getMessageId(ack.get)))
+    case Acknowledge(replyTo, messageId) ⇒
+      val result = consumer.map(_.acknowledgeCumulativeAsync(getMessageId(messageId.get)))
       result.foreach(_ ⇒ replyTo ! Done)
+      if (result.isEmpty) log.error("Consumer not initialized yet")
+
+      Behaviors.same
+
+    case Seek(replyTo, messageId) ⇒
+      val result =
+        for {
+          id ← messageId
+          cons ← consumer
+        } yield cons.seekAsync(getMessageId(id)).andThen {
+          case Failure(e) ⇒ log.error(e, e.getMessage)
+        }
+
+      result.getOrElse(Future.failed(new RuntimeException("Seek must be set"))).map(_ ⇒ Done) pipeTo replyTo
+      if (result.isEmpty) log.error("Seek must be set")
 
       Behaviors.same
 

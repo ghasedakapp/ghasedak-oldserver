@@ -55,12 +55,20 @@ trait UpdateMatcher {
     localMat.shutdown()
   }
 
-  def expectNUpdate(batchSize: Int = 1)(n: Int, seqState: ApiSeqState = defaultSeqState)(implicit testUser: TestUser): Unit = {
+  def seek(seqState: ApiSeqState)(implicit testUser: TestUser): Unit = {
+    val stub = updateStub.seek().addHeader(tokenMetadataKey, testUser.token)
+    stub.invoke(RequestSeek(Some(seqState))).futureValue
+  }
+
+  def expectNUpdate(batchSize: Int = 1)(n: Int, seqState: ApiSeqState = defaultSeqState, ack: Boolean = true)(implicit testUser: TestUser): Seq[ApiSeqState] = {
     val stub = updateStub.getDifference().addHeader(tokenMetadataKey, testUser.token)
+    val ackStub = updateStub.acknowledge().addHeader(tokenMetadataKey, testUser.token)
     val result = (1 to n) flatMap (_ ⇒ stub.invoke(
       RequestGetDifference(
         maxMessages = batchSize)).futureValue.receivedUpdates)
     result.size shouldBe n
+    if (ack) ackStub.invoke(RequestAcknowledge(result.last.messageId))
+    result.flatMap(_.messageId)
   }
 
   def expectNoUpdate(batchSize: Int = 1)(implicit testUser: TestUser): Unit = {
@@ -69,7 +77,7 @@ trait UpdateMatcher {
     result.size shouldBe 0
   }
 
-  def expectStreamNUpdate(n: Int, seqState: ApiSeqState = defaultSeqState)(implicit testUser: TestUser): Unit = {
+  def expectStreamNUpdate(n: Int, ack: Boolean = true)(implicit testUser: TestUser): Seq[ApiSeqState] = {
     val localMat = ActorMaterializer()
     val (ackRef, source) = getAckActorStream
     Thread.sleep(1000)
@@ -82,13 +90,14 @@ trait UpdateMatcher {
       .request(n)
       .expectNextN(n)
 
-    ackRef ! StreamingRequestGetDifference(res.last.receivedUpdates.last.messageId)
+    if (ack) ackRef ! StreamingRequestGetDifference(res.last.receivedUpdates.last.messageId)
 
     src
       .request(1)
       .expectNoMessage(3.seconds)
 
     localMat.shutdown()
+    res.flatMap(_.receivedUpdates.flatMap(_.messageId))
   }
 
   def expectStreamNoUpdate(seqState: ApiSeqState = defaultSeqState)(implicit testUser: TestUser): Unit = {

@@ -14,7 +14,7 @@ import com.sksamuel.pulsar4s.{ MessageId, Topic }
 import im.ghasedak.api.update.ApiSeqState
 import im.ghasedak.rpc.update.ResponseGetDifference
 import im.ghasedak.server.serializer.ActorRefConversions._
-import im.ghasedak.server.update.UpdateEnvelope.{ Acknowledge, GetDifference, StreamGetDifference, Subscribe }
+import im.ghasedak.server.update.UpdateEnvelope.{ Acknowledge, GetDifference, Seek, StreamGetDifference, Subscribe }
 import im.ghasedak.server.update.UpdateProcessor.StopOffice
 import org.apache.pulsar.client.impl.MessageIdImpl
 
@@ -22,8 +22,7 @@ import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
 
 final class SeqUpdateExtensionImpl(val system: ActorSystem) extends Extension
-  with DeliveryOperations
-  with DifferenceOperation {
+  with DeliveryOperations {
 
   protected implicit val _system: ActorSystem = system
 
@@ -74,6 +73,11 @@ final class SeqUpdateExtensionImpl(val system: ActorSystem) extends Extension
   private def getDiffAsk(maxMessages: Int)(r: ActorRef[ResponseGetDifference]): GetDifference = GetDifference(replyTo = r, maxMessages)
   def getDifference(userId: Int, tokenId: String, maxMessages: Int): Future[ResponseGetDifference] = {
     entity(userId, tokenId) ? getDiffAsk(maxMessages)
+  }
+
+  private def seekAsk(messageId: Option[ApiSeqState])(r: ActorRef[Done]): Seek = Seek(replyTo = r, messageId)
+  def seek(userId: Int, tokenId: String, messageId: Option[ApiSeqState]): Future[Unit] = {
+    entity(userId, tokenId) ? seekAsk(messageId) map (_ ⇒ ())
   }
 
 }

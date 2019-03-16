@@ -29,9 +29,8 @@ trait UpdateServiceHelper extends UpdateHelper {
         case Failure(e) ⇒ log.error(e, "Error in get diff request stream")
       }
 
-  def seek(userId: Int, tokenId: String, state: ApiSeqState): Future[Unit] = {
-    val messageId = getMessageId(state)
-    seqUpdateExt.seek(userId, tokenId, messageId)
+  def seek(userId: Int, tokenId: String, state: Option[ApiSeqState]): Future[Unit] = {
+    seqUpdateExt.seek(userId, tokenId, state)
   }
 
 }

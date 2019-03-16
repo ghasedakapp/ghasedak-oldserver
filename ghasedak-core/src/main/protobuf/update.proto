@@ -54,7 +54,7 @@ message UpdateEnvelope {
         im.ghasedak.api.ApiSeqState ack_id = 2;
     }
 
-    message SeekRequest {
+    message Seek {
         option (scalapb.message).extends = "UpdatePayload";
         string reply_to = 1 [(scalapb.field).type = "im.ghasedak.server.serializer.ActorRefContainer"];
         im.ghasedak.api.ApiSeqState message_id = 2;
