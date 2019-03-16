@@ -2,14 +2,17 @@ package im.ghasedak.server.utils
 
 import java.util.concurrent._
 
-import akka.stream.{ ActorMaterializer, OverflowStrategy }
-import akka.stream.scaladsl.{ Keep, Sink, Source }
+import akka.NotUsed
+import akka.actor.ActorRef
+import akka.stream.scaladsl.{ BroadcastHub, Flow, Keep, Sink, Source }
 import akka.stream.testkit.scaladsl.TestSink
+import akka.stream.{ ActorMaterializer, OverflowStrategy }
 import com.google.protobuf.ByteString
 import com.sksamuel.pulsar4s.MessageId
 import im.ghasedak.api.update._
 import im.ghasedak.rpc.update._
 import im.ghasedak.server.GrpcBaseSuit
+
 import scala.concurrent.duration._
 
 trait UpdateMatcher {
@@ -23,34 +26,48 @@ trait UpdateMatcher {
 
   private val defaultSeqState = ApiSeqState(-1, ByteString.copyFrom(MessageId.earliest.bytes))
 
+  private def getAckActorStream: (ActorRef, Source[StreamingRequestGetDifference, NotUsed]) = {
+    Source.actorRef[StreamingRequestGetDifference](8, OverflowStrategy.fail)
+      .toMat(BroadcastHub.sink(bufferSize = 256))(Keep.both)
+      .run()
+  }
+
   def expectStreamUpdate(clazz: UpdateClass, seqState: ApiSeqState = defaultSeqState)(f: Update ⇒ Unit = _ ⇒ ())(implicit testUser: TestUser): Unit = {
     val localMat = ActorMaterializer()
+    val (ackRef, source) = getAckActorStream
+
     val stub = updateStub.streamingGetDifference().addHeader(tokenMetadataKey, testUser.token)
-    val src = stub.invoke(Source.single(StreamingRequestGetDifference(Some(seqState))))
+    val src = stub.invoke(source)
       .filter(_.receivedUpdates.head.getUpdateContainer.update.getClass == clazz)
       .runWith(TestSink.probe[StreamingResponseGetDifference])(localMat)
 
-    val result = src
+    val res = src
       .request(1)
       .expectNextN(1)
+
+    ackRef ! StreamingRequestGetDifference(res.last.receivedUpdates.last.messageId)
 
     src
       .request(1)
       .expectNoMessage(3.seconds)
 
-    f(result.head.receivedUpdates.head.getUpdateContainer.update)
+    f(res.head.receivedUpdates.head.getUpdateContainer.update)
     localMat.shutdown()
   }
 
   def expectStreamNUpdate(n: Int, seqState: ApiSeqState = defaultSeqState)(implicit testUser: TestUser): Unit = {
     val localMat = ActorMaterializer()
+    val (ackRef, source) = getAckActorStream
+
     val stub = updateStub.streamingGetDifference().addHeader(tokenMetadataKey, testUser.token)
-    val src = stub.invoke(Source.single(StreamingRequestGetDifference(Some(seqState))))
+    val src = stub.invoke(source)
       .runWith(TestSink.probe[StreamingResponseGetDifference])(localMat)
 
-    src
+    val res = src
       .request(n)
       .expectNextN(n)
+
+    ackRef ! StreamingRequestGetDifference(res.last.receivedUpdates.last.messageId)
 
     src
       .request(1)

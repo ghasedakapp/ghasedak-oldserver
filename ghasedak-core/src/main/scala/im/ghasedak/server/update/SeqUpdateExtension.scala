@@ -51,6 +51,10 @@ final class SeqUpdateExtensionImpl(val system: ActorSystem) extends Extension
     sharding.entityRefFor(UpdateProcessor.ShardingTypeName, s"${userId}_${tokenId}")
   }
 
+  def stop(userId: Int, tokenId: String): Unit = {
+    entity(userId, tokenId) ! StopOffice
+  }
+
   private def streamAsk(r: ActorRef[SourceRef[ResponseGetDifference]]): StreamGetDifference = StreamGetDifference(replyTo = r)
   def streamGetDifference(userId: Int, tokenId: String): Source[ResponseGetDifference, NotUsed] = {
     val src = entity(userId, tokenId).ask[SourceRef[ResponseGetDifference]](f ⇒ streamAsk(f))

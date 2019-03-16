@@ -17,7 +17,6 @@ import im.ghasedak.server.update.UpdateEnvelope.{ Acknowledge, StreamGetDifferen
 import slick.jdbc.PostgresProfile
 
 import scala.concurrent.ExecutionContext
-import scala.util.Try
 
 object UpdateProcessor {
   val ShardingTypeName: EntityTypeKey[UpdatePayload] = EntityTypeKey[UpdatePayload]("UpdateProcessor")
@@ -65,8 +64,9 @@ class UpdateProcessor(context: ActorContext[UpdatePayload], entityId: String) ex
       Behaviors.same
 
     case Acknowledge(replyTo, ack) ⇒
-      consumer.foreach(_.acknowledge(getMessageId(ack.get)))
-      replyTo ! Done
+      val result = consumer.map(_.acknowledgeCumulativeAsync(getMessageId(ack.get)))
+      result.foreach(_ ⇒ replyTo ! Done)
+
       Behaviors.same
 
     case StopOffice ⇒

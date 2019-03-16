@@ -1,5 +1,6 @@
 package im.ghasedak.server.utils
 
+import com.auth0.jwt.JWT
 import im.ghasedak.rpc.auth._
 import im.ghasedak.server.GrpcBaseSuit
 import im.ghasedak.server.repo.auth.GateAuthCodeRepo
@@ -11,7 +12,7 @@ import scala.util.Random
 
 object UserTestUtils {
 
-  case class TestClientData(userId: Int, token: String, phoneNumber: Option[Long] = None, name: Option[String] = None)
+  case class TestClientData(userId: Int, tokenId: String, token: String, phoneNumber: Option[Long] = None, name: Option[String] = None)
 
 }
 
@@ -58,9 +59,14 @@ trait UserTestUtils {
       response1.transactionHash,
       name)
     val response3 = authStub.signUp.invoke(request3).futureValue
+
+    val token = response3.getApiAuth.token
+    val tokenId = JWT.decode(token).getClaim("tokenId").asString()
+
     TestClientData(
       response3.getApiAuth.getUser.id,
-      response3.getApiAuth.token,
+      tokenId,
+      token,
       Some(response3.getApiAuth.getUser.contactsRecord.head.getPhoneNumber),
       Some(name))
   }
