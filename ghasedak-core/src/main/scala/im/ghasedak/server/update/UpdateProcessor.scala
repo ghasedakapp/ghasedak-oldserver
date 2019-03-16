@@ -17,6 +17,7 @@ import im.ghasedak.server.update.UpdateEnvelope.{ Acknowledge, StreamGetDifferen
 import slick.jdbc.PostgresProfile
 
 import scala.concurrent.ExecutionContext
+import scala.util.Try
 
 object UpdateProcessor {
   val ShardingTypeName: EntityTypeKey[UpdatePayload] = EntityTypeKey[UpdatePayload]("UpdateProcessor")
@@ -54,9 +55,7 @@ class UpdateProcessor(context: ActorContext[UpdatePayload], entityId: String) ex
 
   override def onReceive: Receive = {
     case s: StreamGetDifference ⇒
-      updateSourceRef.foreach(_.killSwitch.shutdown())
-      updateSourceRef = Some(getSourceRef)
-      updateSourceRef.foreach(_.sourceRefFuture pipeTo s.replyTo)
+      createSourceRef.map(_ pipeTo s.replyTo)
 
       Behaviors.same
 
@@ -81,14 +80,15 @@ class UpdateProcessor(context: ActorContext[UpdatePayload], entityId: String) ex
     case PostStop ⇒
       log.info("UpdateProcessor was stopped")
       consumer.foreach(_.close())
+      updateSource.foreach(_.control.close())
       this
   }
 
   /*
-    Will be called after actor initialized
+    Will be called after actor started
    */
   private def initialize(): Unit = {
-    createConsumer
+    createSource()
   }
 
 }

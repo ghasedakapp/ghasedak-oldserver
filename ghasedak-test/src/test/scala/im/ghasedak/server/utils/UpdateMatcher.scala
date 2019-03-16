@@ -43,7 +43,7 @@ trait UpdateMatcher {
 
   def expectStreamNUpdate(n: Int, seqState: ApiSeqState = defaultSeqState)(implicit testUser: TestUser): Unit = {
     val localMat = ActorMaterializer()
-    val stub = updateStub.streamingGetDifference.addHeader(tokenMetadataKey, testUser.token)
+    val stub = updateStub.streamingGetDifference().addHeader(tokenMetadataKey, testUser.token)
     val src = stub.invoke(Source.single(StreamingRequestGetDifference(Some(seqState))))
       .runWith(TestSink.probe[StreamingResponseGetDifference])(localMat)
 

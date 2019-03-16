@@ -20,13 +20,7 @@ trait UpdateServiceHelper extends UpdateHelper {
   }
 
   def acknowledge(userId: Int, tokenId: String, seqState: Option[ApiSeqState]): Future[Unit] = {
-    Future.successful()
-    //    seqState match {
-    //      case Some(state) ⇒
-    //        val messageId = getMessageId(state)
-    //        seqUpdateExt.acknowledge(userId, tokenId, messageId)
-    //      case None ⇒ Future.successful()
-    //    }
+    seqUpdateExt.acknowledge(userId, tokenId, seqState)
   }
 
   def acknowledge(
@@ -34,7 +28,7 @@ trait UpdateServiceHelper extends UpdateHelper {
     userId:        Int, tokenId: String): Unit =
     requestStream.runForeach(req ⇒ acknowledge(userId, tokenId, req.ackId))
       .onComplete {
-        case Success(_) ⇒ log.info("Get diff request stream completed successfully")
+        case Success(_) ⇒ log.info("Ack request stream completed successfully")
         case Failure(e) ⇒ log.error(e, "Error in get diff request stream")
       }
 

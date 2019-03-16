@@ -1,7 +1,9 @@
 package im.ghasedak.server.update
 
-import akka.stream.scaladsl.{ Keep, Source, StreamRefs }
+import akka.NotUsed
+import akka.stream.scaladsl.{ BroadcastHub, Keep, RunnableGraph, Source, StreamRefs }
 import akka.stream.{ ActorMaterializer, KillSwitches, SourceRef, UniqueKillSwitch }
+import com.sksamuel.pulsar4s.akka.streams.Control
 import com.sksamuel.pulsar4s.{ Consumer, ConsumerConfig, PulsarClient, PulsarClientConfig }
 import im.ghasedak.rpc.update.ResponseGetDifference
 import org.apache.pulsar.client.api.Schema
@@ -12,7 +14,7 @@ import scala.util.Try
 trait PulsarHelper {
   this: UpdateProcessor ⇒
 
-  case class SourceRefSwitch(killSwitch: UniqueKillSwitch, sourceRefFuture: Future[SourceRef[ResponseGetDifference]])
+  case class SourceSwitch(control: Control, source: Source[ResponseGetDifference, NotUsed])
 
   protected lazy val pulsarHost: String = config.getString("module.update.pulsar.host")
   protected lazy val pulsarPort: Int = config.getInt("module.update.pulsar.port")
@@ -27,7 +29,7 @@ trait PulsarHelper {
     topics = Seq(topic))
 
   protected var consumer: Option[Consumer[UpdateMapping]] = None
-  protected var updateSourceRef: Option[SourceRefSwitch] = None
+  protected var updateSource: Option[SourceSwitch] = None
 
   protected def createConsumer: Consumer[UpdateMapping] = {
     Try(consumer.foreach(_.close()))
@@ -35,15 +37,18 @@ trait PulsarHelper {
     consumer.get
   }
 
-  protected def createSource(): Source[ResponseGetDifference, UniqueKillSwitch] = {
-    com.sksamuel.pulsar4s.akka.streams.committableSource(() ⇒ createConsumer, None)
-      .viaMat(KillSwitches.single)(Keep.right)
+  protected def createSource(): SourceSwitch = {
+    val matValues = com.sksamuel.pulsar4s.akka.streams.committableSource(() ⇒ createConsumer, None)
       .map(i ⇒ buildDifference(tokenId, i.message))
+      .toMat(BroadcastHub.sink(bufferSize = 256))(Keep.both)
+      .run()
+    updateSource = Some(SourceSwitch(matValues._1, matValues._2))
+    updateSource.get
   }
 
-  protected def getSourceRef: SourceRefSwitch = {
-    val matValue = createSource().toMat(StreamRefs.sourceRef[ResponseGetDifference]())(Keep.both).run()(mat)
-    SourceRefSwitch(matValue._1, matValue._2)
+  protected def createSourceRef: Option[Future[SourceRef[ResponseGetDifference]]] = {
+    //TODO Removes old ref. Only keep one active sourceref
+    updateSource.map(_.source.runWith(StreamRefs.sourceRef[ResponseGetDifference]())(mat))
   }
 
 }

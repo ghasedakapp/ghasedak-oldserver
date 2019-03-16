@@ -31,11 +31,6 @@ trait DifferenceOperation {
     consumer.receiveAsync
   }
 
-  def acknowledge(userId: Int, tokenId: String, messageId: MessageId): Future[Unit] = {
-    val consumer = getConsumer(userId, tokenId + "-ack")
-    consumer.acknowledgeCumulativeAsync(messageId)
-  }
-
   def seek(userId: Int, tokenId: String, messageId: MessageId): Future[Unit] = {
     val consumer = getConsumer(userId, tokenId)
     consumer.seekAsync(messageId)
