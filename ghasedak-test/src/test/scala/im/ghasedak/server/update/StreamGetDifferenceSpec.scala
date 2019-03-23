@@ -7,15 +7,17 @@ import im.ghasedak.server.GrpcBaseSuit
 
 import scala.util.Random
 
-class UpdateServiceSpec extends GrpcBaseSuit {
+class StreamGetDifferenceSpec extends GrpcBaseSuit {
 
-  behavior of "UpdateServiceImpl"
+  behavior of "StreamGetDifferenceSpec"
 
   private val n = 10 // number of updates
 
+  private val updExt = SeqUpdateExtension(system)
+
   it should "get one update after send it" in {
     val user = createUserWithPhone()
-    val stub = testStub.sendUpdate.addHeader(tokenMetadataKey, user.token)
+    val stub = testStub.sendUpdate().addHeader(tokenMetadataKey, user.token)
 
     stub.invoke(RequestSendUpdate(Some(ApiUpdateContainer().withPong(UpdatePong())))).futureValue
 
@@ -27,7 +29,7 @@ class UpdateServiceSpec extends GrpcBaseSuit {
 
   it should "get n update after send it" in {
     val user = createUserWithPhone()
-    val stub = testStub.sendUpdate.addHeader(tokenMetadataKey, user.token)
+    val stub = testStub.sendUpdate().addHeader(tokenMetadataKey, user.token)
 
     val orderOfUpdates = Seq.fill(n)(ApiUpdateContainer().withPong(UpdatePong(Random.nextInt())))
     orderOfUpdates foreach { update ⇒
@@ -42,7 +44,7 @@ class UpdateServiceSpec extends GrpcBaseSuit {
 
   it should "get 2 * n update with two get difference" in {
     val user = createUserWithPhone()
-    val stub2 = testStub.sendUpdate.addHeader(tokenMetadataKey, user.token)
+    val stub2 = testStub.sendUpdate().addHeader(tokenMetadataKey, user.token)
 
     val orderOfUpdates1 = Seq.fill(n)(ApiUpdateContainer().withPong(UpdatePong(Random.nextInt())))
     orderOfUpdates1 foreach { update ⇒
@@ -53,6 +55,8 @@ class UpdateServiceSpec extends GrpcBaseSuit {
       implicit val testUser: TestUser = user
       expectStreamNUpdate(n)
     }
+
+    Thread.sleep(1000)
 
     val orderOfUpdates2 = Seq.fill(n)(ApiUpdateContainer().withPong(UpdatePong(Random.nextInt())))
     orderOfUpdates2 foreach { update ⇒
@@ -67,7 +71,7 @@ class UpdateServiceSpec extends GrpcBaseSuit {
 
   it should "get n update with keep sending order" in {
     val user = createUserWithPhone()
-    val stub = testStub.sendUpdate.addHeader(tokenMetadataKey, user.token)
+    val stub = testStub.sendUpdate().addHeader(tokenMetadataKey, user.token)
 
     val orderOfUpdates = Seq.fill(n)(ApiUpdateContainer().withPong(UpdatePong(Random.nextInt())))
     orderOfUpdates foreach { update ⇒
@@ -82,7 +86,7 @@ class UpdateServiceSpec extends GrpcBaseSuit {
 
   it should "send n update and don't get any update after that" in {
     val user = createUserWithPhone()
-    val stub2 = testStub.sendUpdate.addHeader(tokenMetadataKey, user.token)
+    val stub2 = testStub.sendUpdate().addHeader(tokenMetadataKey, user.token)
 
     val orderOfUpdates1 = Seq.fill(n)(ApiUpdateContainer().withPong(UpdatePong(Random.nextInt())))
     orderOfUpdates1 foreach { update ⇒
@@ -92,6 +96,50 @@ class UpdateServiceSpec extends GrpcBaseSuit {
     {
       implicit val testUser: TestUser = user
       expectStreamNUpdate(n)
+    }
+
+  }
+
+  it should "not receive acked update" in {
+    val user = createUserWithPhone()
+    val stub2 = testStub.sendUpdate().addHeader(tokenMetadataKey, user.token)
+
+    val orderOfUpdates1 = Seq.fill(n)(ApiUpdateContainer().withPong(UpdatePong(Random.nextInt())))
+    orderOfUpdates1 foreach { update ⇒
+      stub2.invoke(RequestSendUpdate(Some(update))).futureValue
+    }
+
+    {
+      implicit val testUser: TestUser = user
+      expectStreamNUpdate(n)
+    }
+
+    Thread.sleep(1000)
+    updExt.stop(user.userId, user.tokenId)
+    Thread.sleep(1000)
+
+    {
+      implicit val testUser: TestUser = user
+      expectStreamNoUpdate()
+    }
+  }
+
+  it should "seek to old update" in {
+    val user = createUserWithPhone()
+    val stub = testStub.sendUpdate().addHeader(tokenMetadataKey, user.token)
+
+    val orderOfUpdates1 = Seq.fill(n)(ApiUpdateContainer().withPong(UpdatePong(Random.nextInt())))
+    orderOfUpdates1 foreach { update ⇒
+      stub.invoke(RequestSendUpdate(Some(update))).futureValue
+    }
+
+    {
+      implicit val testUser: TestUser = user
+      val ids = expectStreamNUpdate(n, ack = false)
+      expectStreamNoUpdate()
+      seek(ids(5))
+      expectStreamNUpdate(n - 5)
+      expectStreamNoUpdate()
     }
 
   }

@@ -6,10 +6,8 @@ import java.util.UUID
 import akka.actor.ActorSystem
 import akka.event.{ Logging, LoggingAdapter }
 import akka.grpc.scaladsl.Metadata
-import com.auth0.jwt.JWT
 import im.ghasedak.rpc.auth._
 import im.ghasedak.rpc.misc.ResponseVoid
-import im.ghasedak.server.SeqUpdateExtension
 import im.ghasedak.server.db.DbExtension
 import im.ghasedak.server.model.auth.AuthPhoneTransaction
 import im.ghasedak.server.repo.auth._

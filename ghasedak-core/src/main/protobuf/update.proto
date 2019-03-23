@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+package im.ghasedak.server.update;
+
+option java_package = "im.ghasedak.server.update";
+option java_multiple_files = true;
+
+option (scalapb.options) = {
+    flat_package: true
+    import: "im.ghasedak.server.serializer.CoreTypeMapper._"
+    primitive_wrappers: true
+    single_file: true
+    preamble: "trait UpdatePayload"
+//    preamble: "sealed trait UpdateCommand { val replyTo:im.ghasedak.server.ActorRefContainer } "
+};
+
+
+import "api/update.proto";
+import "scalapb/scalapb.proto";
+
+message UpdateMapping {
+    im.ghasedak.api.ApiUpdateContainer default = 1;
+    map<string, im.ghasedak.api.ApiUpdateContainer> custom = 2;
+}
+
+message UpdateEnvelope {
+    int32 user_id = 1;
+    string token_id = 2;
+    oneof payload {
+        StreamGetDifference deliver = 3;
+        Subscribe subscribe = 4;
+        Acknowledge acknowledge = 5;
+    }
+
+    message StreamGetDifference {
+        option (scalapb.message).extends = "UpdatePayload";
+        string reply_to = 1 [(scalapb.field).type = "im.ghasedak.server.serializer.ActorRefContainer"];
+    }
+
+    message GetDifference {
+        option (scalapb.message).extends = "UpdatePayload";
+        string reply_to = 1 [(scalapb.field).type = "im.ghasedak.server.serializer.ActorRefContainer"];
+        int32 max_messages = 2;
+    }
+
+    message Subscribe {
+        option (scalapb.message).extends = "UpdatePayload";
+        string reply_to = 1 [(scalapb.field).type = "im.ghasedak.server.serializer.ActorRefContainer"];
+    }
+
+    message Acknowledge {
+        option (scalapb.message).extends = "UpdatePayload";
+        string reply_to = 1 [(scalapb.field).type = "im.ghasedak.server.serializer.ActorRefContainer"];
+        im.ghasedak.api.ApiSeqState ack_id = 2;
+    }
+
+    message Seek {
+        option (scalapb.message).extends = "UpdatePayload";
+        string reply_to = 1 [(scalapb.field).type = "im.ghasedak.server.serializer.ActorRefContainer"];
+        im.ghasedak.api.ApiSeqState message_id = 2;
+    }
+}

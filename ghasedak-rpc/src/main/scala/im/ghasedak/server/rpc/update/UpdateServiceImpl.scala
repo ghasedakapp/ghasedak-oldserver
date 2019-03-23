@@ -8,10 +8,10 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
 import im.ghasedak.rpc.misc.ResponseVoid
 import im.ghasedak.rpc.update._
-import im.ghasedak.server.SeqUpdateExtension
 import im.ghasedak.server.db.DbExtension
 import im.ghasedak.server.rpc.auth.helper.AuthTokenHelper
 import im.ghasedak.server.rpc.{ RpcError, RpcErrorHandler }
+import im.ghasedak.server.update.SeqUpdateExtension
 import im.ghasedak.server.utils.concurrent.FutureResult
 import slick.jdbc.PostgresProfile
 
@@ -36,13 +36,14 @@ final class UpdateServiceImpl(implicit system: ActorSystem) extends UpdateServic
 
   override def getDifference(request: RequestGetDifference, metadata: Metadata): Future[ResponseGetDifference] =
     authorize(metadata) { clientData ⇒
-      getDifference(clientData.userId, clientData.tokenId)
+      getDifference(clientData.userId, clientData.tokenId, request.maxMessages)
     }
 
   override def streamingGetDifference(requestStream: Source[StreamingRequestGetDifference, NotUsed], metadata: Metadata): Source[StreamingResponseGetDifference, NotUsed] =
     authorizeStream(metadata) { clientData ⇒
       acknowledge(requestStream, clientData.userId, clientData.tokenId)
-      streamGetDifference(clientData.userId, clientData.tokenId)
+      seqUpdateExt.streamGetDifference(clientData.userId, clientData.tokenId) map (r ⇒
+        StreamingResponseGetDifference(r.receivedUpdates))
     }
 
   override def acknowledge(request: RequestAcknowledge, metadata: Metadata): Future[ResponseVoid] =
@@ -50,11 +51,11 @@ final class UpdateServiceImpl(implicit system: ActorSystem) extends UpdateServic
       acknowledge(clientData.userId, clientData.tokenId, request.ackId) map (_ ⇒ ResponseVoid())
     }
 
-  override def seek(request: SeekRequest, metadata: Metadata): Future[ResponseVoid] =
+  override def seek(request: RequestSeek, metadata: Metadata): Future[ResponseVoid] =
     authorize(metadata) { clientData ⇒
       val result = for {
         id ← fromOption(UpdateRpcErrors.SeqStateNotFound)(request.messageId)
-        r ← fromFuture(seek(clientData.userId, clientData.tokenId, id) map (_ ⇒ ResponseVoid()))
+        r ← fromFuture(seek(clientData.userId, clientData.tokenId, Some(id)) map (_ ⇒ ResponseVoid()))
       } yield r
       result.value
     }

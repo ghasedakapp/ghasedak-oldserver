@@ -1,6 +1,5 @@
-package im.ghasedak.server
+package im.ghasedak.server.update
 
-import im.ghasedak.server.update.UpdateMapping
 import org.apache.pulsar.client.api.Schema
 import org.apache.pulsar.common.schema.{ SchemaInfo, SchemaType }
 

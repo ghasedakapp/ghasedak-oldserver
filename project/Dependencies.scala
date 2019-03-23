@@ -5,19 +5,26 @@ import sbt._
 object Dependencies {
 
   object V {
-    val akka = "2.5.19"
+    val akka = "2.5.21"
     val slick = "3.2.1"
     val slickPg = "0.16.0"
     val postgres = "42.2.1"
     val flyway = "5.0.7"
     val config = "1.3.2"
     val pulsar4s = "2.2.0"
+    val scalapb = "0.8.2"
   }
 
   object Compile {
     val actor = "com.typesafe.akka" %% "akka-actor" % V.akka
     val cluster = "com.typesafe.akka" %% "akka-cluster" % V.akka
     val sharding = "com.typesafe.akka" %% "akka-cluster-sharding" % V.akka
+
+    //akka typed
+    val actorTyped = "com.typesafe.akka" %% "akka-actor-typed" % V.akka
+    val clusterTyped = "com.typesafe.akka" %% "akka-cluster-typed" % V.akka
+    val shardingTyped = "com.typesafe.akka" %% "akka-cluster-sharding-typed" % V.akka
+
     val akkaSlf4j = "com.typesafe.akka" %% "akka-slf4j" % V.akka
     val stream = "com.typesafe.akka" %% "akka-stream" % V.akka
 
@@ -29,7 +36,8 @@ object Dependencies {
     val hikariCp = "com.typesafe.slick" %% "slick-hikaricp" % V.slick
     val flyway = "org.flywaydb" % "flyway-core" % V.flyway
 
-    val scalapbRuntime = "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf"
+    val scalap = "com.thesamet.scalapb" %% "compilerplugin" % scalapb.compiler.Version.scalapbVersion
+    val scalapbRuntime = "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf" exclude("io.grpc", "grpc-netty")
 
     val logback = "ch.qos.logback" % "logback-classic" % "1.2.3"
 
@@ -71,15 +79,14 @@ object Dependencies {
     actor,
     cluster,
     sharding,
+    actorTyped,
+    clusterTyped,
+    shardingTyped,
     akkaSlf4j,
     caffeine,
     stream
-  )
-
-  val update: Seq[ModuleID] = shared ++ Seq(
-    actor,
-    stream
-  ) ++ pulsar4s
+//    ,scalap
+  )++ pulsar4s
 
   val rpc: Seq[ModuleID] = shared ++ Seq(
     jwt,

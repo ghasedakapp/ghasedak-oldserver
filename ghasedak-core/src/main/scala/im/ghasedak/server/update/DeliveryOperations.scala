@@ -1,13 +1,21 @@
-package im.ghasedak.server
+package im.ghasedak.server.update
 
 import com.sksamuel.pulsar4s._
 import im.ghasedak.api.update.{ ApiSeqState, ApiUpdateContainer }
-import im.ghasedak.server.update.UpdateMapping
+import org.apache.pulsar.client.api.Schema
 
 import scala.concurrent.Future
 
-trait DeliveryOperations {
+trait DeliveryOperations extends UpdateHelper {
   this: SeqUpdateExtensionImpl ⇒
+
+  private val config = system.settings.config
+  private val pulsarHost: String = config.getString("module.update.pulsar.host")
+  private val pulsarPort: Int = config.getInt("module.update.pulsar.port")
+  private val pulsarClientConfig: PulsarClientConfig = PulsarClientConfig(s"pulsar://$pulsarHost:$pulsarPort")
+  private val pulsarClient = PulsarClient(pulsarClientConfig)
+
+  private implicit val updateMappingSchema: Schema[UpdateMapping] = UpdateMappingSchema()
 
   def getBaseUserUpdateProducerConfig: ProducerConfig =
     ProducerConfig(Topic(""), enableBatching = Some(false))
@@ -56,6 +64,7 @@ trait DeliveryOperations {
     userId:    Int,
     mapping:   UpdateMapping,
     reduceKey: Option[String] = None): Future[ApiSeqState] = {
+    Future.successful(ApiSeqState())
     val topic = getUserUpdateTopic(userId)
     val producerConfig = getBaseUserUpdateProducerConfig.copy(topic = topic)
     val producer = pulsarClient.producer[UpdateMapping](producerConfig)

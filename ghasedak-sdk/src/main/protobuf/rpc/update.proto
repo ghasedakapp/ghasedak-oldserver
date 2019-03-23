@@ -12,7 +12,7 @@ service UpdateService {
     rpc GetDifference (RequestGetDifference) returns (ResponseGetDifference);
     rpc Acknowledge(RequestAcknowledge) returns (ResponseVoid);
     rpc StreamingGetDifference (stream StreamingRequestGetDifference) returns (stream StreamingResponseGetDifference);
-    rpc Seek (SeekRequest) returns (ResponseVoid);
+    rpc Seek (RequestSeek) returns (ResponseVoid);
 }
 
 message RequestGetDifference {
@@ -69,6 +69,6 @@ message StreamingResponseGetDifference {
     repeated ApiReceivedUpdate received_updates = 1;
 }
 
-message SeekRequest {
+message RequestSeek {
     im.ghasedak.api.ApiSeqState message_id = 1;
 }

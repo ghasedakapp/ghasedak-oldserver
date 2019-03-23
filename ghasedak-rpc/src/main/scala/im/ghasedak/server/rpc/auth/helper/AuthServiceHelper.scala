@@ -6,7 +6,6 @@ import java.time.{ LocalDateTime, ZoneOffset }
 import com.auth0.jwt.JWT
 import im.ghasedak.api.auth.ApiAuth
 import im.ghasedak.api.user.ApiUser
-import im.ghasedak.server.SeqUpdateExtension
 import im.ghasedak.server.model.auth.{ AuthPhoneTransaction, AuthSession, AuthTransactionBase }
 import im.ghasedak.server.model.org.ApiKey
 import im.ghasedak.server.model.user.{ User, UserAuth }
@@ -15,6 +14,7 @@ import im.ghasedak.server.repo.org.ApiKeyRepo
 import im.ghasedak.server.repo.user.{ UserAuthRepo, UserRepo }
 import im.ghasedak.server.rpc.auth.{ AuthRpcErrors, AuthServiceImpl }
 import im.ghasedak.server.rpc.common.CommonRpcErrors
+import im.ghasedak.server.update.SeqUpdateExtension
 import im.ghasedak.server.user.UserUtils
 import im.ghasedak.server.utils.CodeGen.genPhoneCode
 import im.ghasedak.server.utils.StringUtils._
