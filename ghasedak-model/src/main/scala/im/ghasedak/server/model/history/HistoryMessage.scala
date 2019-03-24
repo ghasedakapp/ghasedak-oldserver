@@ -2,25 +2,18 @@ package im.ghasedak.server.model.history
 
 import java.time.LocalDateTime
 
-import im.ghasedak.api.peer.ApiPeer
-
 final case class HistoryMessage(
-  userId:               Int,
-  peer:                 ApiPeer,
+  chatId:               Long,
   date:                 LocalDateTime,
   senderUserId:         Int,
   sequenceNr:           Int,
   messageContentHeader: Int,
   messageContentData:   Array[Byte],
-  deletedAt:            Option[LocalDateTime]) {
-
-  def ofUser(userId: Int): HistoryMessage = this.copy(userId = userId)
-
-}
+  deletedAt:            Option[LocalDateTime])
 
 object HistoryMessage {
 
-  def empty(userId: Int, peer: ApiPeer, date: LocalDateTime) =
-    HistoryMessage(userId, peer, date, 0, 0, 0, Array.emptyByteArray, None)
+  def empty(chatId: Long, date: LocalDateTime) =
+    HistoryMessage(chatId, date, 0, 0, 0, Array.emptyByteArray, None)
 
 }

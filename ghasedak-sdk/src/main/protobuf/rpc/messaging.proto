@@ -6,7 +6,6 @@ option java_package = "im.ghasedak.rpc.messaging";
 option java_multiple_files = true;
 
 import "api/messaging.proto";
-import "api/peer.proto";
 import "rpc/misc.proto";
 
 service MessagingService {
@@ -18,7 +17,7 @@ service MessagingService {
 }
 
 message RequestSendMessage {
-    im.ghasedak.api.ApiPeer peer = 1;
+    int64 chat_id = 1;
     int64 random_id = 2;
     im.ghasedak.api.ApiMessage message = 3;
 }
@@ -38,7 +37,7 @@ message ResponseLoadDialogs {
 }
 
 message RequestLoadHistory {
-    im.ghasedak.api.ApiPeer peer = 1;
+    int64 chat_id = 1;
     int32 sequence_nr = 2;
     im.ghasedak.api.ApiListLoadMode load_mode = 3;
     int32 limit = 4;
@@ -49,11 +48,11 @@ message ResponseLoadHistory {
 }
 
 message RequestMessageReceived {
-    im.ghasedak.api.ApiPeer peer = 1;
+    int64 chat_id = 1;
     int32 sequence_nr = 2;
 }
 
 message RequestMessageRead {
-    im.ghasedak.api.ApiPeer peer = 1;
+    int64 chat_id = 1;
     int32 sequence_nr = 2;
 }

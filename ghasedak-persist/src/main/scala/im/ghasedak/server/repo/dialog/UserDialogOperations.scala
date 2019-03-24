@@ -2,12 +2,11 @@ package im.ghasedak.server.repo.dialog
 
 import java.time.{ LocalDateTime, ZoneId }
 
-import im.ghasedak.api.peer.{ ApiPeer, ApiPeerType }
 import im.ghasedak.server.model.dialog.UserDialog
 import slick.dbio.Effect
 import slick.jdbc.PostgresProfile
 import slick.jdbc.PostgresProfile.api._
-import slick.sql.{ FixedSqlAction, FixedSqlStreamingAction }
+import slick.sql.FixedSqlAction
 
 import scala.concurrent.ExecutionContext
 
@@ -16,18 +15,11 @@ object UserDialogRepo {
   val userDialogs = TableQuery[UserDialogTable]
 
   val byPKC = Compiled(byPK _)
-  val idByPeerTypeC = Compiled(idByPeerType _)
 
   val notArchived = userDialogs
 
-  private def byPK(userId: Rep[Int], peerType: Rep[Int], peerId: Rep[Int]) =
-    userDialogs.filter(u ⇒ u.userId === userId && u.peerType === peerType && u.peerId === peerId)
-
-  private def byPeerType(userId: Rep[Int], peerType: Rep[Int]) =
-    userDialogs.filter(u ⇒ u.userId === userId && u.peerType === peerType)
-
-  private def idByPeerType(userId: Rep[Int], peerType: Rep[Int]) =
-    byPeerType(userId, peerType).map(_.peerId)
+  private def byPK(chatId: Rep[Long]) =
+    userDialogs.filter(u ⇒ u.chatId === chatId)
 
 }
 
@@ -36,34 +28,31 @@ trait UserDialogOperations {
 
   def createUserDialog(
     userId:               Int,
-    peer:                 ApiPeer,
+    chatId:               Long,
     ownerLastReceivedSeq: Int,
     ownerLastReadSeq:     Int): FixedSqlAction[Int, NoStream, Effect.Write] =
     userDialogs insertOrUpdate UserDialog(
       userId,
-      peer,
+      chatId,
       ownerLastReceivedSeq,
       ownerLastReadSeq,
       LocalDateTime.now(ZoneId.systemDefault()))
 
   def findUsersVisible(userId: Rep[Int]) = notArchived.filter(_.userId === userId)
 
-  def findGroupIds(userId: Int): FixedSqlStreamingAction[Seq[Int], Int, Effect.Read] =
-    idByPeerTypeC((userId, ApiPeerType.GROUP.value)).result
+  def findUsers(chatId: Long): DBIO[Option[UserDialog]] =
+    byPKC.applied(chatId).result.headOption
 
-  def findUsers(userId: Int, peer: ApiPeer): DBIO[Option[UserDialog]] =
-    byPKC.applied((userId, peer.`type`.value, peer.id)).result.headOption
+  def usersExists(chatId: Long): FixedSqlAction[Boolean, PostgresProfile.api.NoStream, Effect.Read] =
+    byPKC.applied(chatId).exists.result
 
-  def usersExists(userId: Int, peer: ApiPeer): FixedSqlAction[Boolean, PostgresProfile.api.NoStream, Effect.Read] =
-    byPKC.applied((userId, peer.`type`.value, peer.id)).exists.result
+  def updateOwnerLastReceivedSeq(chatId: Long, ownerLastReceivedSeq: Int)(implicit ec: ExecutionContext): FixedSqlAction[Int, NoStream, Effect.Write] =
+    byPKC.applied(chatId).map(_.ownerLastReceivedSeq).update(ownerLastReceivedSeq)
 
-  def updateOwnerLastReceivedSeq(userId: Int, peer: ApiPeer, ownerLastReceivedSeq: Int)(implicit ec: ExecutionContext): FixedSqlAction[Int, NoStream, Effect.Write] =
-    byPKC.applied((userId, peer.`type`.value, peer.id)).map(_.ownerLastReceivedSeq).update(ownerLastReceivedSeq)
+  def updateOwnerLastReadSeq(chatId: Long, ownerLastReadSeq: Int)(implicit ec: ExecutionContext): FixedSqlAction[Int, NoStream, Effect.Write] =
+    byPKC.applied(chatId).map(_.ownerLastReadSeq).update(ownerLastReadSeq)
 
-  def updateOwnerLastReadSeq(userId: Int, peer: ApiPeer, ownerLastReadSeq: Int)(implicit ec: ExecutionContext): FixedSqlAction[Int, NoStream, Effect.Write] =
-    byPKC.applied((userId, peer.`type`.value, peer.id)).map(_.ownerLastReadSeq).update(ownerLastReadSeq)
-
-  def delete(userId: Int, peer: ApiPeer): FixedSqlAction[Int, NoStream, Effect.Write] =
-    byPKC.applied((userId, peer.`type`.value, peer.id)).delete
+  def delete(chatId: Long): FixedSqlAction[Int, NoStream, Effect.Write] =
+    byPKC.applied(chatId).delete
 
 }

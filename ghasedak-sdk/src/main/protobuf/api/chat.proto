@@ -2,17 +2,12 @@ syntax = "proto3";
 
 package im.ghasedak.api;
 
-option java_package = "im.ghasedak.api.peer";
+option java_package = "im.ghasedak.api.chat";
 option java_multiple_files = true;
 
-enum ApiPeerType {
+enum ApiChatType {
     UNKNOWN = 0;
     PRIVATE = 1;
     GROUP = 2;
-}
-
-message ApiPeer {
-    ApiPeerType type = 1;
-    int32 id = 2;
 }
 

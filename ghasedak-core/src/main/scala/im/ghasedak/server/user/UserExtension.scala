@@ -5,15 +5,14 @@ import java.time.{ Instant, LocalDateTime, ZoneOffset }
 import akka.actor._
 import im.ghasedak.api.contact.ApiContactRecord
 import im.ghasedak.api.messaging.ApiMessage
-import im.ghasedak.api.peer.{ ApiPeer, ApiPeerType }
 import im.ghasedak.api.user.ApiUser
 import im.ghasedak.rpc.messaging.ResponseSendMessage
 import im.ghasedak.rpc.misc.ResponseVoid
 import im.ghasedak.server.db.DbExtension
-import im.ghasedak.server.repo.dialog.DialogRepo
-import im.ghasedak.server.repo.user.UserRepo
 import im.ghasedak.server.model.contact.UserContact
 import im.ghasedak.server.model.user.UserAuth
+import im.ghasedak.server.repo.dialog.DialogRepo
+import im.ghasedak.server.repo.user.UserRepo
 import slick.jdbc.PostgresProfile
 
 import scala.concurrent.{ ExecutionContext, Future }
@@ -35,36 +34,34 @@ final class UserExtensionImpl(system: ExtendedActorSystem) extends Extension {
     Instant.now()
   }
 
-  def sendMessage(userId: Int, peer: ApiPeer, randomId: Long, message: ApiMessage): Future[ResponseSendMessage] = {
+  def sendMessage(userId: Int, chatId: Long, randomId: Long, message: ApiMessage): Future[ResponseSendMessage] = {
     val msgDate = calculateDate
     val msgLocalDate = LocalDateTime.ofInstant(msgDate, ZoneOffset.UTC)
-    val selfPeer = ApiPeer(ApiPeerType.PRIVATE, userId)
     val action = for {
       seq ← writeHistoryMessage(
-        selfPeer,
-        peer,
+        chatId,
+        userId,
         randomId,
         msgLocalDate,
         message)
-      _ ← createOrUpdateDialog(userId, peer, seq, msgLocalDate)
-      _ ← DialogRepo.updateOwnerLastReadSeq(userId, peer, seq)
-      _ ← createOrUpdateDialog(peer.id, selfPeer, seq, msgLocalDate)
+      _ ← DialogRepo.updateLastMessageSeqDate(chatId, seq, msgLocalDate)
+      _ ← DialogRepo.updateOwnerLastReadSeq(chatId, seq)
     } yield ResponseSendMessage(seq, msgDate.toEpochMilli)
     db.run(action)
   }
 
-  def messageReceived(userId: Int, peer: ApiPeer, seq: Int): Future[ResponseVoid] = {
+  def messageReceived(userId: Int, chatId: Long, seq: Int): Future[ResponseVoid] = {
     val action = for {
-      _ ← DialogRepo.updateOwnerLastReceivedSeq(userId, peer, seq)
-      _ ← DialogRepo.updateLastReceivedSeq(userId, peer, seq)
+      _ ← DialogRepo.updateOwnerLastReceivedSeq(chatId, seq)
+      _ ← DialogRepo.updateLastReceivedSeq(chatId, seq)
     } yield ResponseVoid()
     db.run(action)
   }
 
-  def messageRead(userId: Int, peer: ApiPeer, seq: Int): Future[ResponseVoid] = {
+  def messageRead(userId: Int, chatId: Long, seq: Int): Future[ResponseVoid] = {
     val action = for {
-      _ ← DialogRepo.updateOwnerLastReadSeq(userId, peer, seq)
-      _ ← DialogRepo.updateLastReadSeq(userId, peer, seq)
+      _ ← DialogRepo.updateOwnerLastReadSeq(chatId, seq)
+      _ ← DialogRepo.updateLastReadSeq(chatId, seq)
     } yield ResponseVoid()
     db.run(action)
   }
