@@ -1,12 +1,8 @@
 package im.ghasedak.server.rpc.messaging
 
-import java.time.ZoneOffset
-
 import akka.actor.ActorSystem
 import akka.event.{ Logging, LoggingAdapter }
 import akka.grpc.scaladsl.Metadata
-import com.google.protobuf.CodedInputStream
-import im.ghasedak.api.messaging.{ ApiMessage, ApiMessageContainer }
 import im.ghasedak.rpc.messaging._
 import im.ghasedak.rpc.misc.ResponseVoid
 import im.ghasedak.server.db.DbExtension
@@ -36,7 +32,7 @@ final class MessagingServiceImpl(implicit system: ActorSystem) extends Messaging
 
   override def sendMessage(request: RequestSendMessage, metadata: Metadata): Future[ResponseSendMessage] =
     authorize(metadata) { clientData ⇒
-      val (chatId, randomId, message) = RequestSendMessage.unapply(request).get
+      val (chatId, randomId, message, _, _) = RequestSendMessage.unapply(request).get
       withValidChat(chatId, clientData.userId) {
         userExt.sendMessage(
           clientData.userId,
@@ -57,13 +53,7 @@ final class MessagingServiceImpl(implicit system: ActorSystem) extends Messaging
       db.run(HistoryMessageRepo.findBefore(
         chatId,
         seq,
-        limit)) map { history ⇒
-        history.map(msg ⇒ ApiMessageContainer(
-          msg.senderUserId,
-          msg.sequenceNr,
-          msg.date.atZone(ZoneOffset.UTC).toInstant.toEpochMilli,
-          Some(ApiMessage().mergeFrom(CodedInputStream.newInstance(msg.messageContentData)))))
-      } map (ResponseLoadHistory(_))
+        limit)) map (ResponseLoadHistory(_))
     }
 
   override def messageReceived(request: RequestMessageReceived, metadata: Metadata): Future[ResponseVoid] =

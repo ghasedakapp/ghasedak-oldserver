@@ -7,7 +7,7 @@ option java_multiple_files = true;
 
 import "api/user.proto";
 
-message ApiAuth {
+message Auth {
     string token = 1;
-    ApiUser user = 2;
+    UserProfile user = 2;
 }

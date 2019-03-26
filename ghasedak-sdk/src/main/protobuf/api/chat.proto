@@ -5,9 +5,57 @@ package im.ghasedak.api;
 option java_package = "im.ghasedak.api.chat";
 option java_multiple_files = true;
 
-enum ApiChatType {
+import "google/protobuf/wrappers.proto";
+import "api/file.proto";
+
+enum ChatType {
     UNKNOWN = 0;
     PRIVATE = 1;
     GROUP = 2;
 }
 
+// Member information
+message Member {
+
+    // User id
+    int32 uid = 1;
+
+    // User inviter id
+    int32 inviter_uid = 2;
+
+    // Adding date
+    int64 date = 3;
+}
+
+// Group information
+message Chat {
+    // Chat id
+    int32 id = 1;
+
+    // Chat Type. Used only for displaying information.
+    ChatType group_type = 2;
+
+    // Title of chat
+    string title = 3;
+
+    // Avatar of chat
+    Avatar avatar = 4;
+
+    // Number of members
+    google.protobuf.Int32Value members_amount = 5;
+
+    // Chat creator
+    int32 creator_uid = 6;
+
+    // Members of chat
+    repeated Member members = 7;
+
+    // Date of creation
+    int64 create_date = 8;
+
+    // About of chat
+    google.protobuf.StringValue about = 9;
+
+    // Chat nick name
+    google.protobuf.StringValue nick = 10;
+}

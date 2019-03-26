@@ -1,7 +1,7 @@
 package im.ghasedak.server.update
 
 import com.sksamuel.pulsar4s._
-import im.ghasedak.api.update.{ ApiSeqState, ApiUpdateContainer }
+import im.ghasedak.api.update.{ SeqState, UpdateContainer }
 import org.apache.pulsar.client.api.Schema
 
 import scala.concurrent.Future
@@ -22,8 +22,8 @@ trait DeliveryOperations extends UpdateHelper {
 
   def deliverUserUpdate(
     userId:    Int,
-    update:    ApiUpdateContainer,
-    reduceKey: Option[String]     = None): Future[ApiSeqState] =
+    update:    UpdateContainer,
+    reduceKey: Option[String]  = None): Future[SeqState] =
     deliverUpdate(
       userId,
       UpdateMapping(default = Some(update)),
@@ -31,8 +31,8 @@ trait DeliveryOperations extends UpdateHelper {
 
   def deliverPeopleUpdate(
     userIds:   Seq[Int],
-    update:    ApiUpdateContainer,
-    reduceKey: Option[String]     = None): Future[Unit] =
+    update:    UpdateContainer,
+    reduceKey: Option[String]  = None): Future[Unit] =
     broadcastUpdate(
       userIds,
       UpdateMapping(default = Some(update)),
@@ -40,8 +40,8 @@ trait DeliveryOperations extends UpdateHelper {
 
   def deliverCustomUpdate(
     userId:  Int,
-    default: ApiUpdateContainer,
-    custom:  Map[String, ApiUpdateContainer]): Future[ApiSeqState] =
+    default: UpdateContainer,
+    custom:  Map[String, UpdateContainer]): Future[SeqState] =
     deliverUpdate(
       userId,
       UpdateMapping(
@@ -51,8 +51,8 @@ trait DeliveryOperations extends UpdateHelper {
   def broadcastUserUpdate(
     userId:       Int,
     bcastUserIds: Set[Int],
-    update:       ApiUpdateContainer,
-    reduceKey:    Option[String]     = None): Future[ApiSeqState] = {
+    update:       UpdateContainer,
+    reduceKey:    Option[String]  = None): Future[SeqState] = {
     val mapping = UpdateMapping(default = Some(update))
     for {
       seqState ← deliverUpdate(userId, mapping, reduceKey)
@@ -63,8 +63,8 @@ trait DeliveryOperations extends UpdateHelper {
   private def deliverUpdate(
     userId:    Int,
     mapping:   UpdateMapping,
-    reduceKey: Option[String] = None): Future[ApiSeqState] = {
-    Future.successful(ApiSeqState())
+    reduceKey: Option[String] = None): Future[SeqState] = {
+    Future.successful(SeqState())
     val topic = getUserUpdateTopic(userId)
     val producerConfig = getBaseUserUpdateProducerConfig.copy(topic = topic)
     val producer = pulsarClient.producer[UpdateMapping](producerConfig)

@@ -2,7 +2,7 @@ package im.ghasedak.server.repo.dialog
 
 import java.time.LocalDateTime
 
-import im.ghasedak.server.model.dialog.{ Dialog, DialogCommon, UserDialog }
+import im.ghasedak.server.model.dialog.{ DialogModel, DialogCommon, UserDialog }
 import im.ghasedak.server.repo.TypeMapper._
 import slick.jdbc.PostgresProfile
 import slick.jdbc.PostgresProfile.api._
@@ -105,12 +105,12 @@ object DialogRepo extends UserDialogOperations with DialogCommonOperations {
       createCommon(DialogCommon(chatId, lastMessageDate, lastMessageSeq, 0, 0))
   }
 
-  def find(userId: Int, limit: Int)(implicit ec: ExecutionContext): DBIOAction[Seq[Dialog], NoStream, Effect.Read] = {
+  def find(userId: Int, limit: Int)(implicit ec: ExecutionContext): DBIOAction[Seq[DialogModel], NoStream, Effect.Read] = {
     dialogs.filter(r ⇒ r._2.userId === userId)
       .sortBy {
         case (common, _) ⇒ common.lastMessageDate.desc
       }.take(limit).result.map(_.map {
-        case (c, u) ⇒ Dialog.from(c, u)
+        case (c, u) ⇒ DialogModel.from(c, u)
       })
   }
 

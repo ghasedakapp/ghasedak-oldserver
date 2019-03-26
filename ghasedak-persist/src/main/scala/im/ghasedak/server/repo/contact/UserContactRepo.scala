@@ -1,53 +1,90 @@
 package im.ghasedak.server.repo.contact
 
-import com.github.tminglei.slickpg.ExPostgresProfile
+import java.time.{ LocalDateTime, ZoneOffset }
+
 import com.github.tminglei.slickpg.ExPostgresProfile.api._
-import im.ghasedak.server.model.contact.UserContact
+import im.ghasedak.server.model.contact.UserContactModel
+import im.ghasedak.server.repo.TypeMapper._
 import slick.dbio.Effect
+import slick.dbio.Effect.Write
 import slick.lifted.Tag
 import slick.sql.{ FixedSqlAction, FixedSqlStreamingAction, SqlAction }
 
-final class UserContactTable(tag: Tag) extends Table[UserContact](tag, "user_contacts") {
-
+abstract class UserContactBase[T](tag: Tag, tname: String) extends Table[T](tag, tname) {
   def ownerUserId = column[Int]("owner_user_id", O.PrimaryKey)
-
   def contactUserId = column[Int]("contact_user_id", O.PrimaryKey)
-
-  def localName = column[String]("local_name")
-
-  def hasPhone = column[Boolean]("has_phone", O.Default(false))
-
-  def hasEmail = column[Boolean]("has_email", O.Default(false))
-
-  def isDeleted = column[Boolean]("is_deleted", O.Default(false))
-
-  def * = (ownerUserId, contactUserId, localName, hasPhone, hasEmail, isDeleted) <> (UserContact.tupled, UserContact.unapply)
+  def localName = column[Option[String]]("local_name")
+  def deletedAt = column[Option[LocalDateTime]]("deleted_at")
 
 }
 
+final class UserContactTable(tag: Tag) extends UserContactBase[UserContactModel](tag, "user_contacts") {
+  def * = (ownerUserId, contactUserId, localName, deletedAt) <> (UserContactModel.tupled, UserContactModel.unapply)
+}
+
 object UserContactRepo {
-
   val contacts = TableQuery[UserContactTable]
+  val active = contacts.filter(_.deletedAt.isEmpty)
 
-  val active = contacts.filter(_.isDeleted === false)
+  private def byOwnerUserIdNotDeleted(ownerUserId: Rep[Int]) =
+    active.filter(_.ownerUserId === ownerUserId)
 
-  def findContactIdsActive(ownerUserId: Int): FixedSqlStreamingAction[Seq[Int], Int, Effect.Read] =
-    active.filter(_.ownerUserId === ownerUserId).map(_.contactUserId).distinct.result
+  private val byOwnerUserIdNotDeletedC = Compiled(byOwnerUserIdNotDeleted _)
 
-  def find(ownerUserId: Int): FixedSqlStreamingAction[Seq[UserContact], UserContact, Effect.Read] =
-    active.filter(_.ownerUserId === ownerUserId).result
+  private val countC = Compiled { (userId: Rep[Int]) ⇒
+    byOwnerUserIdNotDeleted(userId).length
+  }
 
-  def find(ownerUserId: Int, contactUserId: Int): SqlAction[Option[UserContact], NoStream, Effect.Read] =
-    active.filter(c ⇒ c.ownerUserId === ownerUserId && c.contactUserId === contactUserId).result.headOption
+  def byPKNotDeleted(ownerUserId: Rep[Int], contactUserId: Rep[Int]) =
+    contacts.filter(c ⇒ c.ownerUserId === ownerUserId && c.contactUserId === contactUserId && c.deletedAt.isEmpty)
 
-  def exists(ownerUserId: Int, contactUserId: Int): FixedSqlAction[Boolean, ExPostgresProfile.api.NoStream, Effect.Read] =
-    active.filter(c ⇒ c.ownerUserId === ownerUserId && c.contactUserId === contactUserId).exists.result
+  val nameByPKNotDeletedC = Compiled(
+    (ownerUserId: Rep[Int], contactUserId: Rep[Int]) ⇒
+      byPKNotDeleted(ownerUserId, contactUserId) map (_.localName))
 
-  def insertOrUpdate(contact: UserContact): FixedSqlAction[Int, NoStream, Effect.Write] =
+  def byContactUserId(contactUserId: Rep[Int]) = active.filter(_.contactUserId === contactUserId)
+  val byContactUserIdC = Compiled(byContactUserId _)
+
+  def byPKDeleted(ownerUserId: Int, contactUserId: Int) =
+    contacts.filter(c ⇒ c.ownerUserId === ownerUserId && c.contactUserId === contactUserId && c.deletedAt.isDefined)
+
+  private def existsC = Compiled { (ownerUserId: Rep[Int], contactUserId: Rep[Int]) ⇒
+    byPKNotDeleted(ownerUserId, contactUserId).exists
+  }
+
+  def fetchAll = active.result
+
+  def exists(ownerUserId: Int, contactUserId: Int) = existsC((ownerUserId, contactUserId)).result
+
+  def find(ownerUserId: Int, contactUserId: Int): DBIO[Option[UserContactModel]] =
+    byPKNotDeleted(ownerUserId, contactUserId).result.headOption
+
+  def count(ownerUserId: Int) = countC(ownerUserId).result
+
+  def findIds(ownerUserId: Int, contactUserIds: Set[Int]) =
+    byOwnerUserIdNotDeletedC.applied(ownerUserId).filter(_.contactUserId inSet contactUserIds).map(_.contactUserId).result
+
+  def findOwners(contactUserId: Int) = byContactUserIdC(contactUserId).result
+
+  def findNotDeletedIds(ownerUserId: Int) =
+    byOwnerUserIdNotDeleted(ownerUserId).map(_.contactUserId).result
+
+  def findName(ownerUserId: Int, contactUserId: Int): DBIOAction[Option[String], NoStream, Effect.Read] =
+    nameByPKNotDeletedC((ownerUserId, contactUserId)).result.map(_.headOption.flatten)
+
+  def findContactIdsAll(ownerUserId: Int) =
+    contacts.filter(c ⇒ c.ownerUserId === ownerUserId).map(_.contactUserId).result
+
+  def findContactIdsActive(ownerUserId: Int) =
+    byOwnerUserIdNotDeleted(ownerUserId).map(_.contactUserId).distinct.result
+
+  def updateName(ownerUserId: Int, contactUserId: Int, name: Option[String]): FixedSqlAction[Int, NoStream, Write] = {
+    contacts.filter(c ⇒ c.ownerUserId === ownerUserId && c.contactUserId === contactUserId).map(_.localName).update(name)
+  }
+
+  def delete(ownerUserId: Int, contactUserId: Int) =
+    byPKNotDeleted(ownerUserId, contactUserId).map(_.deletedAt).update(Some(LocalDateTime.now(ZoneOffset.UTC)))
+
+  def insertOrUpdate(contact: UserContactModel) =
     contacts.insertOrUpdate(contact)
-
-  def delete(ownerUserId: Int, contactUserId: Int): FixedSqlAction[Int, NoStream, Effect.Write] =
-    contacts.filter(c ⇒ c.ownerUserId === ownerUserId && c.contactUserId === contactUserId && c.isDeleted === false)
-      .map(_.isDeleted).update(true)
-
 }

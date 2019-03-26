@@ -5,6 +5,7 @@ CREATE TABLE history_messages (
    sender_user_id         INT       NOT NULL,
    message_content_header INT       NOT NULL,
    message_content_data   bytea     NOT NULL,
+   edited_at             TIMESTAMP,
    deleted_at             TIMESTAMP,
    PRIMARY KEY(chat_id, date, sender_user_id, sequence_nr)
 );

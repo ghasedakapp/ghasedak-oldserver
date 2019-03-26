@@ -6,7 +6,6 @@ import akka.grpc.scaladsl.Metadata
 import im.ghasedak.rpc.contact._
 import im.ghasedak.rpc.misc.ResponseVoid
 import im.ghasedak.server.db.DbExtension
-import im.ghasedak.server.model.contact.UserContact
 import im.ghasedak.server.repo.contact.UserContactRepo
 import im.ghasedak.server.repo.user.UserRepo
 import im.ghasedak.server.rpc.auth.helper.AuthTokenHelper

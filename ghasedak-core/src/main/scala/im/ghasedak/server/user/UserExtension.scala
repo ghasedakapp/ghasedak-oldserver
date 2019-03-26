@@ -3,14 +3,14 @@ package im.ghasedak.server.user
 import java.time.{ Instant, LocalDateTime, ZoneOffset }
 
 import akka.actor._
-import im.ghasedak.api.contact.ApiContactRecord
-import im.ghasedak.api.messaging.ApiMessage
-import im.ghasedak.api.user.ApiUser
+import cats.syntax.flatMap
+import im.ghasedak.api.contact.ContactRecord
+import im.ghasedak.api.messaging.MessageContent
+import im.ghasedak.api.user.User
 import im.ghasedak.rpc.messaging.ResponseSendMessage
 import im.ghasedak.rpc.misc.ResponseVoid
 import im.ghasedak.server.db.DbExtension
-import im.ghasedak.server.model.contact.UserContact
-import im.ghasedak.server.model.user.UserAuth
+import im.ghasedak.server.repo.contact.{ UserContactRepo, UserPhoneContactRepo }
 import im.ghasedak.server.repo.dialog.DialogRepo
 import im.ghasedak.server.repo.user.UserRepo
 import slick.jdbc.PostgresProfile
@@ -26,7 +26,6 @@ final class UserExtensionImpl(system: ExtendedActorSystem) extends Extension {
 
   private implicit val db: PostgresProfile.backend.Database = DbExtension(system).db
 
-  import im.ghasedak.server.dialog.DialogUtils._
   import im.ghasedak.server.messaging.HistoryUtils._
 
   private def calculateDate: Instant = {
@@ -34,7 +33,7 @@ final class UserExtensionImpl(system: ExtendedActorSystem) extends Extension {
     Instant.now()
   }
 
-  def sendMessage(userId: Int, chatId: Long, randomId: Long, message: ApiMessage): Future[ResponseSendMessage] = {
+  def sendMessage(userId: Int, chatId: Long, randomId: Long, message: MessageContent): Future[ResponseSendMessage] = {
     val msgDate = calculateDate
     val msgLocalDate = LocalDateTime.ofInstant(msgDate, ZoneOffset.UTC)
     val action = for {
@@ -64,28 +63,6 @@ final class UserExtensionImpl(system: ExtendedActorSystem) extends Extension {
       _ ← DialogRepo.updateLastReadSeq(chatId, seq)
     } yield ResponseVoid()
     db.run(action)
-  }
-
-  def getUsers(clientOrgId: Int, clientUserId: Int, userIds: Seq[Int]): Future[Seq[ApiUser]] = {
-    val action =
-      UserRepo.findUserContact(clientOrgId, clientUserId, userIds) map (_.map {
-        case ((user, userAuth), contact) ⇒
-          ApiUser(
-            id = user.id,
-            name = user.name,
-            localName = contact.map(_.localName).getOrElse(user.name),
-            about = user.about,
-            contactsRecord = toApiContact(userAuth, contact))
-      })
-    db.run(action)
-  }
-
-  def toApiContact(userAuth: Option[UserAuth], contact: Option[UserContact]): Seq[ApiContactRecord] = {
-    Seq(
-      contact.filter(_.hasPhone) flatMap (_ ⇒ userAuth.flatMap(_.phoneNumber.map(ApiContactRecord().withPhoneNumber))),
-      contact.filter(_.hasEmail) flatMap (_ ⇒ userAuth.flatMap(_.email.map(ApiContactRecord().withEmail))),
-      userAuth.flatMap(_.nickname.map(ApiContactRecord().withNickname)))
-      .flatten
   }
 
 }

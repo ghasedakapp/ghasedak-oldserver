@@ -2,7 +2,8 @@ package im.ghasedak.server.repo.history
 
 import java.time.{ LocalDateTime, ZoneId }
 
-import im.ghasedak.server.model.history.HistoryMessage
+import im.ghasedak.api.messaging.{ HistoryMessage, MessageContent }
+import im.ghasedak.server.model.TimeConversions._
 import im.ghasedak.server.repo.TypeMapper._
 import slick.dbio.Effect.{ Read, Write }
 import slick.jdbc.PostgresProfile.api._
@@ -23,27 +24,37 @@ final class HistoryMessageTable(tag: Tag) extends Table[HistoryMessage](tag, "hi
 
   def messageContentData = column[Array[Byte]]("message_content_data")
 
+  def editedAt = column[Option[LocalDateTime]]("edited_at")
+
   def deletedAt = column[Option[LocalDateTime]]("deleted_at")
 
-  def * = (chatId, date, senderUserId, sequenceNr, messageContentHeader, messageContentData, deletedAt) <>
+  def * = (chatId, date, senderUserId, sequenceNr, messageContentHeader, messageContentData, editedAt, deletedAt) <>
     (applyHistoryMessage.tupled, unapplyHistoryMessage)
 
-  private def applyHistoryMessage: (Long, LocalDateTime, Int, Int, Int, Array[Byte], Option[LocalDateTime]) ⇒ HistoryMessage = {
-    case (chatId, date, senderUserId, sequenceNr, messageContentHeader, messageContentData, deletedAt) ⇒
+  private def applyHistoryMessage: (Long, LocalDateTime, Int, Int, Int, Array[Byte], Option[LocalDateTime], Option[LocalDateTime]) ⇒ HistoryMessage = {
+    case (chatId, date, senderUserId, sequenceNr, messageContentHeader, messageContentData, editedAt, deletedAt) ⇒
       HistoryMessage(
-        chatId,
-        date = date,
-        senderUserId = senderUserId,
+        chatId = chatId,
         sequenceNr = sequenceNr,
-        messageContentHeader = messageContentHeader,
-        messageContentData = messageContentData,
+        date = Some(date),
+        senderUserId = senderUserId,
+        message = Some(MessageContent.parseFrom(messageContentData)),
+        editedAt = editedAt,
         deletedAt = deletedAt)
   }
 
-  private def unapplyHistoryMessage: HistoryMessage ⇒ Option[(Long, LocalDateTime, Int, Int, Int, Array[Byte], Option[LocalDateTime])] = { historyMessage ⇒
+  private def unapplyHistoryMessage: HistoryMessage ⇒ Option[(Long, LocalDateTime, Int, Int, Int, Array[Byte], Option[LocalDateTime], Option[LocalDateTime])] = { historyMessage ⇒
     HistoryMessage.unapply(historyMessage) map {
-      case (chatId, date, senderUserId, sequenceNr, messageContentHeader, messageContentData, deletedAt) ⇒
-        (chatId, date, senderUserId, sequenceNr, messageContentHeader, messageContentData, deletedAt)
+      case (chatId, sequenceNr, date, senderUserId, message, _, _, _, editedAt, deletedAt, _) ⇒
+        (
+          chatId,
+          date.get,
+          senderUserId,
+          sequenceNr,
+          message.get.body.number,
+          message.get.toByteArray,
+          editedAt,
+          deletedAt)
     }
   }
 
@@ -118,10 +129,6 @@ object HistoryMessageRepo {
       .filter(_.sequenceNr < seq)
       .sortBy(_.date.asc)
       .take(limit)
-  }
-
-  private val byUserIdPeerRidC = Compiled { (chatId: Rep[Long], sequenceNr: Rep[Int]) ⇒
-    byChatId(chatId).filter(_.sequenceNr === sequenceNr)
   }
 
   def findBefore(chatId: Long, seq: Int, limit: Long): FixedSqlStreamingAction[Seq[HistoryMessage], HistoryMessage, Read] =

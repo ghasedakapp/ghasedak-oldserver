@@ -36,7 +36,7 @@ message RequestSignUp {
 
 message ResponseAuth {
     bool is_registered = 1;
-    im.ghasedak.api.ApiAuth api_auth = 2;
+    im.ghasedak.api.Auth api_auth = 2;
 }
 
 message RequestSignOut {

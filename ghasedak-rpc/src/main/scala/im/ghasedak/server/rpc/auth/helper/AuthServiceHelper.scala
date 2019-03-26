@@ -1,21 +1,20 @@
 package im.ghasedak.server.rpc.auth.helper
 
 import java.time.temporal.ChronoUnit
-import java.time.{ LocalDateTime, ZoneOffset }
+import java.time.{LocalDateTime, ZoneOffset}
 
 import com.auth0.jwt.JWT
-import im.ghasedak.api.auth.ApiAuth
-import im.ghasedak.api.user.ApiUser
-import im.ghasedak.server.model.auth.{ AuthPhoneTransaction, AuthSession, AuthTransactionBase }
+import im.ghasedak.api.auth.Auth
+import im.ghasedak.api.user.{User, UserData, UserProfile}
+import im.ghasedak.server.model.auth.{AuthPhoneTransaction, AuthSession, AuthTransactionBase}
 import im.ghasedak.server.model.org.ApiKey
-import im.ghasedak.server.model.user.{ User, UserAuth }
-import im.ghasedak.server.repo.auth.{ AuthSessionRepo, AuthTransactionRepo, GateAuthCodeRepo }
+import im.ghasedak.server.model.user.UserModel
+import im.ghasedak.server.repo.auth.{AuthSessionRepo, AuthTransactionRepo, GateAuthCodeRepo}
 import im.ghasedak.server.repo.org.ApiKeyRepo
-import im.ghasedak.server.repo.user.{ UserAuthRepo, UserRepo }
-import im.ghasedak.server.rpc.auth.{ AuthRpcErrors, AuthServiceImpl }
+import im.ghasedak.server.repo.user.{UserAuthRepo, UserRepo}
+import im.ghasedak.server.rpc.auth.{AuthRpcErrors, AuthServiceImpl}
 import im.ghasedak.server.rpc.common.CommonRpcErrors
 import im.ghasedak.server.update.SeqUpdateExtension
-import im.ghasedak.server.user.UserUtils
 import im.ghasedak.server.utils.CodeGen.genPhoneCode
 import im.ghasedak.server.utils.StringUtils._
 import im.ghasedak.server.utils.number.IdUtils._
@@ -88,7 +87,7 @@ trait AuthServiceHelper {
     } yield ()
   }
 
-  protected def getOptApiAuth(transaction: AuthTransactionBase, optUserAuth: Option[UserAuth]): Result[Option[ApiAuth]] = {
+  protected def getOptApiAuth(transaction: AuthTransactionBase, optUserAuth: Option[UserAuth]): Result[Option[Auth]] = {
     optUserAuth match {
       case None ⇒ point(None)
       case Some(userAuth) ⇒
@@ -104,18 +103,26 @@ trait AuthServiceHelper {
           _ ← fromDBIO(AuthSessionRepo.create(authSession))
           _ ← fromDBIO(AuthTransactionRepo.delete(transaction.transactionHash))
           contactsRecord ← fromDBIO(UserUtils.getUserContactsRecord(user.id))
-          apiUser = ApiUser(user.id, user.name, user.name, user.about, contactsRecord)
-        } yield Some(ApiAuth(token, Some(apiUser)))
+          apiUser = UserProfile(
+            user = User(
+              user.id,
+              UserData(
+                name = user.name,
+
+              )
+            )
+          )
+        } yield Some(Auth(token, Some(apiUser)))
     }
   }
 
-  protected def newUserPhoneSignUp(transaction: AuthPhoneTransaction, name: String): Result[Option[ApiAuth]] = {
+  protected def newUserPhoneSignUp(transaction: AuthPhoneTransaction, name: String): Result[Option[Auth]] = {
     val phone = transaction.phoneNumber
     for {
       phoneAndCode ← fromOption(AuthRpcErrors.InvalidPhoneNumber)(normalizeWithCountry(phone).headOption)
       (_, countryCode) = phoneAndCode
       validName ← fromOption(CommonRpcErrors.InvalidName)(validName(name))
-      user = User(
+      user = UserModel(
         id = nextIntId(),
         orgId = transaction.orgId,
         name = validName,
@@ -131,7 +138,7 @@ trait AuthServiceHelper {
     } yield optApiAuth
   }
 
-  protected def subscribe(optApiAuth: Option[ApiAuth]): Future[Unit] = {
+  protected def subscribe(optApiAuth: Option[Auth]): Future[Unit] = {
     if (optApiAuth.isDefined) {
       val tokenId = JWT.decode(optApiAuth.get.token).getClaim("tokenId").asString()
       seqExt.subscribe(optApiAuth.get.user.get.id, tokenId)

@@ -2,11 +2,9 @@ package im.ghasedak.server.rpc.update
 
 import akka.NotUsed
 import akka.stream.scaladsl.Source
-import com.sksamuel.pulsar4s.ConsumerMessage
-import com.sksamuel.pulsar4s.akka.streams.Control
-import im.ghasedak.api.update.ApiSeqState
+import im.ghasedak.api.update.SeqState
 import im.ghasedak.rpc.update._
-import im.ghasedak.server.update.{ UpdateHelper, UpdateMapping }
+import im.ghasedak.server.update.UpdateHelper
 
 import scala.concurrent.Future
 import scala.util.{ Failure, Success }
@@ -17,7 +15,7 @@ trait UpdateServiceHelper extends UpdateHelper {
   def getDifference(userId: Int, tokenId: String, maxMessages: Int): Future[ResponseGetDifference] =
     seqUpdateExt.getDifference(userId, tokenId, maxMessages)
 
-  def acknowledge(userId: Int, tokenId: String, seqState: Option[ApiSeqState]): Future[Unit] =
+  def acknowledge(userId: Int, tokenId: String, seqState: Option[SeqState]): Future[Unit] =
     seqUpdateExt.acknowledge(userId, tokenId, seqState)
 
   def acknowledge(
@@ -29,7 +27,7 @@ trait UpdateServiceHelper extends UpdateHelper {
         case Failure(e) ⇒ log.error(e, "Error in get diff request stream")
       }
 
-  def seek(userId: Int, tokenId: String, state: Option[ApiSeqState]): Future[Unit] = {
+  def seek(userId: Int, tokenId: String, state: Option[SeqState]): Future[Unit] = {
     seqUpdateExt.seek(userId, tokenId, state)
   }
 

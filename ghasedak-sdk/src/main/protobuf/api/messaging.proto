@@ -6,35 +6,89 @@ option java_package = "im.ghasedak.api.messaging";
 option java_multiple_files = true;
 
 import "google/protobuf/wrappers.proto";
+import "google/protobuf/timestamp.proto";
 
-message ApiMessage {
-    oneof message {
-        ApiTextMessage text_message = 1;
+
+enum MessageState {
+    MESSAGESTATE_UNKNOWN = 0;
+    MESSAGESTATE_SENT = 1;
+    MESSAGESTATE_RECEIVED = 2;
+    MESSAGESTATE_READ = 3;
+}
+
+enum ListLoadMode {
+    LISTLOADMODE_UNKNOWN = 0;
+    LISTLOADMODE_FORWARD = 1;
+    LISTLOADMODE_BACKWARD = 2;
+    LISTLOADMODE_BOTH = 3;
+}
+
+// Message Attributes
+message MessageAttributes {
+    // Is mentioned. If set overrides built-in value.
+    google.protobuf.BoolValue is_mentioned = 1;
+
+    // Is message highlighted. Default is false.
+    google.protobuf.BoolValue is_highlighted = 2;
+
+    // Is notified. If set overrides built-in settings.
+    google.protobuf.BoolValue is_notified = 3;
+
+    // If this message is only for you. Default is false
+    google.protobuf.BoolValue is_only_for_you = 4;
+}
+
+// Referenced messge id
+message ReferencedMessages {
+    int64 chat_id = 1;
+    int32 sequence_nr = 2;
+}
+
+
+message MessageContent {
+    oneof body {
+        TextMessage text_message = 1;
     }
 }
 
-message ApiTextMessage {
+// Reaction to message
+message MessageReaction {
+    // User's reaction
+    repeated int32 users = 1;
+
+    // Reaction EMOJI code
+    string code = 2;
+}
+
+message TextMessage {
     string text = 1;
     repeated int32 mentions = 2;
 }
 
-message ApiMessageContainer {
-    int32 sender_user_id = 1;
+// Message from history
+message HistoryMessage {
+    int64 chat_id = 1;
     int32 sequence_nr = 2;
-    int64 date = 3;
-    ApiMessage message = 4;
+    google.protobuf.Timestamp date = 3;
+    int32 sender_user_id = 4;
+    MessageContent message = 5;
+    MessageState state = 6;
+    repeated MessageReaction reactions = 7;
+    MessageAttributes attribute = 8;
+    oneof attach {
+        ReferencedMessages forward = 9;
+        ReferencedMessages reply = 10;
+    }
+    google.protobuf.Timestamp edited_at = 11;
+    google.protobuf.Timestamp deleted_at = 12;
 }
 
-message ApiDialog {
+
+message Dialog {
     int64 chat_id = 1;
     int32 unread_count = 2;
-    int64 sort_date = 3;
-    ApiMessageContainer message = 4;
-    google.protobuf.Int64Value firstUnreadSeq = 5;
+    google.protobuf.Timestamp sort_date = 3;
+    HistoryMessage message = 4;
+    google.protobuf.Int64Value first_unread_seq = 5;
 }
 
-enum ApiListLoadMode {
-    BACKWARD = 0;
-    FORWARD = 1;
-    BOTH = 2;
-}

@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package im.ghasedak.rpc;
+
+option java_package = "im.ghasedak.rpc.chat";
+option java_multiple_files = true;
+
+
+import "google/protobuf/timestamp.proto";
+import "api/chat.proto";
+import "rpc/misc.proto";
+
+service ChatService {
+    rpc CreateChat (RequestCreateChat) returns (ResponseCreateChat);
+}
+
+
+message RequestCreateChat {
+
+    // Random Id for avoiding double create
+    int64 random_id = 1;
+
+    // Chat type
+    int32 chat_type = 2;
+
+    // Chat title
+    string title = 3;
+
+    // Members of chat
+    repeated int32 users = 4;
+
+}
+
+message ResponseCreateChat {
+    // Created chat
+    im.ghasedak.api.Chat chat = 1;
+
+    // Created date
+    google.protobuf.Timestamp date = 2;
+}

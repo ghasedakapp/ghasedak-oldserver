@@ -6,12 +6,103 @@ option java_package = "im.ghasedak.api.user";
 option java_multiple_files = true;
 
 import "google/protobuf/wrappers.proto";
-import "api/contact.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+import "api/file.proto";
 
-message ApiUser {
+enum Sex {
+    SEX_UNKNOWN = 0;
+    SEX_MALE = 2;
+    SEX_FEMALE = 3;
+}
+
+enum ContactType {
+    CONTACTTYPE_UNKNOWN = 0;
+    CONTACTTYPE_PHONE = 1;
+    CONTACTTYPE_EMAIL = 2;
+    CONTACTTYPE_WEB = 3;
+    CONTACTTYPE_SOCIAL = 4;
+}
+
+enum Lifecycle {
+    MISSED = 0;
+    ACTIVE = 1;
+    DELETED = 2;
+    BLOCKED = 3;
+    BLOCKED_AND_DELETED = 4;
+}
+
+// Contact information record
+message ContactRecord {
+    ContactType type = 1;
+    /**
+     * Value for specification type of contact,
+     * for example 'mobile/standalone/office' for phones or 'vk/fb/telegram'
+     * for extenrnal networks.
+     */
+    google.protobuf.StringValue type_spec = 6;
+    google.protobuf.StringValue string_value = 2;
+    google.protobuf.Int64Value long_value = 3;
+    google.protobuf.StringValue title = 4;
+    google.protobuf.StringValue subtitle = 5;
+}
+
+enum UserStatusType {
+    USERSTATUSTYPE_UNKNOWN = 0;
+    USERSTATUSTYPE_UNSET = 1;
+    USERSTATUSTYPE_AWAY = 2;
+    USERSTATUSTYPE_DONOTDISTURB = 3;
+    USERSTATUSTYPE_INVISIBLE = 4;
+}
+
+// User's status
+message UserStatus {
+    UserStatusType type = 1;
+    // Text supplied by user
+    google.protobuf.StringValue text = 2;
+}
+
+
+// Main user object
+message UserData {
+    string name = 1;
+    google.protobuf.StringValue nick = 2;
+    Sex sex = 3;
+    Avatar avatar = 4;
+    google.protobuf.BoolValue is_bot = 5;
+    Lifecycle status = 6;
+    UserStatus user_status = 7;
+    string time_zone = 8;
+    google.protobuf.Struct exts = 9;
+    google.protobuf.Timestamp clock = 10;
+}
+
+message User {
     int32 id = 1;
-    string name = 2;
-    string local_name = 3;
-    google.protobuf.StringValue about = 4;
-    repeated ApiContactRecord contacts_record = 5;
+    UserData data = 2;
+}
+
+message UserProfile {
+    User user = 1;
+    repeated ContactRecord contact_info = 2;
+    google.protobuf.StringValue about = 3;
+    repeated string preferred_languages = 4;
+    // Time Zone of user in TZ format
+    google.protobuf.StringValue time_zone = 5;
+    repeated BotCommand bot_commands = 6;
+
+    // custom user profile info
+    google.protobuf.Struct custom_profile = 7;
+
+    google.protobuf.StringValue integration_token = 8;
+}
+
+// Available bot commands
+message BotCommand {
+    // Slash command name (wihtout slash)
+    string slash_command = 1;
+    // Slash command description
+    string description = 2;
+    // Optional Localization Key for i18n
+    google.protobuf.StringValue loc_key = 3;
 }

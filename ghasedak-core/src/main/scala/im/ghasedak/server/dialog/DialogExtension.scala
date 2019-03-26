@@ -3,7 +3,7 @@ package im.ghasedak.server.dialog
 import akka.actor.{ ActorSystem, ExtendedActorSystem, Extension, ExtensionId, ExtensionIdProvider }
 import im.ghasedak.rpc.messaging.ResponseLoadDialogs
 import im.ghasedak.server.db.DbExtension
-import im.ghasedak.server.model.dialog.Dialog
+import im.ghasedak.server.model.dialog.DialogModel
 import im.ghasedak.server.repo.dialog.DialogRepo
 import im.ghasedak.server.repo.history.HistoryMessageRepo
 import slick.dbio.DBIO
@@ -28,7 +28,7 @@ final class DialogExtensionImpl(system: ExtendedActorSystem) extends Extension {
     db.run(action)
   }
 
-  private def getDialog(dialog: Dialog) =
+  private def getDialog(dialog: DialogModel) =
     for {
       apiDialog ← HistoryMessageRepo.find(dialog.chatId, Some(dialog.lastMessageDate), 1).headOption.map(dialog.toApi)
       firstUnreadOpt ← HistoryMessageRepo.findAfter(dialog.chatId, dialog.lastReadSeq, 1) map (_.headOption)

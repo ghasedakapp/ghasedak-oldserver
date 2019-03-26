@@ -5,12 +5,12 @@ package im.ghasedak.api;
 option java_package = "im.ghasedak.api.update";
 option java_multiple_files = true;
 
-message ApiSeqState {
+message SeqState {
     int32 seq = 1;
     bytes state = 2;
 }
 
-message ApiUpdateContainer {
+message UpdateContainer {
     oneof update {
         UpdatePong pong = 1;
     }

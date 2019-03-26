@@ -17,5 +17,5 @@ message RequestCheckAuth {
 }
 
 message RequestSendUpdate {
-    im.ghasedak.api.ApiUpdateContainer update_container = 1;
+    im.ghasedak.api.UpdateContainer update_container = 1;
 }

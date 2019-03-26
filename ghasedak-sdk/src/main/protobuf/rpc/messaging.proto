@@ -18,8 +18,17 @@ service MessagingService {
 
 message RequestSendMessage {
     int64 chat_id = 1;
+
+    // Id for message deduplication
     int64 random_id = 2;
-    im.ghasedak.api.ApiMessage message = 3;
+
+    im.ghasedak.api.MessageContent message = 3;
+
+    // If current message forwards some other
+    im.ghasedak.api.ReferencedMessages forward = 4;
+
+    // If current message is a reply on some other
+    im.ghasedak.api.ReferencedMessages reply = 5;
 }
 
 message ResponseSendMessage {
@@ -33,18 +42,18 @@ message RequestLoadDialogs {
 }
 
 message ResponseLoadDialogs {
-    repeated im.ghasedak.api.ApiDialog dialogs = 1;
+    repeated im.ghasedak.api.Dialog dialogs = 1;
 }
 
 message RequestLoadHistory {
     int64 chat_id = 1;
     int32 sequence_nr = 2;
-    im.ghasedak.api.ApiListLoadMode load_mode = 3;
+    im.ghasedak.api.ListLoadMode load_mode = 3;
     int32 limit = 4;
 }
 
 message ResponseLoadHistory {
-    repeated im.ghasedak.api.ApiMessageContainer history = 1;
+    repeated im.ghasedak.api.HistoryMessage history = 1;
 }
 
 message RequestMessageReceived {

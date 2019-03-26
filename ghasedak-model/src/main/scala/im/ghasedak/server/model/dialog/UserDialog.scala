@@ -1,10 +1,9 @@
 package im.ghasedak.server.model.dialog
 
-import java.time.{ LocalDateTime, ZoneOffset }
+import java.time.LocalDateTime
 
-import im.ghasedak.api.messaging.{ ApiDialog, ApiMessage, ApiMessageContainer }
-import im.ghasedak.server.model.history.HistoryMessage
-
+import im.ghasedak.api.messaging.{ Dialog, HistoryMessage }
+import im.ghasedak.server.model.TimeConversions._
 final case class DialogCommon(
   chatId:          Long,
   lastMessageDate: LocalDateTime,
@@ -19,7 +18,7 @@ final case class UserDialog(
   ownerLastReadSeq:     Int,
   createdAt:            LocalDateTime)
 
-final case class Dialog(
+final case class DialogModel(
   chatId:               Long,
   ownerLastReceivedSeq: Int,
   ownerLastReadSeq:     Int,
@@ -29,26 +28,21 @@ final case class Dialog(
   lastReadSeq:          Int,
   createdAt:            LocalDateTime) {
 
-  def toApi(msgOpt: Option[HistoryMessage]): ApiDialog = {
-    val history = msgOpt.getOrElse(HistoryMessage.empty(chatId, lastMessageDate))
-    val msgDate = lastMessageDate.toInstant(ZoneOffset.UTC).toEpochMilli
-    ApiDialog(
+  def toApi(msgOpt: Option[HistoryMessage]): Dialog = {
+    val history = msgOpt.getOrElse(HistoryMessage().copy(chatId = chatId, date = Some(lastMessageDate)))
+    Dialog(
       chatId,
       lastMessageSeq - ownerLastReadSeq,
-      msgDate,
-      Some(ApiMessageContainer(
-        history.senderUserId,
-        history.sequenceNr,
-        msgDate,
-        Some(ApiMessage.parseFrom(history.messageContentData)))))
+      Some(lastMessageDate),
+      Some(history))
   }
 
 }
 
-object Dialog {
+object DialogModel {
 
-  def from(common: DialogCommon, dialog: UserDialog): Dialog =
-    Dialog(
+  def from(common: DialogCommon, dialog: UserDialog): DialogModel =
+    DialogModel(
       chatId = dialog.chatId,
       ownerLastReceivedSeq = dialog.ownerLastReceivedSeq,
       ownerLastReadSeq = dialog.ownerLastReadSeq,
