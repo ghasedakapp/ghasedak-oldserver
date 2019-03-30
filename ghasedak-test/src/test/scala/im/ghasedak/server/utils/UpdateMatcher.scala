@@ -4,7 +4,7 @@ import java.util.concurrent._
 
 import akka.NotUsed
 import akka.actor.ActorRef
-import akka.stream.scaladsl.{ BroadcastHub, Flow, Keep, Sink, Source }
+import akka.stream.scaladsl.{ BroadcastHub, Keep, Sink, Source }
 import akka.stream.testkit.scaladsl.TestSink
 import akka.stream.{ ActorMaterializer, OverflowStrategy }
 import com.google.protobuf.ByteString
@@ -18,13 +18,13 @@ import scala.concurrent.duration._
 trait UpdateMatcher {
   this: GrpcBaseSuit ⇒
 
-  private type Update = ApiUpdateContainer.Update
+  private type Update = UpdateContainer.Update
 
-  private type UpdateClass = Class[_ <: ApiUpdateContainer.Update]
+  private type UpdateClass = Class[_ <: UpdateContainer.Update]
 
   private val sleepForUpdates = 3000
 
-  private val defaultSeqState = ApiSeqState(-1, ByteString.copyFrom(MessageId.earliest.bytes))
+  private val defaultSeqState = SeqState(-1, ByteString.copyFrom(MessageId.earliest.bytes))
 
   private def getAckActorStream: (ActorRef, Source[StreamingRequestGetDifference, NotUsed]) = {
     Source.actorRef[StreamingRequestGetDifference](8, OverflowStrategy.fail)
@@ -32,7 +32,7 @@ trait UpdateMatcher {
       .run()
   }
 
-  def expectStreamUpdate(clazz: UpdateClass, seqState: ApiSeqState = defaultSeqState)(f: Update ⇒ Unit = _ ⇒ ())(implicit testUser: TestUser): Unit = {
+  def expectStreamUpdate(clazz: UpdateClass, seqState: SeqState = defaultSeqState)(f: Update ⇒ Unit = _ ⇒ ())(implicit testUser: TestUser): Unit = {
     val localMat = ActorMaterializer()
     val (ackRef, source) = getAckActorStream
 
@@ -55,12 +55,12 @@ trait UpdateMatcher {
     localMat.shutdown()
   }
 
-  def seek(seqState: ApiSeqState)(implicit testUser: TestUser): Unit = {
+  def seek(seqState: SeqState)(implicit testUser: TestUser): Unit = {
     val stub = updateStub.seek().addHeader(tokenMetadataKey, testUser.token)
     stub.invoke(RequestSeek(Some(seqState))).futureValue
   }
 
-  def expectNUpdate(batchSize: Int = 1)(n: Int, seqState: ApiSeqState = defaultSeqState, ack: Boolean = true)(implicit testUser: TestUser): Seq[ApiSeqState] = {
+  def expectNUpdate(batchSize: Int = 1)(n: Int, seqState: SeqState = defaultSeqState, ack: Boolean = true)(implicit testUser: TestUser): Seq[SeqState] = {
     val stub = updateStub.getDifference().addHeader(tokenMetadataKey, testUser.token)
     val ackStub = updateStub.acknowledge().addHeader(tokenMetadataKey, testUser.token)
     val result = (1 to n) flatMap (_ ⇒ stub.invoke(
@@ -77,7 +77,7 @@ trait UpdateMatcher {
     result.size shouldBe 0
   }
 
-  def expectStreamNUpdate(n: Int, ack: Boolean = true)(implicit testUser: TestUser): Seq[ApiSeqState] = {
+  def expectStreamNUpdate(n: Int, ack: Boolean = true)(implicit testUser: TestUser): Seq[SeqState] = {
     val localMat = ActorMaterializer()
     val (ackRef, source) = getAckActorStream
     Thread.sleep(1000)
@@ -100,7 +100,7 @@ trait UpdateMatcher {
     res.flatMap(_.receivedUpdates.flatMap(_.messageId))
   }
 
-  def expectStreamNoUpdate(seqState: ApiSeqState = defaultSeqState)(implicit testUser: TestUser): Unit = {
+  def expectStreamNoUpdate(seqState: SeqState = defaultSeqState)(implicit testUser: TestUser): Unit = {
     val localMat = ActorMaterializer()
     val stub = updateStub.streamingGetDifference().addHeader(tokenMetadataKey, testUser.token)
     val src = stub.invoke(Source.single(StreamingRequestGetDifference(Some(seqState))))
@@ -111,7 +111,7 @@ trait UpdateMatcher {
     localMat.shutdown()
   }
 
-  def expectStreamOrderUpdate(orderOfUpdates: Seq[Update], seqState: ApiSeqState = defaultSeqState)(implicit testUser: TestUser): Unit = {
+  def expectStreamOrderUpdate(orderOfUpdates: Seq[Update], seqState: SeqState = defaultSeqState)(implicit testUser: TestUser): Unit = {
     val localMat = ActorMaterializer()
     val latch = new CountDownLatch(orderOfUpdates.length)
     val stub = updateStub.streamingGetDifference().addHeader(tokenMetadataKey, testUser.token)

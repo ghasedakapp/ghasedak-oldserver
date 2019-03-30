@@ -13,7 +13,7 @@ final class UserPhoneTable(tag: Tag) extends Table[UserPhone](tag, "user_phones"
   def number = column[Long]("number")
   def title = column[String]("title")
 
-  def * = (id, userId, number, title) <> (UserPhone.tupled, UserPhone.unapply)
+  def * = (id, userId, orgId, number, title) <> (UserPhone.tupled, UserPhone.unapply)
 }
 
 object UserPhoneRepo {
@@ -38,8 +38,8 @@ object UserPhoneRepo {
   def findByUserId(userId: Int): FixedSqlStreamingAction[Seq[UserPhone], UserPhone, Read] =
     phones.filter(_.userId === userId).result
 
-  def create(id: Int, userId: Int, number: Long, title: String): FixedSqlAction[Int, NoStream, Write] =
-    phones += UserPhone(id, userId, number, title)
+  def create(id: Int, userId: Int, orgId: Int, number: Long, title: String): FixedSqlAction[Int, NoStream, Write] =
+    phones += UserPhone(id, userId, orgId, number, title)
 
   def create(phone: UserPhone): FixedSqlAction[Int, NoStream, Write] =
     phones += phone

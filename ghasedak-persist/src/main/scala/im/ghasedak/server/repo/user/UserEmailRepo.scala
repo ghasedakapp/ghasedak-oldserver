@@ -9,10 +9,11 @@ import slick.sql.{ FixedSqlAction, FixedSqlStreamingAction, SqlAction }
 final class UserEmailTable(tag: Tag) extends Table[UserEmail](tag, "user_emails") {
   def userId = column[Int]("user_id", O.PrimaryKey)
   def id = column[Int]("id", O.PrimaryKey)
+  def orgId = column[Int]("org_id")
   def email = column[String]("email")
   def title = column[String]("title")
 
-  def * = (id, userId, email, title) <> (UserEmail.tupled, UserEmail.unapply)
+  def * = (id, userId, orgId, email, title) <> (UserEmail.tupled, UserEmail.unapply)
 }
 
 object UserEmailRepo {
@@ -44,6 +45,6 @@ object UserEmailRepo {
   def findByUserIds(userIds: Set[Int]): FixedSqlStreamingAction[Seq[UserEmail], UserEmail, Read] =
     emails.filter(_.userId inSet userIds).result
 
-  def create(id: Int, userId: Int, email: String, title: String): FixedSqlAction[Int, NoStream, Write] =
-    emails += UserEmail(id, userId, email.toLowerCase, title)
+  def create(id: Int, userId: Int, orgId: Int, email: String, title: String): FixedSqlAction[Int, NoStream, Write] =
+    emails += UserEmail(id, userId, orgId, email.toLowerCase, title)
 }

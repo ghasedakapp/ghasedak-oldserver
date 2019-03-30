@@ -15,6 +15,7 @@ import im.ghasedak.server.repo.user.{ UserPhoneRepo, UserRepo }
 import im.ghasedak.server.rpc.auth.{ AuthRpcErrors, AuthServiceImpl }
 import im.ghasedak.server.rpc.common.CommonRpcErrors
 import im.ghasedak.server.update.SeqUpdateExtension
+import im.ghasedak.server.user.UserUtils
 import im.ghasedak.server.utils.CodeGen.genPhoneCode
 import im.ghasedak.server.utils.StringUtils._
 import im.ghasedak.server.utils.number.IdUtils._
@@ -102,12 +103,13 @@ trait AuthServiceHelper {
             tokenId, LocalDateTime.now(ZoneOffset.UTC))
           _ ← fromDBIO(AuthSessionRepo.create(authSession))
           _ ← fromDBIO(AuthTransactionRepo.delete(transaction.transactionHash))
-          //          contactsRecord ← fromDBIO(UserUtils.getUserContactsRecord(user.id))
+          contactsRecord ← fromDBIO(UserUtils.getUserContactsRecord(user.id))
           apiUser = UserProfile(
             user = Some(User(
               user.id,
               Some(UserData(
-                name = user.name)))))
+                name = user.name)))),
+            contactInfo = contactsRecord)
         } yield Some(Auth(token, Some(apiUser)))
     }
   }
@@ -127,6 +129,7 @@ trait AuthServiceHelper {
       userPhone = UserPhone(
         id = nextIntId(),
         userId = user.id,
+        transaction.orgId,
         number = phone,
         title = "Mobile Phone")
       _ ← fromDBIO(UserPhoneRepo.create(userPhone))

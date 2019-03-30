@@ -17,6 +17,7 @@ CREATE UNIQUE INDEX idx_users_nickname ON users (nickname);
 CREATE TABLE user_emails (
        id int NOT NULL,
        user_id int NOT NULL,
+       org_id  INT NOT NULL,
        email varchar(255) NOT NULL,
        title varchar(255) NOT NULL,
        PRIMARY KEY (id)

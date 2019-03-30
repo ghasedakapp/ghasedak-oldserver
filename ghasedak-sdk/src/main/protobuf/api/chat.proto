@@ -9,9 +9,9 @@ import "google/protobuf/wrappers.proto";
 import "api/file.proto";
 
 enum ChatType {
-    UNKNOWN = 0;
-    PRIVATE = 1;
-    GROUP = 2;
+    CHATTYPE_UNKNOWN = 0;
+    CHATTYPE_PRIVATE = 1;
+    CHATTYPE_GROUP = 2;
 }
 
 // Member information
