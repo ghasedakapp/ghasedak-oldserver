@@ -1,10 +1,11 @@
 package im.ghasedak.server.repo.contact
 
+import com.github.tminglei.slickpg.ExPostgresProfile
 import com.github.tminglei.slickpg.ExPostgresProfile.api._
 import im.ghasedak.server.model.contact.UserPhoneContact
 import slick.dbio.Effect
 import slick.lifted.Tag
-import slick.sql.{ FixedSqlAction, FixedSqlStreamingAction }
+import slick.sql.{ FixedSqlAction, FixedSqlStreamingAction, SqlAction }
 import im.ghasedak.server.repo.TypeMapper._
 import im.ghasedak.server.repo.contact.UserEmailContactRepo.econtacts
 
@@ -20,10 +21,13 @@ object UserPhoneContactRepo {
   val pcontacts = TableQuery[UserPhoneContactTable]
 
   private def findByPhone(orgId: Int, number: Long) =
-    pcontacts.filter(c ⇒ c.phoneNumber === number && c.inherited.orgId === orgId)
+    pcontacts.filter(c ⇒ c.phoneNumber === number && c.orgId === orgId)
 
-  def find(orgId: Int, number: Long): FixedSqlStreamingAction[Seq[UserPhoneContact], UserPhoneContact, Effect.Read] =
-    findByPhone(orgId, number).result
+  def exist(orgId: Int, number: Long): FixedSqlAction[Boolean, ExPostgresProfile.api.NoStream, Effect.Read] =
+    findByPhone(orgId, number).exists.result
+
+  def find(orgId: Int, number: Long): SqlAction[Option[UserPhoneContact], NoStream, Effect.Read] =
+    findByPhone(orgId, number).result.headOption
 
   def findContactUserId(orgId: Int, number: Long): FixedSqlStreamingAction[Seq[Int], Int, Effect.Read] =
     findByPhone(orgId, number).map(_.contactUserId).result

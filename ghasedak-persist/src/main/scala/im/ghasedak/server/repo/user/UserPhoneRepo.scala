@@ -4,7 +4,7 @@ import com.github.tminglei.slickpg.ExPostgresProfile
 import im.ghasedak.server.model.user.UserPhone
 import slick.dbio.Effect.{ Read, Write }
 import com.github.tminglei.slickpg.ExPostgresProfile.api._
-import slick.sql.{ FixedSqlAction, FixedSqlStreamingAction }
+import slick.sql.{ FixedSqlAction, FixedSqlStreamingAction, SqlAction }
 
 final class UserPhoneTable(tag: Tag) extends Table[UserPhone](tag, "user_phones") {
   def userId = column[Int]("user_id", O.PrimaryKey)
@@ -19,9 +19,8 @@ final class UserPhoneTable(tag: Tag) extends Table[UserPhone](tag, "user_phones"
 object UserPhoneRepo {
   val phones = TableQuery[UserPhoneTable]
 
-  private val byPhoneNumber = Compiled { (number: Rep[Long], orgId: Rep[Int]) ⇒
+  private def byPhoneNumber(number: Rep[Long], orgId: Rep[Int]) =
     phones.filter(p ⇒ p.number === number && p.orgId === orgId)
-  }
 
   private val phoneExists = Compiled { number: Rep[Long] ⇒
     phones.filter(_.number === number).exists
@@ -29,8 +28,11 @@ object UserPhoneRepo {
 
   def exists(number: Long): FixedSqlAction[Boolean, ExPostgresProfile.api.NoStream, Read] = phoneExists(number).result
 
-  // TODO: rename to findByNumber
-  def findByPhoneNumber(number: Long, orgId: Int): FixedSqlStreamingAction[Seq[UserPhone], UserPhone, Read] = byPhoneNumber(number, orgId).result
+  def findUserIdByNumber(orgId: Int, number: Long): SqlAction[Option[Int], NoStream, Read] =
+    byPhoneNumber(number, orgId).map(_.userId).result.headOption
+
+  def findByNumber(orgId: Int, number: Long): SqlAction[Option[UserPhone], NoStream, Read] =
+    byPhoneNumber(number, orgId).result.headOption
 
   def findByNumbers(numbers: Set[Long], orgId: Int): FixedSqlStreamingAction[Seq[UserPhone], UserPhone, Read] =
     phones.filter(_.number inSet numbers).filter(_.orgId === orgId).result

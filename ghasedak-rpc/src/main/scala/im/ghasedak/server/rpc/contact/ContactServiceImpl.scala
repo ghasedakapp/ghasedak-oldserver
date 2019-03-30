@@ -47,36 +47,43 @@ final class ContactServiceImpl(implicit system: ActorSystem) extends ContactServ
         name ← fromDBIO(UserRepo.find(clientData.orgId, contactUserId).map(_.map(_.name)))
         localName ← fromOption(CommonRpcErrors.InvalidName)(validName(request.localName.getOrElse(name.get)))
         _ ← fromBoolean(ContactRpcErrors.CantAddSelf)(clientData.userId != contactUserId)
-        optExistContact ← fromDBIO(UserContactRepo.find(clientData.userId, contactUserId))
-        //        _ ← fromBoolean(ContactRpcErrors.ContactAlreadyExists) {
-        //          val contact = optExistContact.getOrElse(UserContactModel(clientData.userId, contactUserId,clientData.orgId, Some(localName), None))
-        //          !((contact.hasEmail && contact.hasEmail == contactRecord.contact.isEmail) ||
-        //            (contact.hasPhone && contact.hasPhone == contactRecord.contact.isPhoneNumber))
-        //        }
         // fixme: use UserProcessor actor for concurrency problem
         _ ← if (contactRecord.`type` == CONTACTTYPE_PHONE)
-          fromDBIO(UserPhoneContactRepo.insertOrUpdate(
-            UserPhoneContact(
-              phoneNumber = contactRecord.getLongValue,
-              clientData.userId,
-              contactUserId,
-              clientData.orgId,
-              Some(localName),
-              None)))
+          addPhoneContact(UserPhoneContact(
+            phoneNumber = contactRecord.getLongValue,
+            clientData.userId,
+            contactUserId,
+            clientData.orgId,
+            Some(localName),
+            None))
         else if (contactRecord.`type` == CONTACTTYPE_EMAIL)
-          fromDBIO(UserEmailContactRepo.insertOrUpdate(
+          addEmailContact(
             UserEmailContact(
               email = contactRecord.getStringValue,
               clientData.userId,
               contactUserId,
               clientData.orgId,
               Some(localName),
-              None)))
+              None))
         else throw ContactRpcErrors.InvalidContactRecord
       } yield ResponseAddContact(contactUserId)
       val result = db.run(action.value)
       result
     }
+  }
+
+  private def addPhoneContact(phone: UserPhoneContact) = {
+    for {
+      _ ← fromDBIOBoolean(ContactRpcErrors.ContactAlreadyExists)(UserPhoneContactRepo.exist(phone.orgId, phone.phoneNumber).map(!_))
+      r ← fromDBIO(UserPhoneContactRepo.insertOrUpdate(phone))
+    } yield r
+  }
+
+  private def addEmailContact(email: UserEmailContact) = {
+    for {
+      _ ← fromDBIOBoolean(ContactRpcErrors.ContactAlreadyExists)(UserEmailContactRepo.exist(email.orgId, email.email).map(!_))
+      r ← fromDBIO(UserEmailContactRepo.insertOrUpdate(email))
+    } yield r
   }
 
   override def removeContact(request: RequestRemoveContact, metadata: Metadata): Future[ResponseVoid] = {

@@ -1,6 +1,7 @@
 CREATE TABLE user_contacts (
    owner_user_id   INT          NOT NULL,
    contact_user_id INT          NOT NULL,
+   org_id  INT NOT NULL,
    local_name      VARCHAR(255) NOT NULL,
    deleted_at   TIMESTAMP,
    PRIMARY KEY (owner_user_id, contact_user_id)

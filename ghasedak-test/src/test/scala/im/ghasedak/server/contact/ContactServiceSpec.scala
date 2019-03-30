@@ -1,6 +1,7 @@
 package im.ghasedak.server.contact
 
-import im.ghasedak.api.contact.ApiContactRecord
+import im.ghasedak.api.user.ContactRecord
+import im.ghasedak.api.user.ContactType.CONTACTTYPE_PHONE
 import im.ghasedak.rpc.contact.{ RequestAddContact, RequestGetContacts, RequestRemoveContact }
 import im.ghasedak.rpc.user.RequestLoadUsers
 import im.ghasedak.server.GrpcBaseSuit
@@ -36,7 +37,7 @@ class ContactServiceSpec extends GrpcBaseSuit {
     val stub = contactStub.addContact.addHeader(tokenMetadataKey, user1.token)
     val request = RequestAddContact(
       localName = Some(Random.alphanumeric.take(20).mkString),
-      Some(ApiContactRecord().withPhoneNumber(user2.phoneNumber.get)))
+      Some(ContactRecord().withType(CONTACTTYPE_PHONE).withLongValue(user2.phoneNumber.get)))
     val response = stub.invoke(request).futureValue
     response.contactUserId shouldEqual user2.userId
   }
@@ -50,7 +51,7 @@ class ContactServiceSpec extends GrpcBaseSuit {
         ex.getStatus.getCode shouldEqual Code.INVALID_ARGUMENT
         ex.getStatus.getDescription shouldEqual "INVALID_CONTACT_RECORD"
     }
-    val request2 = RequestAddContact(Some(Random.alphanumeric.take(20).mkString), Some(ApiContactRecord()))
+    val request2 = RequestAddContact(Some(Random.alphanumeric.take(20).mkString), Some(ContactRecord()))
     stub.invoke(request2).failed.futureValue match {
       case ex: StatusRuntimeException ⇒
         ex.getStatus.getCode shouldEqual Code.INVALID_ARGUMENT
@@ -63,7 +64,7 @@ class ContactServiceSpec extends GrpcBaseSuit {
     val stub = contactStub.addContact.addHeader(tokenMetadataKey, user.token)
     val request = RequestAddContact(
       Some(Random.alphanumeric.take(20).mkString),
-      Some(ApiContactRecord().withPhoneNumber(user.phoneNumber.get)))
+      Some(ContactRecord().withType(CONTACTTYPE_PHONE).withLongValue(user.phoneNumber.get)))
     stub.invoke(request).failed.futureValue match {
       case ex: StatusRuntimeException ⇒
         ex.getStatus.getCode shouldEqual Code.FAILED_PRECONDITION
@@ -77,7 +78,7 @@ class ContactServiceSpec extends GrpcBaseSuit {
     val stub = contactStub.addContact.addHeader(tokenMetadataKey, user1.token)
     val request = RequestAddContact(
       localName = Some(Random.alphanumeric.take(20).mkString),
-      Some(ApiContactRecord().withPhoneNumber(user2.phoneNumber.get)))
+      Some(ContactRecord().withType(CONTACTTYPE_PHONE).withLongValue(user2.phoneNumber.get)))
     stub.invoke(request).futureValue
     stub.invoke(request).failed.futureValue match {
       case ex: StatusRuntimeException ⇒
@@ -91,7 +92,7 @@ class ContactServiceSpec extends GrpcBaseSuit {
     val stub = contactStub.addContact.addHeader(tokenMetadataKey, user.token)
     val request = RequestAddContact(
       Some(Random.alphanumeric.take(20).mkString),
-      Some(ApiContactRecord().withPhoneNumber(generatePhoneNumber())))
+      Some(ContactRecord().withType(CONTACTTYPE_PHONE).withLongValue(generatePhoneNumber())))
     stub.invoke(request).failed.futureValue match {
       case ex: StatusRuntimeException ⇒
         ex.getStatus.getCode shouldEqual Code.NOT_FOUND
@@ -108,7 +109,7 @@ class ContactServiceSpec extends GrpcBaseSuit {
     contacts foreach { contact ⇒
       val request = RequestAddContact(
         localName = Some(Random.alphanumeric.take(20).mkString),
-        Some(ApiContactRecord().withPhoneNumber(contact.phoneNumber.get)))
+        Some(ContactRecord().withType(CONTACTTYPE_PHONE).withLongValue(contact.phoneNumber.get)))
       stub.invoke(request).futureValue
     }
     val request = RequestGetContacts()
@@ -124,7 +125,7 @@ class ContactServiceSpec extends GrpcBaseSuit {
     val removeContactStub = contactStub.removeContact().addHeader(tokenMetadataKey, user1.token)
     val request = RequestAddContact(
       localName = Some(Random.alphanumeric.take(20).mkString),
-      Some(ApiContactRecord().withPhoneNumber(user2.phoneNumber.get)))
+      Some(ContactRecord().withType(CONTACTTYPE_PHONE).withLongValue(user2.phoneNumber.get)))
     addContactStub.invoke(request).futureValue
     getContactStub.invoke(RequestGetContacts()).futureValue.contactUserIds.contains(user2.userId) shouldEqual true
     removeContactStub.invoke(RequestRemoveContact(user2.userId)).futureValue
@@ -138,12 +139,12 @@ class ContactServiceSpec extends GrpcBaseSuit {
     val uStub = userStub.loadUsers.addHeader(tokenMetadataKey, user1.token)
     val request = RequestAddContact(
       localName = None,
-      Some(ApiContactRecord().withPhoneNumber(user2.phoneNumber.get)))
+      Some(ContactRecord().withType(CONTACTTYPE_PHONE).withLongValue(user2.phoneNumber.get)))
     val response = stub.invoke(request).futureValue
     response.contactUserId shouldEqual user2.userId
 
-    val name = db.run(UserRepo.find(user2.userId)).futureValue.get.name
-    uStub.invoke(RequestLoadUsers(Seq(response.contactUserId))).futureValue.users.head.localName shouldEqual name
+    val name = db.run(UserRepo.find(officialApiKeys.head.orgId, user2.userId)).futureValue.get.name
+    uStub.invoke(RequestLoadUsers(Seq(response.contactUserId))).futureValue.users.head.data.get.name shouldEqual name
   }
 
 }

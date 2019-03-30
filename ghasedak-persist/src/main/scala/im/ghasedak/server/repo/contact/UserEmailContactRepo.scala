@@ -1,5 +1,6 @@
 package im.ghasedak.server.repo.contact
 
+import com.github.tminglei.slickpg.ExPostgresProfile
 import com.github.tminglei.slickpg.ExPostgresProfile.api._
 import im.ghasedak.server.model.contact.{ UserEmailContact, UserPhoneContact }
 import slick.dbio.Effect
@@ -20,7 +21,10 @@ object UserEmailContactRepo {
   val econtacts = TableQuery[UserEmailContactTable]
 
   private def findByEmail(orgId: Int, email: String) =
-    econtacts.filter(c ⇒ c.email === email && c.inherited.orgId === orgId)
+    econtacts.filter(c ⇒ c.email === email && c.orgId === orgId)
+
+  def exist(orgId: Int, email: String): FixedSqlAction[Boolean, ExPostgresProfile.api.NoStream, Effect.Read] =
+    findByEmail(orgId, email).exists.result
 
   def find(orgId: Int, email: String): FixedSqlStreamingAction[Seq[UserEmailContact], UserEmailContact, Effect.Read] =
     findByEmail(orgId, email).result

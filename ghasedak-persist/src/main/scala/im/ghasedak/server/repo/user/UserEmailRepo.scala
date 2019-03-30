@@ -19,19 +19,18 @@ final class UserEmailTable(tag: Tag) extends Table[UserEmail](tag, "user_emails"
 object UserEmailRepo {
   val emails = TableQuery[UserEmailTable]
 
-  val byEmail = Compiled { email: Rep[String] ⇒
+  private def byEmail(orgId: Int, email: Rep[String]) =
     emails.filter(_.email === email)
-  }
 
   val emailExists = Compiled { email: Rep[String] ⇒
     emails.filter(_.email === email).exists
   }
 
-  def findByEmails(emailSet: Set[String]): FixedSqlStreamingAction[Seq[UserEmail], UserEmail, Read] =
-    emails.filter(_.email inSet emailSet).result
+  def findUserId(orgId: Int, email: String): SqlAction[Option[Int], NoStream, Read] =
+    byEmail(orgId, email).map(_.userId).result.headOption
 
-  def find(email: String): SqlAction[Option[UserEmail], NoStream, Read] =
-    byEmail(email).result.headOption
+  def find(orgId: Int, email: String): SqlAction[Option[UserEmail], NoStream, Read] =
+    byEmail(orgId, email).result.headOption
 
   def findByDomain(domain: String): FixedSqlStreamingAction[Seq[UserEmail], UserEmail, Read] =
     emails.filter(_.email.like(s"%@$domain")).result
