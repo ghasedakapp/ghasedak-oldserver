@@ -10,16 +10,19 @@ import slick.dbio.Effect.Write
 import slick.lifted.Tag
 import slick.sql.{ FixedSqlAction, FixedSqlStreamingAction, SqlAction }
 
+import scala.concurrent.ExecutionContext
+
 abstract class UserContactBase[T](tag: Tag, tname: String) extends Table[T](tag, tname) {
   def ownerUserId = column[Int]("owner_user_id", O.PrimaryKey)
   def contactUserId = column[Int]("contact_user_id", O.PrimaryKey)
+  def orgId = column[Int]("org_id", O.PrimaryKey)
   def localName = column[Option[String]]("local_name")
   def deletedAt = column[Option[LocalDateTime]]("deleted_at")
 
 }
 
 final class UserContactTable(tag: Tag) extends UserContactBase[UserContactModel](tag, "user_contacts") {
-  def * = (ownerUserId, contactUserId, localName, deletedAt) <> (UserContactModel.tupled, UserContactModel.unapply)
+  def * = (ownerUserId, contactUserId, orgId, localName, deletedAt) <> (UserContactModel.tupled, UserContactModel.unapply)
 }
 
 object UserContactRepo {
@@ -69,7 +72,7 @@ object UserContactRepo {
   def findNotDeletedIds(ownerUserId: Int) =
     byOwnerUserIdNotDeleted(ownerUserId).map(_.contactUserId).result
 
-  def findName(ownerUserId: Int, contactUserId: Int): DBIOAction[Option[String], NoStream, Effect.Read] =
+  def findName(ownerUserId: Int, contactUserId: Int)(implicit ec: ExecutionContext): DBIOAction[Option[String], NoStream, Effect.Read] =
     nameByPKNotDeletedC((ownerUserId, contactUserId)).result.map(_.headOption.flatten)
 
   def findContactIdsAll(ownerUserId: Int) =

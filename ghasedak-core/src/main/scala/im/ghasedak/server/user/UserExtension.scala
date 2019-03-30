@@ -3,16 +3,11 @@ package im.ghasedak.server.user
 import java.time.{ Instant, LocalDateTime, ZoneOffset }
 
 import akka.actor._
-import cats.syntax.flatMap
-import im.ghasedak.api.contact.ContactRecord
 import im.ghasedak.api.messaging.MessageContent
-import im.ghasedak.api.user.User
 import im.ghasedak.rpc.messaging.ResponseSendMessage
 import im.ghasedak.rpc.misc.ResponseVoid
 import im.ghasedak.server.db.DbExtension
-import im.ghasedak.server.repo.contact.{ UserContactRepo, UserPhoneContactRepo }
 import im.ghasedak.server.repo.dialog.DialogRepo
-import im.ghasedak.server.repo.user.UserRepo
 import slick.jdbc.PostgresProfile
 
 import scala.concurrent.{ ExecutionContext, Future }

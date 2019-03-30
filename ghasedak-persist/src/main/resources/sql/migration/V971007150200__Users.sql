@@ -28,6 +28,7 @@ CREATE INDEX idx_user_emails_user_id ON user_emails (user_id);
 CREATE TABLE user_phones (
   id int NOT NULL,
   user_id int NOT NULL,
+  org_id  INT NOT NULL,
   number bigint NOT NULL,
   title varchar(64) NOT NULL,
   PRIMARY KEY (user_id, id)

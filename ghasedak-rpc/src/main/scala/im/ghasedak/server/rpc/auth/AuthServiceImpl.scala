@@ -11,7 +11,7 @@ import im.ghasedak.rpc.misc.ResponseVoid
 import im.ghasedak.server.db.DbExtension
 import im.ghasedak.server.model.auth.AuthPhoneTransaction
 import im.ghasedak.server.repo.auth._
-import im.ghasedak.server.repo.user.UserAuthRepo
+import im.ghasedak.server.repo.user.UserPhoneRepo
 import im.ghasedak.server.rpc._
 import im.ghasedak.server.rpc.auth.helper._
 import im.ghasedak.server.utils.concurrent.DBIOResult
@@ -38,7 +38,7 @@ final class AuthServiceImpl(implicit val system: ActorSystem) extends AuthServic
       optApiKey ← getApiKey(request.apiKey)
       apiKey ← fromOption(AuthRpcErrors.InvalidApiKey)(optApiKey)
       normalizedPhone ← fromOption(AuthRpcErrors.InvalidPhoneNumber)(normalizeLong(request.phoneNumber).headOption)
-      optUserAuth ← fromDBIO(UserAuthRepo.findByPhoneNumberAndOrgId(normalizedPhone, apiKey.orgId))
+      optUserAuth ← fromDBIO(UserPhoneRepo.findByPhoneNumber(normalizedPhone, apiKey.orgId).headOption)
       // todo: fix this (delete account)
       _ ← optUserAuth map (ua ⇒ forbidDeletedUser(ua.userId)) getOrElse point(())
       optAuthTransaction ← fromDBIO(AuthPhoneTransactionRepo.findByPhoneNumberAndOrgId(normalizedPhone, apiKey.orgId))
@@ -70,8 +70,8 @@ final class AuthServiceImpl(implicit val system: ActorSystem) extends AuthServic
         case apt: AuthPhoneTransaction ⇒
           for {
             // todo: fix this (delete account)
-            optUserAuth ← fromDBIO(UserAuthRepo.findByPhoneNumberAndOrgId(apt.phoneNumber, transaction.orgId))
-            optApiAuth ← getOptApiAuth(apt, optUserAuth)
+            optUserPhone ← fromDBIO(UserPhoneRepo.findByPhoneNumber(apt.phoneNumber, transaction.orgId).headOption)
+            optApiAuth ← getOptApiAuth(apt, optUserPhone.map(_.userId))
           } yield optApiAuth
       }
       // todo: make it async and retryable

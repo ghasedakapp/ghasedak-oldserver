@@ -3,10 +3,12 @@ package im.ghasedak.server.rpc.contact
 import akka.actor.ActorSystem
 import akka.event.{ Logging, LoggingAdapter }
 import akka.grpc.scaladsl.Metadata
+import im.ghasedak.api.user.ContactType.{ CONTACTTYPE_EMAIL, CONTACTTYPE_PHONE }
 import im.ghasedak.rpc.contact._
 import im.ghasedak.rpc.misc.ResponseVoid
 import im.ghasedak.server.db.DbExtension
-import im.ghasedak.server.repo.contact.UserContactRepo
+import im.ghasedak.server.model.contact.{ UserEmailContact, UserPhoneContact }
+import im.ghasedak.server.repo.contact.{ UserContactRepo, UserEmailContactRepo, UserPhoneContactRepo }
 import im.ghasedak.server.repo.user.UserRepo
 import im.ghasedak.server.rpc.auth.helper.AuthTokenHelper
 import im.ghasedak.server.rpc.common.CommonRpcErrors
@@ -42,22 +44,34 @@ final class ContactServiceImpl(implicit system: ActorSystem) extends ContactServ
       val action: Result[ResponseAddContact] = for {
         contactRecord ← fromOption(ContactRpcErrors.InvalidContactRecord)(request.contactRecord)
         contactUserId ← getContactRecordUserId(contactRecord, clientData.orgId)
-        name ← fromDBIO(UserRepo.find(contactUserId).map(_.map(_.name)))
+        name ← fromDBIO(UserRepo.find(clientData.orgId, contactUserId).map(_.map(_.name)))
         localName ← fromOption(CommonRpcErrors.InvalidName)(validName(request.localName.getOrElse(name.get)))
         _ ← fromBoolean(ContactRpcErrors.CantAddSelf)(clientData.userId != contactUserId)
         optExistContact ← fromDBIO(UserContactRepo.find(clientData.userId, contactUserId))
-        _ ← fromBoolean(ContactRpcErrors.ContactAlreadyExists) {
-          val contact = optExistContact.getOrElse(UserContact(clientData.userId, contactUserId, localName))
-          !((contact.hasEmail && contact.hasEmail == contactRecord.contact.isEmail) ||
-            (contact.hasPhone && contact.hasPhone == contactRecord.contact.isPhoneNumber))
-        }
+        //        _ ← fromBoolean(ContactRpcErrors.ContactAlreadyExists) {
+        //          val contact = optExistContact.getOrElse(UserContactModel(clientData.userId, contactUserId,clientData.orgId, Some(localName), None))
+        //          !((contact.hasEmail && contact.hasEmail == contactRecord.contact.isEmail) ||
+        //            (contact.hasPhone && contact.hasPhone == contactRecord.contact.isPhoneNumber))
+        //        }
         // fixme: use UserProcessor actor for concurrency problem
-        _ ← if (contactRecord.contact.isPhoneNumber)
-          fromDBIO(UserContactRepo.insertOrUpdate(
-            UserContact(clientData.userId, contactUserId, localName, hasPhone = true, hasEmail = optExistContact.exists(_.hasEmail))))
-        else if (contactRecord.contact.isEmail)
-          fromDBIO(UserContactRepo.insertOrUpdate(
-            UserContact(clientData.userId, contactUserId, localName, hasEmail = true, hasPhone = optExistContact.exists(_.hasPhone))))
+        _ ← if (contactRecord.`type` == CONTACTTYPE_PHONE)
+          fromDBIO(UserPhoneContactRepo.insertOrUpdate(
+            UserPhoneContact(
+              phoneNumber = contactRecord.getLongValue,
+              clientData.userId,
+              contactUserId,
+              clientData.orgId,
+              Some(localName),
+              None)))
+        else if (contactRecord.`type` == CONTACTTYPE_EMAIL)
+          fromDBIO(UserEmailContactRepo.insertOrUpdate(
+            UserEmailContact(
+              email = contactRecord.getStringValue,
+              clientData.userId,
+              contactUserId,
+              clientData.orgId,
+              Some(localName),
+              None)))
         else throw ContactRpcErrors.InvalidContactRecord
       } yield ResponseAddContact(contactUserId)
       val result = db.run(action.value)
