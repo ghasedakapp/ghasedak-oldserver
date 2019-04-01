@@ -11,7 +11,7 @@ import scala.concurrent.Future
 trait UserServiceHelper {
   this: UserServiceImpl ⇒
 
-  protected def getUsers(clientOrgId: Int, clientUserId: Int, userIds: Set[Int]): Future[Set[UserProfile]] =
+  protected def getUsers(clientOrgId: Int, clientUserId: Int, userIds: Seq[Int]): Future[Seq[UserProfile]] =
     Future.sequence(userIds.map(uid ⇒ getUser(clientOrgId, clientUserId, uid))).map(_.flatten)
 
   protected def getUser(clientOrgId: Int, clientUserId: Int, userId: Int): Future[Option[UserProfile]] = {

@@ -49,15 +49,18 @@ final class ContactServiceImpl(implicit system: ActorSystem) extends ContactServ
         _ ← fromBoolean(ContactRpcErrors.CantAddSelf)(clientData.userId != contactUserId)
         // fixme: use UserProcessor actor for concurrency problem
         _ ← if (contactRecord.`type` == CONTACTTYPE_PHONE)
-          addPhoneContact(UserPhoneContact(
-            phoneNumber = contactRecord.getLongValue,
+          addPhoneContact(
             clientData.userId,
-            contactUserId,
-            clientData.orgId,
-            Some(localName),
-            None))
+            UserPhoneContact(
+              phoneNumber = contactRecord.getLongValue,
+              clientData.userId,
+              contactUserId,
+              clientData.orgId,
+              Some(localName),
+              None))
         else if (contactRecord.`type` == CONTACTTYPE_EMAIL)
           addEmailContact(
+            clientData.userId,
             UserEmailContact(
               email = contactRecord.getStringValue,
               clientData.userId,

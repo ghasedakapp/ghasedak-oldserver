@@ -33,7 +33,7 @@ final class UserServiceImpl(implicit system: ActorSystem) extends UserServicePow
       val action: Result[ResponseLoadUsers] = for {
         // todo: config
         _ ← fromBoolean(CommonRpcErrors.CollectionSizeLimitExceed)(request.userIds.size <= 20)
-        users ← fromFuture(getUsers(clientData.orgId, clientData.userId, request.userIds.toSet))
+        users ← fromFuture(getUsers(clientData.orgId, clientData.userId, request.userIds.distinct))
       } yield ResponseLoadUsers(users.toSeq)
       action.value
     }

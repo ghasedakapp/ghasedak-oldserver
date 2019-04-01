@@ -21,16 +21,16 @@ trait ContactServiceHelper {
     } yield userId
   }
 
-  protected def addPhoneContact(phone: UserPhoneContact) = {
+  protected def addPhoneContact(clientUserId: Int, phone: UserPhoneContact) = {
     for {
-      _ ← fromDBIOBoolean(ContactRpcErrors.ContactAlreadyExists)(UserPhoneContactRepo.exist(phone.orgId, phone.phoneNumber).map(!_))
+      _ ← fromDBIOBoolean(ContactRpcErrors.ContactAlreadyExists)(UserPhoneContactRepo.exist(phone.orgId, clientUserId, phone.phoneNumber).map(!_))
       r ← fromDBIO(UserPhoneContactRepo.insertOrUpdate(phone))
     } yield r
   }
 
-  protected def addEmailContact(email: UserEmailContact) = {
+  protected def addEmailContact(clientUserId: Int, email: UserEmailContact) = {
     for {
-      _ ← fromDBIOBoolean(ContactRpcErrors.ContactAlreadyExists)(UserEmailContactRepo.exist(email.orgId, email.email).map(!_))
+      _ ← fromDBIOBoolean(ContactRpcErrors.ContactAlreadyExists)(UserEmailContactRepo.exist(email.orgId, clientUserId, email.email).map(!_))
       r ← fromDBIO(UserEmailContactRepo.insertOrUpdate(email))
     } yield r
   }

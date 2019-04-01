@@ -23,8 +23,8 @@ object UserEmailContactRepo {
   private def findByEmail(orgId: Int, email: String) =
     econtacts.filter(c ⇒ c.email === email && c.orgId === orgId)
 
-  def exist(orgId: Int, email: String): FixedSqlAction[Boolean, ExPostgresProfile.api.NoStream, Effect.Read] =
-    findByEmail(orgId, email).exists.result
+  def exist(orgId: Int, ownerId: Int, email: String): FixedSqlAction[Boolean, ExPostgresProfile.api.NoStream, Effect.Read] =
+    econtacts.filter(c ⇒ c.email === email && c.orgId === orgId && c.ownerUserId === ownerId).exists.result
 
   def find(orgId: Int, email: String): FixedSqlStreamingAction[Seq[UserEmailContact], UserEmailContact, Effect.Read] =
     findByEmail(orgId, email).result

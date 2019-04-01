@@ -144,7 +144,7 @@ class ContactServiceSpec extends GrpcBaseSuit {
     response.contactUserId shouldEqual user2.userId
 
     val name = db.run(UserRepo.find(officialApiKeys.head.orgId, user2.userId)).futureValue.get.name
-    uStub.invoke(RequestLoadUsers(Seq(response.contactUserId))).futureValue.users.head.data.get.name shouldEqual name
+    uStub.invoke(RequestLoadUsers(Seq(response.contactUserId))).futureValue.profiles.head.user.get.data.get.name shouldEqual name
   }
 
 }

@@ -23,8 +23,8 @@ object UserPhoneContactRepo {
   private def findByPhone(orgId: Int, number: Long) =
     pcontacts.filter(c ⇒ c.phoneNumber === number && c.orgId === orgId)
 
-  def exist(orgId: Int, number: Long): FixedSqlAction[Boolean, ExPostgresProfile.api.NoStream, Effect.Read] =
-    findByPhone(orgId, number).exists.result
+  def exist(orgId: Int, ownerId: Int, number: Long): FixedSqlAction[Boolean, ExPostgresProfile.api.NoStream, Effect.Read] =
+    pcontacts.filter(c ⇒ c.phoneNumber === number && c.orgId === orgId && c.ownerUserId === ownerId).exists.result
 
   def find(orgId: Int, number: Long): SqlAction[Option[UserPhoneContact], NoStream, Effect.Read] =
     findByPhone(orgId, number).result.headOption
