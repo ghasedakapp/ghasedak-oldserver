@@ -8,7 +8,7 @@ import im.ghasedak.rpc.contact._
 import im.ghasedak.rpc.misc.ResponseVoid
 import im.ghasedak.server.db.DbExtension
 import im.ghasedak.server.model.contact.{ UserEmailContact, UserPhoneContact }
-import im.ghasedak.server.repo.contact.{ UserContactRepo, UserEmailContactRepo, UserPhoneContactRepo }
+import im.ghasedak.server.repo.contact.UserContactRepo
 import im.ghasedak.server.repo.user.UserRepo
 import im.ghasedak.server.rpc.auth.helper.AuthTokenHelper
 import im.ghasedak.server.rpc.common.CommonRpcErrors
@@ -70,20 +70,6 @@ final class ContactServiceImpl(implicit system: ActorSystem) extends ContactServ
       val result = db.run(action.value)
       result
     }
-  }
-
-  private def addPhoneContact(phone: UserPhoneContact) = {
-    for {
-      _ ← fromDBIOBoolean(ContactRpcErrors.ContactAlreadyExists)(UserPhoneContactRepo.exist(phone.orgId, phone.phoneNumber).map(!_))
-      r ← fromDBIO(UserPhoneContactRepo.insertOrUpdate(phone))
-    } yield r
-  }
-
-  private def addEmailContact(email: UserEmailContact) = {
-    for {
-      _ ← fromDBIOBoolean(ContactRpcErrors.ContactAlreadyExists)(UserEmailContactRepo.exist(email.orgId, email.email).map(!_))
-      r ← fromDBIO(UserEmailContactRepo.insertOrUpdate(email))
-    } yield r
   }
 
   override def removeContact(request: RequestRemoveContact, metadata: Metadata): Future[ResponseVoid] = {
