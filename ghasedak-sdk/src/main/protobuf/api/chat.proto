@@ -6,6 +6,7 @@ option java_package = "im.ghasedak.api.chat";
 option java_multiple_files = true;
 
 import "google/protobuf/wrappers.proto";
+import "google/protobuf/timestamp.proto";
 import "api/file.proto";
 
 enum ChatType {
@@ -24,16 +25,18 @@ message Member {
     int32 inviter_uid = 2;
 
     // Adding date
-    int64 date = 3;
+    google.protobuf.Timestamp date = 3;
+
+    bool is_admin = 4;
 }
 
 // Group information
 message Chat {
     // Chat id
-    int32 id = 1;
+    int64 id = 1;
 
-    // Chat Type. Used only for displaying information.
-    ChatType group_type = 2;
+    // Type of chat. Private/Group etc
+    int32 chat_type = 2;
 
     // Title of chat
     string title = 3;
@@ -45,13 +48,13 @@ message Chat {
     google.protobuf.Int32Value members_amount = 5;
 
     // Chat creator
-    int32 creator_uid = 6;
+    int32 creator_user_id = 6;
 
     // Members of chat
     repeated Member members = 7;
 
     // Date of creation
-    int64 create_date = 8;
+    google.protobuf.Timestamp created_at = 8;
 
     // About of chat
     google.protobuf.StringValue about = 9;

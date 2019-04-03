@@ -1,6 +1,6 @@
 package im.ghasedak.server.update
 
-import im.ghasedak.api.update.{ ApiUpdateContainer, UpdatePong }
+import im.ghasedak.api.update.{ UpdateContainer, UpdatePong }
 import im.ghasedak.rpc.test.RequestSendUpdate
 import im.ghasedak.server.GrpcBaseSuit
 
@@ -28,7 +28,7 @@ class GetDifferenceSpec extends GrpcBaseSuit {
     val user = createUserWithPhone()
     val stub = testStub.sendUpdate().addHeader(tokenMetadataKey, user.token)
 
-    val orderOfUpdates1 = Seq.fill(n)(ApiUpdateContainer().withPong(UpdatePong(Random.nextInt())))
+    val orderOfUpdates1 = Seq.fill(n)(UpdateContainer().withPong(UpdatePong(Random.nextInt())))
     orderOfUpdates1 foreach { update ⇒
       stub.invoke(RequestSendUpdate(Some(update))).futureValue
     }
@@ -43,7 +43,7 @@ class GetDifferenceSpec extends GrpcBaseSuit {
     val user = createUserWithPhone()
     val stub = testStub.sendUpdate().addHeader(tokenMetadataKey, user.token)
 
-    val orderOfUpdates1 = Seq.fill(n)(ApiUpdateContainer().withPong(UpdatePong(Random.nextInt())))
+    val orderOfUpdates1 = Seq.fill(n)(UpdateContainer().withPong(UpdatePong(Random.nextInt())))
     orderOfUpdates1 foreach { update ⇒
       stub.invoke(RequestSendUpdate(Some(update))).futureValue
     }
@@ -58,7 +58,7 @@ class GetDifferenceSpec extends GrpcBaseSuit {
     val user = createUserWithPhone()
     val stub = testStub.sendUpdate().addHeader(tokenMetadataKey, user.token)
 
-    val orderOfUpdates1 = Seq.fill(n)(ApiUpdateContainer().withPong(UpdatePong(Random.nextInt())))
+    val orderOfUpdates1 = Seq.fill(n)(UpdateContainer().withPong(UpdatePong(Random.nextInt())))
     orderOfUpdates1 foreach { update ⇒
       stub.invoke(RequestSendUpdate(Some(update))).futureValue
     }

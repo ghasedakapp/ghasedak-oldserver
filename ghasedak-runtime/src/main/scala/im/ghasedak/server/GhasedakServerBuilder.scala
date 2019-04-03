@@ -7,6 +7,7 @@ import akka.http.scaladsl.model.{ HttpRequest, HttpResponse }
 import akka.stream.{ ActorMaterializer, Materializer }
 import com.typesafe.config.Config
 import im.ghasedak.rpc.auth.AuthServiceHandler
+import im.ghasedak.rpc.chat.ChatServiceHandler
 import im.ghasedak.rpc.contact.ContactServiceHandler
 import im.ghasedak.rpc.messaging.MessagingServiceHandler
 import im.ghasedak.rpc.test.TestServiceHandler
@@ -14,6 +15,7 @@ import im.ghasedak.rpc.update.UpdateServiceHandler
 import im.ghasedak.rpc.user.UserServiceHandler
 import im.ghasedak.server.frontend.Frontend
 import im.ghasedak.server.rpc.auth.AuthServiceImpl
+import im.ghasedak.server.rpc.chat.ChatServiceImpl
 import im.ghasedak.server.rpc.contact.ContactServiceImpl
 import im.ghasedak.server.rpc.messaging.MessagingServiceImpl
 import im.ghasedak.server.rpc.test.TestServiceImpl
@@ -52,6 +54,8 @@ object ServiceDescriptors {
       AuthServiceHandler.partial(new AuthServiceImpl)
     val messagingService: PartialFunction[HttpRequest, Future[HttpResponse]] =
       MessagingServiceHandler.partial(new MessagingServiceImpl)
+    val chatService: PartialFunction[HttpRequest, Future[HttpResponse]] =
+      ChatServiceHandler.partial(new ChatServiceImpl)
     val contactService: PartialFunction[HttpRequest, Future[HttpResponse]] =
       ContactServiceHandler.partial(new ContactServiceImpl)
     val userService: PartialFunction[HttpRequest, Future[HttpResponse]] =
@@ -63,6 +67,7 @@ object ServiceDescriptors {
       testService,
       authService,
       messagingService,
+      chatService,
       contactService,
       userService,
       updateService)

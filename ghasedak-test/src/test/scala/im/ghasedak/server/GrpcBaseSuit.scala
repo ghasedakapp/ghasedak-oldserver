@@ -4,9 +4,11 @@ import java.net.ServerSocket
 
 import akka.actor.ActorSystem
 import akka.grpc.GrpcClientSettings
+import akka.grpc.scaladsl.SingleResponseRequestBuilder
 import akka.stream.ActorMaterializer
 import com.typesafe.config._
 import im.ghasedak.rpc.auth._
+import im.ghasedak.rpc.chat.{ ChatServiceClient, ChatServiceClientPowerApi }
 import im.ghasedak.rpc.contact._
 import im.ghasedak.rpc.messaging._
 import im.ghasedak.rpc.test._
@@ -96,11 +98,29 @@ abstract class GrpcBaseSuit extends FlatSpec
 
   protected val messagingStub: MessagingServiceClientPowerApi = MessagingServiceClient(GrpcClientSettings.fromConfig("ghasedak"))
 
+  protected val chatStub: ChatServiceClientPowerApi = ChatServiceClient(GrpcClientSettings.fromConfig("ghasedak"))
+
   protected val contactStub: ContactServiceClientPowerApi = ContactServiceClient(GrpcClientSettings.fromConfig("ghasedak"))
 
   protected val userStub: UserServiceClientPowerApi = UserServiceClient(GrpcClientSettings.fromConfig("ghasedak"))
 
   protected val updateStub: UpdateServiceClientPowerApi = UpdateServiceClient(GrpcClientSettings.fromConfig("ghasedak"))
+
+  protected def sendMessageStub(token: String) = {
+    messagingStub.sendMessage().addHeader(tokenMetadataKey, token)
+  }
+
+  protected def loadHistoryStub(token: String) = {
+    messagingStub.loadHistory().addHeader(tokenMetadataKey, token)
+  }
+
+  protected def loadDialogsStub(token: String) = {
+    messagingStub.loadDialogs().addHeader(tokenMetadataKey, token)
+  }
+
+  protected def createChatStub(token: String) = {
+    chatStub.createChat().addHeader(tokenMetadataKey, token)
+  }
 
   override def afterAll(): Unit = {
     super.afterAll()

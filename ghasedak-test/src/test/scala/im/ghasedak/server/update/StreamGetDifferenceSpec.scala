@@ -1,7 +1,7 @@
 package im.ghasedak.server.update
 
-import im.ghasedak.api.update.ApiUpdateContainer.Update.Pong
-import im.ghasedak.api.update.{ ApiUpdateContainer, UpdatePong }
+import im.ghasedak.api.update.UpdateContainer.Update.Pong
+import im.ghasedak.api.update.{ UpdateContainer, UpdatePong }
 import im.ghasedak.rpc.test.RequestSendUpdate
 import im.ghasedak.server.GrpcBaseSuit
 
@@ -19,7 +19,7 @@ class StreamGetDifferenceSpec extends GrpcBaseSuit {
     val user = createUserWithPhone()
     val stub = testStub.sendUpdate().addHeader(tokenMetadataKey, user.token)
 
-    stub.invoke(RequestSendUpdate(Some(ApiUpdateContainer().withPong(UpdatePong())))).futureValue
+    stub.invoke(RequestSendUpdate(Some(UpdateContainer().withPong(UpdatePong())))).futureValue
 
     {
       implicit val testUser: TestUser = user
@@ -31,7 +31,7 @@ class StreamGetDifferenceSpec extends GrpcBaseSuit {
     val user = createUserWithPhone()
     val stub = testStub.sendUpdate().addHeader(tokenMetadataKey, user.token)
 
-    val orderOfUpdates = Seq.fill(n)(ApiUpdateContainer().withPong(UpdatePong(Random.nextInt())))
+    val orderOfUpdates = Seq.fill(n)(UpdateContainer().withPong(UpdatePong(Random.nextInt())))
     orderOfUpdates foreach { update ⇒
       stub.invoke(RequestSendUpdate(Some(update))).futureValue
     }
@@ -46,7 +46,7 @@ class StreamGetDifferenceSpec extends GrpcBaseSuit {
     val user = createUserWithPhone()
     val stub2 = testStub.sendUpdate().addHeader(tokenMetadataKey, user.token)
 
-    val orderOfUpdates1 = Seq.fill(n)(ApiUpdateContainer().withPong(UpdatePong(Random.nextInt())))
+    val orderOfUpdates1 = Seq.fill(n)(UpdateContainer().withPong(UpdatePong(Random.nextInt())))
     orderOfUpdates1 foreach { update ⇒
       stub2.invoke(RequestSendUpdate(Some(update))).futureValue
     }
@@ -58,7 +58,7 @@ class StreamGetDifferenceSpec extends GrpcBaseSuit {
 
     Thread.sleep(1000)
 
-    val orderOfUpdates2 = Seq.fill(n)(ApiUpdateContainer().withPong(UpdatePong(Random.nextInt())))
+    val orderOfUpdates2 = Seq.fill(n)(UpdateContainer().withPong(UpdatePong(Random.nextInt())))
     orderOfUpdates2 foreach { update ⇒
       stub2.invoke(RequestSendUpdate(Some(update))).futureValue
     }
@@ -73,7 +73,7 @@ class StreamGetDifferenceSpec extends GrpcBaseSuit {
     val user = createUserWithPhone()
     val stub = testStub.sendUpdate().addHeader(tokenMetadataKey, user.token)
 
-    val orderOfUpdates = Seq.fill(n)(ApiUpdateContainer().withPong(UpdatePong(Random.nextInt())))
+    val orderOfUpdates = Seq.fill(n)(UpdateContainer().withPong(UpdatePong(Random.nextInt())))
     orderOfUpdates foreach { update ⇒
       stub.invoke(RequestSendUpdate(Some(update))).futureValue
     }
@@ -88,7 +88,7 @@ class StreamGetDifferenceSpec extends GrpcBaseSuit {
     val user = createUserWithPhone()
     val stub2 = testStub.sendUpdate().addHeader(tokenMetadataKey, user.token)
 
-    val orderOfUpdates1 = Seq.fill(n)(ApiUpdateContainer().withPong(UpdatePong(Random.nextInt())))
+    val orderOfUpdates1 = Seq.fill(n)(UpdateContainer().withPong(UpdatePong(Random.nextInt())))
     orderOfUpdates1 foreach { update ⇒
       stub2.invoke(RequestSendUpdate(Some(update))).futureValue
     }
@@ -104,7 +104,7 @@ class StreamGetDifferenceSpec extends GrpcBaseSuit {
     val user = createUserWithPhone()
     val stub2 = testStub.sendUpdate().addHeader(tokenMetadataKey, user.token)
 
-    val orderOfUpdates1 = Seq.fill(n)(ApiUpdateContainer().withPong(UpdatePong(Random.nextInt())))
+    val orderOfUpdates1 = Seq.fill(n)(UpdateContainer().withPong(UpdatePong(Random.nextInt())))
     orderOfUpdates1 foreach { update ⇒
       stub2.invoke(RequestSendUpdate(Some(update))).futureValue
     }
@@ -128,7 +128,7 @@ class StreamGetDifferenceSpec extends GrpcBaseSuit {
     val user = createUserWithPhone()
     val stub = testStub.sendUpdate().addHeader(tokenMetadataKey, user.token)
 
-    val orderOfUpdates1 = Seq.fill(n)(ApiUpdateContainer().withPong(UpdatePong(Random.nextInt())))
+    val orderOfUpdates1 = Seq.fill(n)(UpdateContainer().withPong(UpdatePong(Random.nextInt())))
     orderOfUpdates1 foreach { update ⇒
       stub.invoke(RequestSendUpdate(Some(update))).futureValue
     }
