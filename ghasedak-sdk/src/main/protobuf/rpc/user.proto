@@ -17,5 +17,5 @@ message RequestLoadUsers {
 }
 
 message ResponseLoadUsers {
-    repeated im.ghasedak.api.ApiUser users = 1;
+    repeated im.ghasedak.api.UserProfile profiles = 1;
 }

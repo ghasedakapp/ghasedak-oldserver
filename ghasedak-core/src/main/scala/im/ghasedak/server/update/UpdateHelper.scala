@@ -2,20 +2,20 @@ package im.ghasedak.server.update
 
 import com.google.protobuf.ByteString
 import com.sksamuel.pulsar4s._
-import im.ghasedak.api.update.ApiSeqState
-import im.ghasedak.rpc.update.{ ApiReceivedUpdate, ResponseGetDifference }
+import im.ghasedak.api.update.SeqState
+import im.ghasedak.rpc.update.{ ReceivedUpdate, ResponseGetDifference }
 import org.apache.pulsar.client.impl.MessageIdImpl
 
 trait UpdateHelper {
   def getUserUpdateTopic(userId: Int): Topic = Topic(s"user_update_$userId")
 
-  def getApiSeqState(messageId: MessageId): ApiSeqState = {
+  def getApiSeqState(messageId: MessageId): SeqState = {
     val state = MessageIdImpl.fromByteArray(messageId.bytes).asInstanceOf[MessageIdImpl]
     val seq = state.getEntryId
-    ApiSeqState(seq.toInt, ByteString.copyFrom(state.toByteArray))
+    SeqState(seq.toInt, ByteString.copyFrom(state.toByteArray))
   }
 
-  def getMessageId(seqState: ApiSeqState): MessageId = {
+  def getMessageId(seqState: SeqState): MessageId = {
     MessageId.fromJava(MessageIdImpl.fromByteArray(seqState.state.toByteArray))
   }
 
@@ -31,6 +31,6 @@ trait UpdateHelper {
       updateMapping.custom(tokenId)
     else
       updateMapping.default.get
-    ResponseGetDifference(Seq(ApiReceivedUpdate(Some(seqState), Some(updateContainer))))
+    ResponseGetDifference(Seq(ReceivedUpdate(Some(seqState), Some(updateContainer))))
   }
 }

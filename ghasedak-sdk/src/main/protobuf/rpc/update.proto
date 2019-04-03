@@ -28,9 +28,9 @@ message RequestGetDifference {
     int32 max_messages = 2;
 }
 
-message ApiReceivedUpdate {
-    im.ghasedak.api.ApiSeqState message_id = 1;
-    im.ghasedak.api.ApiUpdateContainer update_container = 2;
+message ReceivedUpdate {
+    im.ghasedak.api.SeqState message_id = 1;
+    im.ghasedak.api.UpdateContainer update_container = 2;
 }
 
 message ResponseGetDifference {
@@ -38,14 +38,14 @@ message ResponseGetDifference {
     // there are no more available in the backlog. The Pub/Sub system may return
     // fewer than the maxMessages requested even if there are more updates
     // available in the backlog.
-    repeated ApiReceivedUpdate received_updates = 1;
+    repeated ReceivedUpdate received_updates = 1;
 }
 
 // Request for the Acknowledge method.
 message RequestAcknowledge {
     // The acknowledgment ID for the messages being acknowledged that was returned
     // by the Pub/Sub system in the `RequestGetDifference` response. Must not be empty.
-    im.ghasedak.api.ApiSeqState ack_id = 1;
+    im.ghasedak.api.SeqState ack_id = 1;
 }
 
 // Establishes a stream with the server, which sends update down to the
@@ -61,14 +61,14 @@ message StreamingRequestGetDifference {
     // the corresponding message may be redelivered later. Acknowledging a message
     // more than once will not result in an error. If the acknowledgement ID is
     // malformed, the stream will be aborted with status `INVALID_ARGUMENT`.
-    im.ghasedak.api.ApiSeqState ack_id = 1;
+    im.ghasedak.api.SeqState ack_id = 1;
 }
 
 message StreamingResponseGetDifference {
     // Received updates. This will not be empty.
-    repeated ApiReceivedUpdate received_updates = 1;
+    repeated ReceivedUpdate received_updates = 1;
 }
 
 message RequestSeek {
-    im.ghasedak.api.ApiSeqState message_id = 1;
+    im.ghasedak.api.SeqState message_id = 1;
 }

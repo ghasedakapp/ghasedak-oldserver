@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+package im.ghasedak.api;
+
+option java_package = "im.ghasedak.api.chat";
+option java_multiple_files = true;
+
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/timestamp.proto";
+import "api/file.proto";
+
+enum ChatType {
+    CHATTYPE_UNKNOWN = 0;
+    CHATTYPE_PRIVATE = 1;
+    CHATTYPE_GROUP = 2;
+}
+
+// Member information
+message Member {
+
+    // User id
+    int32 uid = 1;
+
+    // User inviter id
+    int32 inviter_uid = 2;
+
+    // Adding date
+    google.protobuf.Timestamp date = 3;
+
+    bool is_admin = 4;
+}
+
+// Group information
+message Chat {
+    // Chat id
+    int64 id = 1;
+
+    // Type of chat. Private/Group etc
+    int32 chat_type = 2;
+
+    // Title of chat
+    string title = 3;
+
+    // Avatar of chat
+    Avatar avatar = 4;
+
+    // Number of members
+    google.protobuf.Int32Value members_amount = 5;
+
+    // Chat creator
+    int32 creator_user_id = 6;
+
+    // Members of chat
+    repeated Member members = 7;
+
+    // Date of creation
+    google.protobuf.Timestamp created_at = 8;
+
+    // About of chat
+    google.protobuf.StringValue about = 9;
+
+    // Chat nick name
+    google.protobuf.StringValue nick = 10;
+}

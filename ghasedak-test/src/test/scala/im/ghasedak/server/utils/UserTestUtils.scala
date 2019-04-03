@@ -64,10 +64,10 @@ trait UserTestUtils {
     val tokenId = JWT.decode(token).getClaim("tokenId").asString()
 
     TestClientData(
-      response3.getApiAuth.getUser.id,
+      response3.getApiAuth.getUser.user.get.id,
       tokenId,
       token,
-      Some(response3.getApiAuth.getUser.contactsRecord.head.getPhoneNumber),
+      Some(response3.getApiAuth.user.get.contactInfo.head.getLongValue),
       Some(name))
   }
 

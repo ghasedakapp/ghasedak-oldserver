@@ -2,9 +2,9 @@ package im.ghasedak.server.repo.history
 
 import java.time.{ LocalDateTime, ZoneId }
 
-import im.ghasedak.api.peer.{ ApiPeer, ApiPeerType }
+import im.ghasedak.api.messaging.{ HistoryMessage, MessageContent }
+import im.ghasedak.server.model.TimeConversions._
 import im.ghasedak.server.repo.TypeMapper._
-import im.ghasedak.server.model.history.HistoryMessage
 import slick.dbio.Effect.{ Read, Write }
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.Tag
@@ -12,11 +12,7 @@ import slick.sql.{ FixedSqlAction, FixedSqlStreamingAction, SqlAction }
 
 final class HistoryMessageTable(tag: Tag) extends Table[HistoryMessage](tag, "history_messages") {
 
-  def userId = column[Int]("user_id", O.PrimaryKey)
-
-  def peerType = column[Int]("peer_type", O.PrimaryKey)
-
-  def peerId = column[Int]("peer_id", O.PrimaryKey)
+  def chatId = column[Long]("chat_id", O.PrimaryKey)
 
   def date = column[LocalDateTime]("date", O.PrimaryKey)
 
@@ -28,28 +24,37 @@ final class HistoryMessageTable(tag: Tag) extends Table[HistoryMessage](tag, "hi
 
   def messageContentData = column[Array[Byte]]("message_content_data")
 
+  def editedAt = column[Option[LocalDateTime]]("edited_at")
+
   def deletedAt = column[Option[LocalDateTime]]("deleted_at")
 
-  def * = (userId, peerType, peerId, date, senderUserId, sequenceNr, messageContentHeader, messageContentData, deletedAt) <>
+  def * = (chatId, date, senderUserId, sequenceNr, messageContentHeader, messageContentData, editedAt, deletedAt) <>
     (applyHistoryMessage.tupled, unapplyHistoryMessage)
 
-  private def applyHistoryMessage: (Int, Int, Int, LocalDateTime, Int, Int, Int, Array[Byte], Option[LocalDateTime]) ⇒ HistoryMessage = {
-    case (userId, peerType, peerId, date, senderUserId, sequenceNr, messageContentHeader, messageContentData, deletedAt) ⇒
+  private def applyHistoryMessage: (Long, LocalDateTime, Int, Int, Int, Array[Byte], Option[LocalDateTime], Option[LocalDateTime]) ⇒ HistoryMessage = {
+    case (chatId, date, senderUserId, sequenceNr, messageContentHeader, messageContentData, editedAt, deletedAt) ⇒
       HistoryMessage(
-        userId = userId,
-        peer = ApiPeer(ApiPeerType.fromValue(peerType), peerId),
-        date = date,
-        senderUserId = senderUserId,
+        chatId = chatId,
         sequenceNr = sequenceNr,
-        messageContentHeader = messageContentHeader,
-        messageContentData = messageContentData,
+        date = Some(date),
+        senderUserId = senderUserId,
+        message = Some(MessageContent.parseFrom(messageContentData)),
+        editedAt = editedAt,
         deletedAt = deletedAt)
   }
 
-  private def unapplyHistoryMessage: HistoryMessage ⇒ Option[(Int, Int, Int, LocalDateTime, Int, Int, Int, Array[Byte], Option[LocalDateTime])] = { historyMessage ⇒
+  private def unapplyHistoryMessage: HistoryMessage ⇒ Option[(Long, LocalDateTime, Int, Int, Int, Array[Byte], Option[LocalDateTime], Option[LocalDateTime])] = { historyMessage ⇒
     HistoryMessage.unapply(historyMessage) map {
-      case (userId, peer, date, senderUserId, sequenceNr, messageContentHeader, messageContentData, deletedAt) ⇒
-        (userId, peer.`type`.value, peer.id, date, senderUserId, sequenceNr, messageContentHeader, messageContentData, deletedAt)
+      case (chatId, sequenceNr, date, senderUserId, message, _, _, _, editedAt, deletedAt, _) ⇒
+        (
+          chatId,
+          date.get,
+          senderUserId,
+          sequenceNr,
+          message.get.body.number,
+          message.get.toByteArray,
+          editedAt,
+          deletedAt)
     }
   }
 
@@ -66,9 +71,9 @@ object HistoryMessageRepo {
 
   val withoutServiceMessages = notDeletedMessages.filter(_.messageContentHeader =!= 2)
 
-  def byUserIdPeer(userId: Rep[Int], peerType: Rep[Int], peerId: Rep[Int]): Query[HistoryMessageTable, HistoryMessage, Seq] =
+  def byChatId(chatId: Rep[Long]): Query[HistoryMessageTable, HistoryMessage, Seq] =
     notDeletedMessages
-      .filter(m ⇒ m.userId === userId && m.peerType === peerType && m.peerId === peerId)
+      .filter(m ⇒ m.chatId === chatId)
 
   def create(message: HistoryMessage): FixedSqlAction[Int, NoStream, Write] =
     messagesC += message
@@ -76,12 +81,10 @@ object HistoryMessageRepo {
   def create(newMessages: Seq[HistoryMessage]): FixedSqlAction[Option[Int], NoStream, Write] =
     messagesC ++= newMessages
 
-  def find(userId: Int, peer: ApiPeer, dateOpt: Option[LocalDateTime], limit: Int): FixedSqlStreamingAction[Seq[HistoryMessage], HistoryMessage, Read] = {
+  def find(chatId: Long, dateOpt: Option[LocalDateTime], limit: Int): FixedSqlStreamingAction[Seq[HistoryMessage], HistoryMessage, Read] = {
     val baseQuery = notDeletedMessages
       .filter(m ⇒
-        m.userId === userId &&
-          m.peerType === peer.`type`.value &&
-          m.peerId === peer.id)
+        m.chatId === chatId)
 
     val query = dateOpt match {
       case Some(date) ⇒
@@ -93,104 +96,85 @@ object HistoryMessageRepo {
     query.take(limit).result
   }
 
-  private val afterC = Compiled { (userId: Rep[Int], peerType: Rep[Int], peerId: Rep[Int], seq: Rep[Int], limit: ConstColumn[Long]) ⇒
-    byUserIdPeer(userId, peerType, peerId)
+  private val afterC = Compiled { (chatId: Rep[Long], seq: Rep[Int], limit: ConstColumn[Long]) ⇒
+    byChatId(chatId)
       .filter(_.sequenceNr >= seq)
       .sortBy(_.sequenceNr.asc)
       .take(limit)
   }
 
-  def findAfter(userId: Int, peer: ApiPeer, seq: Int, limit: Long): FixedSqlStreamingAction[Seq[HistoryMessage], HistoryMessage, Read] =
-    afterC((userId, peer.`type`.value, peer.id, seq, limit)).result
+  def findAfter(chatId: Long, seq: Int, limit: Long): FixedSqlStreamingAction[Seq[HistoryMessage], HistoryMessage, Read] =
+    afterC((chatId, seq, limit)).result
 
-  private val metaAfterC = Compiled { (userId: Rep[Int], peerType: Rep[Int], peerId: Rep[Int], date: Rep[LocalDateTime], limit: ConstColumn[Long]) ⇒
-    byUserIdPeer(userId, peerType, peerId)
+  private val metaAfterC = Compiled { (chatId: Rep[Long], date: Rep[LocalDateTime], limit: ConstColumn[Long]) ⇒
+    byChatId(chatId)
       .filter(_.date > date)
       .sortBy(_.date.asc)
       .take(limit)
       .map(hm ⇒ (hm.sequenceNr, hm.date, hm.senderUserId, hm.messageContentHeader))
   }
 
-  def findMetaAfter(userId: Int, peer: ApiPeer, date: LocalDateTime, limit: Long): FixedSqlStreamingAction[Seq[(Int, LocalDateTime, Int, Int)], (Int, LocalDateTime, Int, Int), Read] =
-    metaAfterC((userId, peer.`type`.value, peer.id, date, limit)).result
+  def findMetaAfter(chatId: Long, date: LocalDateTime, limit: Long): FixedSqlStreamingAction[Seq[(Int, LocalDateTime, Int, Int)], (Int, LocalDateTime, Int, Int), Read] =
+    metaAfterC((chatId, date, limit)).result
 
-  private val beforeC = Compiled { (userId: Rep[Int], peerId: Rep[Int], peerType: Rep[Int], seq: Rep[Int], limit: ConstColumn[Long]) ⇒
-    byUserIdPeer(userId, peerType, peerId)
+  private val beforeC = Compiled { (chatId: Rep[Long], seq: Rep[Int], limit: ConstColumn[Long]) ⇒
+    byChatId(chatId)
       .filter(_.sequenceNr <= seq)
       .sortBy(_.sequenceNr.desc)
       .take(limit)
   }
 
-  private val beforeExclC = Compiled { (userId: Rep[Int], peerId: Rep[Int], peerType: Rep[Int], seq: Rep[Int], limit: ConstColumn[Long]) ⇒
-    byUserIdPeer(userId, peerType, peerId)
+  private val beforeExclC = Compiled { (chatId: Rep[Long], seq: Rep[Int], limit: ConstColumn[Long]) ⇒
+    byChatId(chatId)
       .filter(_.sequenceNr < seq)
       .sortBy(_.date.asc)
       .take(limit)
   }
 
-  private val byUserIdPeerRidC = Compiled { (userId: Rep[Int], peerType: Rep[Int], peerId: Rep[Int], sequenceNr: Rep[Int]) ⇒
-    byUserIdPeer(userId, peerType, peerId).filter(_.sequenceNr === sequenceNr)
-  }
+  def findBefore(chatId: Long, seq: Int, limit: Long): FixedSqlStreamingAction[Seq[HistoryMessage], HistoryMessage, Read] =
+    beforeC((chatId, seq, limit)).result
 
-  def findBefore(userId: Int, peer: ApiPeer, seq: Int, limit: Long): FixedSqlStreamingAction[Seq[HistoryMessage], HistoryMessage, Read] =
-    beforeC((userId, peer.id, peer.`type`.value, seq, limit)).result
+  def findBydi(chatId: Long, seq: Int, limit: Long): FixedSqlStreamingAction[Seq[HistoryMessage], HistoryMessage, Read] =
+    (beforeExclC.applied((chatId, seq, limit)) ++
+      afterC.applied((chatId, seq, limit))).result
 
-  def findBydi(userId: Int, peer: ApiPeer, seq: Int, limit: Long): FixedSqlStreamingAction[Seq[HistoryMessage], HistoryMessage, Read] =
-    (beforeExclC.applied((userId, peer.`type`.value, peer.id, seq, limit)) ++
-      afterC.applied((userId, peer.`type`.value, peer.id, seq, limit))).result
+  def findBySender(senderUserId: Int, chatId: Long, sequenceNr: Int): FixedSqlStreamingAction[Seq[HistoryMessage], HistoryMessage, Read] =
+    notDeletedMessages.filter(m ⇒ m.senderUserId === senderUserId && m.chatId === chatId && m.sequenceNr === sequenceNr).result
 
-  def findBySender(senderUserId: Int, peer: ApiPeer, sequenceNr: Int): FixedSqlStreamingAction[Seq[HistoryMessage], HistoryMessage, Read] =
-    notDeletedMessages.filter(m ⇒ m.senderUserId === senderUserId && m.peerType === peer.`type`.value && m.peerId === peer.id && m.sequenceNr === sequenceNr).result
-
-  def findUserIds(peer: ApiPeer, sequenceNumbers: Set[Int]): DBIO[Seq[Int]] =
+  def findNewest(chatId: Long): SqlAction[Option[HistoryMessage], NoStream, Read] =
     notDeletedMessages
-      .filter(m ⇒ m.peerType === peer.`type`.value && m.peerId === peer.id && (m.sequenceNr inSet sequenceNumbers))
-      .map(_.userId)
-      .result
-
-  def findNewest(userId: Int, peer: ApiPeer): SqlAction[Option[HistoryMessage], NoStream, Read] =
-    notDeletedMessages
-      .filter(m ⇒ m.userId === userId && m.peerType === peer.`type`.value && m.peerId === peer.id)
+      .filter(m ⇒ m.chatId === chatId)
       .sortBy(_.date.desc)
       .take(1)
       .result
       .headOption
 
-  def find(userId: Int, peer: ApiPeer): FixedSqlStreamingAction[Seq[HistoryMessage], HistoryMessage, Read] =
+  def find(chatId: Long): FixedSqlStreamingAction[Seq[HistoryMessage], HistoryMessage, Read] =
     notDeletedMessages
-      .filter(m ⇒ m.userId === userId && m.peerType === peer.`type`.value && m.peerId === peer.id)
+      .filter(m ⇒ m.chatId === chatId)
       .sortBy(_.date.desc)
       .result
 
-  def find(userId: Int, peer: ApiPeer, sequenceNumbers: Set[Int]): FixedSqlStreamingAction[Seq[HistoryMessage], HistoryMessage, Read] =
-    notDeletedMessages.filter(m ⇒ m.userId === userId && m.peerType === peer.`type`.value && m.peerId === peer.id && (m.sequenceNr inSet sequenceNumbers)).result
+  def find(chatId: Long, sequenceNumbers: Set[Int]): FixedSqlStreamingAction[Seq[HistoryMessage], HistoryMessage, Read] =
+    notDeletedMessages.filter(m ⇒ m.chatId === chatId && (m.sequenceNr inSet sequenceNumbers)).result
 
-  def updateContentAll(userIds: Set[Int], sequenceNr: Int, peerType: ApiPeerType, peerIds: Set[Int],
-                       messageContentHeader: Int, messageContentData: Array[Byte]): FixedSqlAction[Int, NoStream, Write] =
-    notDeletedMessages
-      .filter(m ⇒ m.sequenceNr === sequenceNr && m.peerType === peerType.value)
-      .filter(_.peerId inSet peerIds)
-      .filter(_.userId inSet userIds)
-      .map(m ⇒ (m.messageContentHeader, m.messageContentData))
-      .update((messageContentHeader, messageContentData))
-
-  def getUnreadCount(historyOwner: Int, clientUserId: Int, peer: ApiPeer, lastReadAt: LocalDateTime, noServiceMessages: Boolean = false): FixedSqlAction[Int, NoStream, Read] =
+  def getUnreadCount(chatId: Long, clientUserId: Int, lastReadAt: LocalDateTime, noServiceMessages: Boolean = false): FixedSqlAction[Int, NoStream, Read] =
     (if (noServiceMessages) withoutServiceMessages else notDeletedMessages)
-      .filter(m ⇒ m.userId === historyOwner && m.peerType === peer.`type`.value && m.peerId === peer.id)
+      .filter(m ⇒ m.chatId === chatId)
       .filter(m ⇒ m.date > lastReadAt && m.senderUserId =!= clientUserId)
       .length
       .result
 
-  def deleteAll(userId: Int, peer: ApiPeer): FixedSqlAction[Int, NoStream, Write] = {
+  def deleteAll(chatId: Long): FixedSqlAction[Int, NoStream, Write] = {
     notDeletedMessages
-      .filter(m ⇒ m.userId === userId && m.peerType === peer.`type`.value && m.peerId === peer.id)
+      .filter(m ⇒ m.chatId === chatId)
       .map(_.deletedAt)
       .update(Some(LocalDateTime.now(ZoneId.systemDefault())))
   }
 
-  def delete(userId: Int, peer: ApiPeer, sequenceNumbers: Set[Int]): FixedSqlAction[Int, NoStream, Write] =
+  def delete(chatId: Long, sequenceNumbers: Set[Int]): FixedSqlAction[Int, NoStream, Write] =
     notDeletedMessages
-      .filter(m ⇒ m.userId === userId && m.peerType === peer.`type`.value && m.peerId === peer.id)
+      .filter(m ⇒ m.chatId === chatId)
       .filter(_.sequenceNr inSet sequenceNumbers)
       .map(_.deletedAt)
       .update(Some(LocalDateTime.now(ZoneId.systemDefault())))

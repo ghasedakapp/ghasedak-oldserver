@@ -13,11 +13,11 @@ import im.ghasedak.server.utils.concurrent.FutureResult
 import slick.jdbc.PostgresProfile
 
 import scala.concurrent.{ ExecutionContext, Future }
-
 final class UserServiceImpl(implicit system: ActorSystem) extends UserServicePowerApi
   with AuthTokenHelper
   with FutureResult[RpcError]
-  with RpcErrorHandler {
+  with RpcErrorHandler
+  with UserServiceHelper {
 
   // todo: use separate dispatcher for rpc handlers
   override implicit val ec: ExecutionContext = system.dispatcher
@@ -32,9 +32,9 @@ final class UserServiceImpl(implicit system: ActorSystem) extends UserServicePow
     authorize(metadata) { clientData ⇒
       val action: Result[ResponseLoadUsers] = for {
         // todo: config
-        _ ← fromBoolean(CommonRpcErrors.CollectionSizeLimitExceed)(request.userIds.size <= 100)
-        users ← fromFuture(userExt.getUsers(clientData.orgId, clientData.userId, request.userIds))
-      } yield ResponseLoadUsers(users)
+        _ ← fromBoolean(CommonRpcErrors.CollectionSizeLimitExceed)(request.userIds.size <= 20)
+        users ← fromFuture(getUsers(clientData.orgId, clientData.userId, request.userIds.distinct))
+      } yield ResponseLoadUsers(users.toSeq)
       action.value
     }
   }

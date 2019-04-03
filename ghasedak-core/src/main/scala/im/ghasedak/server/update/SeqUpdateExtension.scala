@@ -1,6 +1,5 @@
 package im.ghasedak.server.update
 
-import akka.{ Done, NotUsed }
 import akka.actor.typed.ActorRef
 import akka.actor.typed.scaladsl.adapter._
 import akka.actor.{ ActorSystem, ExtendedActorSystem, Extension, ExtensionId, ExtensionIdProvider, Scheduler }
@@ -9,14 +8,12 @@ import akka.cluster.sharding.typed.scaladsl.{ ClusterSharding, Entity, EntityRef
 import akka.stream.SourceRef
 import akka.stream.scaladsl.Source
 import akka.util.Timeout
-import com.google.protobuf.ByteString
-import com.sksamuel.pulsar4s.{ MessageId, Topic }
-import im.ghasedak.api.update.ApiSeqState
+import akka.{ Done, NotUsed }
+import im.ghasedak.api.update.SeqState
 import im.ghasedak.rpc.update.ResponseGetDifference
 import im.ghasedak.server.serializer.ActorRefConversions._
 import im.ghasedak.server.update.UpdateEnvelope.{ Acknowledge, GetDifference, Seek, StreamGetDifference, Subscribe }
 import im.ghasedak.server.update.UpdateProcessor.StopOffice
-import org.apache.pulsar.client.impl.MessageIdImpl
 
 import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
@@ -65,8 +62,8 @@ final class SeqUpdateExtensionImpl(val system: ActorSystem) extends Extension
     (entity(userId, tokenId) ? subscribeAsk) map (_ ⇒ ())
   }
 
-  private def acknowledgeAsk(seqState: Option[ApiSeqState])(r: ActorRef[Done]): Acknowledge = Acknowledge(replyTo = r, seqState)
-  def acknowledge(userId: Int, tokenId: String, seqState: Option[ApiSeqState]): Future[Unit] = {
+  private def acknowledgeAsk(seqState: Option[SeqState])(r: ActorRef[Done]): Acknowledge = Acknowledge(replyTo = r, seqState)
+  def acknowledge(userId: Int, tokenId: String, seqState: Option[SeqState]): Future[Unit] = {
     (entity(userId, tokenId) ? acknowledgeAsk(seqState)) map (_ ⇒ ())
   }
 
@@ -75,8 +72,8 @@ final class SeqUpdateExtensionImpl(val system: ActorSystem) extends Extension
     entity(userId, tokenId) ? getDiffAsk(maxMessages)
   }
 
-  private def seekAsk(messageId: Option[ApiSeqState])(r: ActorRef[Done]): Seek = Seek(replyTo = r, messageId)
-  def seek(userId: Int, tokenId: String, messageId: Option[ApiSeqState]): Future[Unit] = {
+  private def seekAsk(messageId: Option[SeqState])(r: ActorRef[Done]): Seek = Seek(replyTo = r, messageId)
+  def seek(userId: Int, tokenId: String, messageId: Option[SeqState]): Future[Unit] = {
     entity(userId, tokenId) ? seekAsk(messageId) map (_ ⇒ ())
   }
 

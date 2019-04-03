@@ -6,7 +6,7 @@ option java_package = "im.ghasedak.rpc.contact";
 option java_multiple_files = true;
 
 import "google/protobuf/wrappers.proto";
-import "api/contact.proto";
+import "api/user.proto";
 import "rpc/misc.proto";
 
 service ContactService {
@@ -25,7 +25,7 @@ message ResponseGetContacts {
 
 message RequestAddContact {
     google.protobuf.StringValue local_name = 1;
-    im.ghasedak.api.ApiContactRecord contact_record = 2;
+    im.ghasedak.api.ContactRecord contact_record = 2;
 }
 
 message ResponseAddContact {

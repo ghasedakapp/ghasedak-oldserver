@@ -1,13 +1,11 @@
 package im.ghasedak.server.model.dialog
 
-import java.time.{ LocalDateTime, ZoneId, ZoneOffset }
+import java.time.LocalDateTime
 
-import im.ghasedak.api.messaging.{ ApiDialog, ApiMessage, ApiMessageContainer }
-import im.ghasedak.api.peer.ApiPeer
-import im.ghasedak.server.model.history.HistoryMessage
-
+import im.ghasedak.api.messaging.{ Dialog, HistoryMessage }
+import im.ghasedak.server.model.TimeConversions._
 final case class DialogCommon(
-  dialogId:        String,
+  chatId:          Long,
   lastMessageDate: LocalDateTime,
   lastMessageSeq:  Int,
   lastReceivedSeq: Int,
@@ -15,14 +13,13 @@ final case class DialogCommon(
 
 final case class UserDialog(
   userId:               Int,
-  peer:                 ApiPeer,
+  chatId:               Long,
   ownerLastReceivedSeq: Int,
   ownerLastReadSeq:     Int,
   createdAt:            LocalDateTime)
 
-final case class Dialog(
-  userId:               Int,
-  peer:                 ApiPeer,
+final case class DialogModel(
+  chatId:               Long,
   ownerLastReceivedSeq: Int,
   ownerLastReadSeq:     Int,
   lastMessageSeq:       Int,
@@ -31,28 +28,22 @@ final case class Dialog(
   lastReadSeq:          Int,
   createdAt:            LocalDateTime) {
 
-  def toApi(msgOpt: Option[HistoryMessage]): ApiDialog = {
-    val history = msgOpt.getOrElse(HistoryMessage.empty(userId, peer, lastMessageDate))
-    val msgDate = lastMessageDate.toInstant(ZoneOffset.UTC).toEpochMilli
-    ApiDialog(
-      Some(peer),
+  def toApi(msgOpt: Option[HistoryMessage]): Dialog = {
+    val history = msgOpt.getOrElse(HistoryMessage().copy(chatId = chatId, date = Some(lastMessageDate)))
+    Dialog(
+      chatId,
       lastMessageSeq - ownerLastReadSeq,
-      msgDate,
-      Some(ApiMessageContainer(
-        history.senderUserId,
-        history.sequenceNr,
-        msgDate,
-        Some(ApiMessage.parseFrom(history.messageContentData)))))
+      Some(lastMessageDate),
+      Some(history))
   }
 
 }
 
-object Dialog {
+object DialogModel {
 
-  def from(common: DialogCommon, dialog: UserDialog): Dialog =
-    Dialog(
-      userId = dialog.userId,
-      peer = dialog.peer,
+  def from(common: DialogCommon, dialog: UserDialog): DialogModel =
+    DialogModel(
+      chatId = dialog.chatId,
       ownerLastReceivedSeq = dialog.ownerLastReceivedSeq,
       ownerLastReadSeq = dialog.ownerLastReadSeq,
       lastMessageDate = common.lastMessageDate,

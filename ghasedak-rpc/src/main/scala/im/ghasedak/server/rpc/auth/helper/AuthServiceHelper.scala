@@ -4,14 +4,14 @@ import java.time.temporal.ChronoUnit
 import java.time.{ LocalDateTime, ZoneOffset }
 
 import com.auth0.jwt.JWT
-import im.ghasedak.api.auth.ApiAuth
-import im.ghasedak.api.user.ApiUser
+import im.ghasedak.api.auth.Auth
+import im.ghasedak.api.user.{ User, UserData, UserProfile }
 import im.ghasedak.server.model.auth.{ AuthPhoneTransaction, AuthSession, AuthTransactionBase }
 import im.ghasedak.server.model.org.ApiKey
-import im.ghasedak.server.model.user.{ User, UserAuth }
+import im.ghasedak.server.model.user.{ UserModel, UserPhone }
 import im.ghasedak.server.repo.auth.{ AuthSessionRepo, AuthTransactionRepo, GateAuthCodeRepo }
 import im.ghasedak.server.repo.org.ApiKeyRepo
-import im.ghasedak.server.repo.user.{ UserAuthRepo, UserRepo }
+import im.ghasedak.server.repo.user.{ UserPhoneRepo, UserRepo }
 import im.ghasedak.server.rpc.auth.{ AuthRpcErrors, AuthServiceImpl }
 import im.ghasedak.server.rpc.common.CommonRpcErrors
 import im.ghasedak.server.update.SeqUpdateExtension
@@ -88,12 +88,12 @@ trait AuthServiceHelper {
     } yield ()
   }
 
-  protected def getOptApiAuth(transaction: AuthTransactionBase, optUserAuth: Option[UserAuth]): Result[Option[ApiAuth]] = {
-    optUserAuth match {
+  protected def getOptApiAuth(transaction: AuthTransactionBase, optUserId: Option[Int]): Result[Option[Auth]] = {
+    optUserId match {
       case None ⇒ point(None)
-      case Some(userAuth) ⇒
+      case Some(userId) ⇒
         for {
-          userOpt ← fromDBIO(UserRepo.find(userAuth.userId))
+          userOpt ← fromDBIO(UserRepo.find(transaction.orgId, userId))
           // todo: fix this (delete account)
           user = userOpt.get
           generatedToken ← fromFuture(generateToken(user.id, transaction.orgId))
@@ -104,37 +104,43 @@ trait AuthServiceHelper {
           _ ← fromDBIO(AuthSessionRepo.create(authSession))
           _ ← fromDBIO(AuthTransactionRepo.delete(transaction.transactionHash))
           contactsRecord ← fromDBIO(UserUtils.getUserContactsRecord(user.id))
-          apiUser = ApiUser(user.id, user.name, user.name, user.about, contactsRecord)
-        } yield Some(ApiAuth(token, Some(apiUser)))
+          apiUser = UserProfile(
+            user = Some(User(
+              user.id,
+              Some(UserData(
+                name = user.name)))),
+            contactInfo = contactsRecord)
+        } yield Some(Auth(token, Some(apiUser)))
     }
   }
 
-  protected def newUserPhoneSignUp(transaction: AuthPhoneTransaction, name: String): Result[Option[ApiAuth]] = {
+  protected def newUserPhoneSignUp(transaction: AuthPhoneTransaction, name: String): Result[Option[Auth]] = {
     val phone = transaction.phoneNumber
     for {
       phoneAndCode ← fromOption(AuthRpcErrors.InvalidPhoneNumber)(normalizeWithCountry(phone).headOption)
       (_, countryCode) = phoneAndCode
       validName ← fromOption(CommonRpcErrors.InvalidName)(validName(name))
-      user = User(
+      user = UserModel(
         id = nextIntId(),
         orgId = transaction.orgId,
         name = validName,
         createdAt = LocalDateTime.now(ZoneOffset.UTC))
       _ ← fromDBIO(UserRepo.create(user))
-      userAuth = UserAuth(
-        orgId = transaction.orgId,
+      userPhone = UserPhone(
+        id = nextIntId(),
         userId = user.id,
-        phoneNumber = Some(phone),
-        countryCode = Some(countryCode))
-      _ ← fromDBIO(UserAuthRepo.create(userAuth))
-      optApiAuth ← getOptApiAuth(transaction, Some(userAuth))
+        transaction.orgId,
+        number = phone,
+        title = "Mobile Phone")
+      _ ← fromDBIO(UserPhoneRepo.create(userPhone))
+      optApiAuth ← getOptApiAuth(transaction, Some(user.id))
     } yield optApiAuth
   }
 
-  protected def subscribe(optApiAuth: Option[ApiAuth]): Future[Unit] = {
+  protected def subscribe(optApiAuth: Option[Auth]): Future[Unit] = {
     if (optApiAuth.isDefined) {
       val tokenId = JWT.decode(optApiAuth.get.token).getClaim("tokenId").asString()
-      seqExt.subscribe(optApiAuth.get.user.get.id, tokenId)
+      seqExt.subscribe(optApiAuth.get.user.get.user.get.id, tokenId)
     } else Future.successful()
   }
 

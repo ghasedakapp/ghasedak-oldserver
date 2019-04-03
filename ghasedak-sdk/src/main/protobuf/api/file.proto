@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+package im.ghasedak.api;
+
+option java_package = "im.ghasedak.api.file";
+option java_multiple_files = true;
+
+import "google/protobuf/wrappers.proto";
+
+// Location of file on server
+message FileLocation {
+    // Unique Id of file
+    int64 file_id = 1;
+
+    // Access hash of file
+    int64 access_hash = 2;
+}
+
+// Image location
+message ImageLocation {
+    // Location of file
+    FileLocation file_location = 1;
+
+    // Width of avatar image
+    int32 width = 2;
+
+    // Height of avatar image
+    int32 height = 3;
+
+    // Size of file
+    int32 file_size = 4;
+}
+
+// Audio location
+message AudioLocation {
+    // File location
+    FileLocation file_location = 1;
+
+    // audio duration in seconds
+    int32 duration = 2;
+
+    // mime type
+    string mime_type = 3;
+
+    // file size
+    int32 file_size = 4;
+}
+
+// Avatar Image
+message AvatarImage {
+    // Location of file
+    FileLocation file_location = 1;
+
+    // Width of avatar image
+    int32 width = 2;
+
+    // Height of avatar image
+    int32 height = 3;
+
+    // Size of file
+    int32 file_size = 4;
+}
+
+// Avatar of User or Group
+message Avatar {
+    // Optional small image of avatar box in 100x100
+    AvatarImage small_image = 1;
+
+    // Optional large image of avatar box in 200x200
+    AvatarImage large_image = 2;
+
+    // Optional full screen image of avatar
+    AvatarImage full_image = 3;
+}

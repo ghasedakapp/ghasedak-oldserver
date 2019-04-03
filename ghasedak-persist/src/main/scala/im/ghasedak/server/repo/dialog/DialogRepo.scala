@@ -2,9 +2,8 @@ package im.ghasedak.server.repo.dialog
 
 import java.time.LocalDateTime
 
-import im.ghasedak.api.peer.{ ApiPeer, ApiPeerType }
+import im.ghasedak.server.model.dialog.{ DialogModel, DialogCommon, UserDialog }
 import im.ghasedak.server.repo.TypeMapper._
-import im.ghasedak.server.model.dialog.{ Dialog, DialogCommon, UserDialog }
 import slick.jdbc.PostgresProfile
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.Tag
@@ -13,7 +12,7 @@ import scala.concurrent.ExecutionContext
 
 final class DialogCommonTable(tag: Tag) extends Table[DialogCommon](tag, "dialog_commons") {
 
-  def dialogId = column[String]("dialog_id", O.PrimaryKey)
+  def chatId = column[Long]("chat_id", O.PrimaryKey)
 
   def lastMessageDate = column[LocalDateTime]("last_message_date")
 
@@ -23,27 +22,27 @@ final class DialogCommonTable(tag: Tag) extends Table[DialogCommon](tag, "dialog
 
   def lastReadSeq = column[Int]("last_read_seq")
 
-  def * = (dialogId, lastMessageDate, lastMessageSeq, lastReceivedSeq, lastReadSeq) <> (applyDialogCommon.tupled, unapplyDialogCommon)
+  def * = (chatId, lastMessageDate, lastMessageSeq, lastReceivedSeq, lastReadSeq) <> (applyDialogCommon.tupled, unapplyDialogCommon)
 
-  def applyDialogCommon: (String, LocalDateTime, Int, Int, Int) ⇒ DialogCommon = {
+  def applyDialogCommon: (Long, LocalDateTime, Int, Int, Int) ⇒ DialogCommon = {
     case (
-      dialogId,
+      chatId,
       lastMessageDate,
       lastMessageSeq,
       lastReceivedSeq,
       lastReadSeq) ⇒
       DialogCommon(
-        dialogId = dialogId,
+        chatId = chatId,
         lastMessageDate = lastMessageDate,
         lastMessageSeq = lastMessageSeq,
         lastReceivedSeq = lastReceivedSeq,
         lastReadSeq = lastReadSeq)
   }
 
-  def unapplyDialogCommon: DialogCommon ⇒ Option[(String, LocalDateTime, Int, Int, Int)] = { dc ⇒
+  def unapplyDialogCommon: DialogCommon ⇒ Option[(Long, LocalDateTime, Int, Int, Int)] = { dc ⇒
     DialogCommon.unapply(dc).map {
-      case (dialogId, lastMessageDate, lastMessageSeq, lastReceivedSeq, lastReadSeq) ⇒
-        (dialogId, lastMessageDate, lastMessageSeq, lastReceivedSeq, lastReadSeq)
+      case (chatId, lastMessageDate, lastMessageSeq, lastReceivedSeq, lastReadSeq) ⇒
+        (chatId, lastMessageDate, lastMessageSeq, lastReceivedSeq, lastReadSeq)
     }
   }
 }
@@ -52,9 +51,7 @@ final class UserDialogTable(tag: Tag) extends Table[UserDialog](tag, "user_dialo
 
   def userId = column[Int]("user_id", O.PrimaryKey)
 
-  def peerType = column[Int]("peer_type", O.PrimaryKey)
-
-  def peerId = column[Int]("peer_id", O.PrimaryKey)
+  def chatId = column[Long]("chat_id", O.PrimaryKey)
 
   def ownerLastReceivedSeq = column[Int]("owner_last_received_seq")
 
@@ -64,32 +61,30 @@ final class UserDialogTable(tag: Tag) extends Table[UserDialog](tag, "user_dialo
 
   def * = (
     userId,
-    peerType,
-    peerId,
+    chatId,
     ownerLastReceivedSeq,
     ownerLastReadSeq,
     createdAt) <> (applyUserDialog.tupled, unapplyUserDialog)
 
-  def applyUserDialog: (Int, Int, Int, Int, Int, LocalDateTime) ⇒ UserDialog = {
+  def applyUserDialog: (Int, Long, Int, Int, LocalDateTime) ⇒ UserDialog = {
     case (
       userId,
-      peerType,
-      peerId,
+      chatId,
       ownerLastReceivedSeq,
       ownerLastReadSeq,
       createdAt) ⇒
       UserDialog(
         userId = userId,
-        peer = ApiPeer(ApiPeerType.fromValue(peerType), peerId),
+        chatId = chatId,
         ownerLastReceivedSeq = ownerLastReceivedSeq,
         ownerLastReadSeq = ownerLastReadSeq,
         createdAt = createdAt)
   }
 
-  def unapplyUserDialog: UserDialog ⇒ Option[(Int, Int, Int, Int, Int, LocalDateTime)] = { du ⇒
+  def unapplyUserDialog: UserDialog ⇒ Option[(Int, Long, Int, Int, LocalDateTime)] = { du ⇒
     UserDialog.unapply(du).map {
-      case (userId, peer, ownerLastReceivedSeq, ownerLastReadSeq, createdAt) ⇒
-        (userId, peer.`type`.value, peer.id, ownerLastReceivedSeq, ownerLastReadSeq, createdAt)
+      case (userId, chatId, ownerLastReceivedSeq, ownerLastReadSeq, createdAt) ⇒
+        (userId, chatId, ownerLastReceivedSeq, ownerLastReadSeq, createdAt)
     }
   }
 }
@@ -98,24 +93,24 @@ object DialogRepo extends UserDialogOperations with DialogCommonOperations {
 
   val dialogs = for {
     c ← DialogCommonRepo.dialogCommon
-    u ← UserDialogRepo.userDialogs if c.dialogId === repDialogId(u.userId, u.peerId, u.peerType)
+    u ← UserDialogRepo.userDialogs if c.chatId === u.chatId
   } yield (c, u)
 
   def create(
     userId:          Int,
-    peer:            ApiPeer,
+    chatId:          Long,
     lastMessageSeq:  Int,
     lastMessageDate: LocalDateTime): DBIOAction[Int, PostgresProfile.api.NoStream, Effect.Write with Effect.Write] = {
-    createUserDialog(userId, peer, 0, 0) andThen
-      createCommon(DialogCommon(getDialogId(Some(userId), peer), lastMessageDate, lastMessageSeq, 0, 0))
+    createUserDialog(userId, chatId, 0, 0) andThen
+      createCommon(DialogCommon(chatId, lastMessageDate, lastMessageSeq, 0, 0))
   }
 
-  def find(userId: Int, limit: Int)(implicit ec: ExecutionContext): DBIOAction[Seq[Dialog], NoStream, Effect.Read] = {
+  def find(userId: Int, limit: Int)(implicit ec: ExecutionContext): DBIOAction[Seq[DialogModel], NoStream, Effect.Read] = {
     dialogs.filter(r ⇒ r._2.userId === userId)
       .sortBy {
         case (common, _) ⇒ common.lastMessageDate.desc
       }.take(limit).result.map(_.map {
-        case (c, u) ⇒ Dialog.from(c, u)
+        case (c, u) ⇒ DialogModel.from(c, u)
       })
   }
 
